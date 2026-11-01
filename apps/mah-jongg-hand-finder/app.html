@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
+<base target="_self">
 <link rel="icon" href="data:,">
 <title>Mah Jongg Hand Finder</title>
 <style>
@@ -181,10 +182,25 @@
   .btn-ghost{
     background:transparent;color:var(--ink);border-color:var(--line-strong);flex:0 1 auto;
   }
+  /* Same-tab navigation — Back steps through searches in this tab */
+  .results-nav{
+    display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+    margin:26px 2px 10px;
+  }
+  .results-nav.bottom{margin:18px 2px 0}
+  .nav-btn{
+    min-height:44px;padding:9px 16px;
+    font-size:.98rem;font-weight:700;
+    color:var(--ink);background:var(--surface);
+    border:1.5px solid var(--line-strong);border-radius:999px;
+    cursor:pointer;-webkit-tap-highlight-color:transparent;
+  }
+  .nav-btn:active{border-color:var(--jade);color:var(--jade)}
+  .results-nav .nav-note{color:var(--ink-faint);font-size:.9rem;margin-left:2px}
   /* Results */
   .results-head{
     display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;
-    margin:28px 2px 12px;
+    margin:6px 2px 12px;
   }
   .results-head h2{font-family:Georgia,serif;font-size:1.55rem;margin:0;letter-spacing:-.01em}
   .count{color:var(--ink-soft);font-weight:600}
@@ -341,6 +357,11 @@
   </form>
 
   <section aria-live="polite">
+    <nav class="results-nav" aria-label="Page navigation">
+      <button type="button" class="nav-btn js-back">&larr; Back</button>
+      <button type="button" class="nav-btn js-to-filters">&uarr; Back to filters</button>
+      <span class="nav-note">Stays in this tab &mdash; Back returns to your last search.</span>
+    </nav>
     <div class="results-head">
       <h2 id="resultsTitle">All hands</h2>
       <div class="count" id="resultsCount">79 hands</div>
@@ -351,6 +372,10 @@
       <h3>No hands match</h3>
       <p>Try turning off a tile, a group, a number or a point value, or set a dropdown back to &ldquo;Any&rdquo;.</p>
     </div>
+    <nav class="results-nav bottom" aria-label="Page navigation">
+      <button type="button" class="nav-btn js-back">&larr; Back</button>
+      <button type="button" class="nav-btn js-to-filters">&uarr; Back to filters</button>
+    </nav>
   </section>
 
   <footer>
@@ -506,8 +531,7 @@ function handMatchesNumbers(h, picks){
   return false;
 }
 
-function applyFilters(){
-  var f = getFilters();
+function buildLabels(f){
   var labels = [];
   if(f.section) labels.push(f.section);
   if(f.suits !== null) labels.push(f.suits + (f.suits===1 ? ' suit' : ' suits'));
@@ -517,9 +541,12 @@ function applyFilters(){
     var feat = FEATURES.filter(function(x){return x.key===k})[0];
     if(feat) labels.push(feat.label);
   });
+  return labels;
+}
 
+function filterHands(f){
   var pickInts = f.numbers.map(function(n){ return parseInt(n, 10); });
-  var list = HANDS.filter(function(h){
+  return HANDS.filter(function(h){
     if(f.section && h.section !== f.section) return false;
     if(f.suits !== null && h.suits !== f.suits) return false;
     if(!handMatchesNumbers(h, pickInts)) return false;
@@ -527,15 +554,139 @@ function applyFilters(){
     for(var i=0;i<f.must.length;i++){ if(!h[f.must[i]]) return false; }
     return true;
   });
-  // HANDS already in card order
-  render(list, labels);
-  // Move focus of reading to results on small screens after an explicit Apply
-  document.getElementById('resultsTitle').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function renderForFilters(f, scrollTarget){
+  render(filterHands(f), buildLabels(f));
+  if(scrollTarget === 'results'){
+    document.getElementById('resultsTitle').scrollIntoView({behavior:'smooth', block:'start'});
+  } else if(scrollTarget === 'filters'){
+    document.getElementById('filterForm').scrollIntoView({behavior:'smooth', block:'start'});
+  }
+}
+
+function hasAnyFilter(f){
+  return !!(f.section || f.suits !== null || f.numbers.length || f.points.length || f.must.length);
+}
+
+/* --- Same-tab history: each search is one step in this tab, so the
+   browser Back / Forward buttons step through searches instead of
+   leaving the page, and no view ever opens in a new tab. --- */
+var navDepth = 0;
+var restoring = false;
+
+function encodeFilters(f){
+  var parts = [];
+  if(f.section) parts.push('section=' + encodeURIComponent(f.section));
+  if(f.suits !== null) parts.push('suits=' + encodeURIComponent(String(f.suits)));
+  if(f.numbers.length) parts.push('nums=' + encodeURIComponent(f.numbers.join(',')));
+  if(f.points.length) parts.push('pts=' + encodeURIComponent(f.points.join(',')));
+  if(f.must.length) parts.push('must=' + encodeURIComponent(f.must.join(',')));
+  return parts.join('&');
+}
+
+function decodeFilters(hash){
+  var f = {section:'', suits:null, must:[], numbers:[], points:[]};
+  var raw = String(hash || '').replace(/^#/, '');
+  if(!raw) return f;
+  raw.split('&').forEach(function(pair){
+    var idx = pair.indexOf('=');
+    if(idx === -1) return;
+    var key = pair.slice(0, idx);
+    var val = '';
+    try { val = decodeURIComponent(pair.slice(idx + 1)); } catch(e){ val = pair.slice(idx + 1); }
+    if(key === 'section') f.section = val;
+    else if(key === 'suits'){ var n = parseInt(val, 10); f.suits = isNaN(n) ? null : n; }
+    else if(key === 'nums') f.numbers = val ? val.split(',').filter(function(x){ return x !== ''; }) : [];
+    else if(key === 'pts') f.points = val ? val.split(',').map(function(x){ return parseInt(x, 10); }).filter(function(x){ return !isNaN(x); }) : [];
+    else if(key === 'must') f.must = val ? val.split(',').filter(function(x){ return x !== ''; }) : [];
+  });
+  return f;
+}
+
+function filtersEqual(a, b){
+  return encodeFilters(a) === encodeFilters(b);
+}
+
+function setUIFromFilters(f){
+  document.getElementById('section').value = f.section || '';
+  document.getElementById('suits').value = (f.suits === null || f.suits === undefined) ? '' : String(f.suits);
+  function sync(sel, values, attr){
+    var btns = document.querySelectorAll(sel);
+    for(var i=0;i<btns.length;i++){
+      var v = btns[i].getAttribute(attr);
+      var on = values.indexOf(attr === 'data-pts' ? parseInt(v, 10) : v) !== -1;
+      btns[i].classList.toggle('on', on);
+      btns[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+  }
+  sync('.num-btn', f.numbers.map(function(n){ return String(n); }), 'data-num');
+  sync('.pts-btn', f.points, 'data-pts');
+  sync('.feat-btn', f.must, 'data-feat');
+}
+
+function pushSearchHistory(f){
+  var hash = encodeFilters(f);
+  var url = hash ? ('#' + hash) : '#all';
+  var state = {mjFinder:1, depth:navDepth + 1, hash:hash};
+  try {
+    history.pushState(state, '', url);
+    navDepth = state.depth;
+  } catch(e){
+    // Fallback for sandboxes that refuse pushState: setting the hash
+    // still creates a normal history entry the Back button can use.
+    navDepth = state.depth;
+    if(window.location.hash !== url) window.location.hash = url;
+  }
+}
+
+function replaceSearchHistory(f){
+  var hash = encodeFilters(f);
+  var url = hash ? ('#' + hash) : '#all';
+  try {
+    history.replaceState({mjFinder:1, depth:navDepth, hash:hash}, '', url);
+  } catch(e){ /* keep the current URL; rendering below still works */ }
+}
+
+function applyFilters(push){
+  var f = getFilters();
+  if(push !== false){
+    var current = decodeFilters(window.location.hash === '#all' ? '' : window.location.hash);
+    if(!filtersEqual(current, f)) pushSearchHistory(f);
+    else replaceSearchHistory(f);
+  }
+  renderForFilters(f, 'results');
 }
 
 document.getElementById('filterForm').addEventListener('submit', function(e){
   e.preventDefault();
-  applyFilters();
+  applyFilters(true);
+});
+
+// Restore a search when the user navigates with Back / Forward.
+function restoreFromHistory(state){
+  if(restoring) return;
+  restoring = true;
+  var hash = '';
+  if(state && typeof state.hash === 'string') hash = state.hash;
+  else if(window.location.hash && window.location.hash !== '#all') hash = window.location.hash;
+  if(state && typeof state.depth === 'number') navDepth = state.depth;
+  var f = decodeFilters(hash);
+  setUIFromFilters(f);
+  renderForFilters(f, hasAnyFilter(f) ? 'results' : 'filters');
+  restoring = false;
+}
+
+window.addEventListener('popstate', function(e){
+  restoreFromHistory(e.state);
+});
+window.addEventListener('hashchange', function(){
+  // Only react when the hash was changed by Back / Forward without a
+  // popstate payload we already handled, or by a same-tab hash link.
+  if(restoring) return;
+  var f = decodeFilters(window.location.hash === '#all' ? '' : window.location.hash);
+  if(filtersEqual(f, getFilters())) return;
+  restoreFromHistory(null);
 });
 
 var numBtns = document.querySelectorAll('.num-btn');
@@ -569,11 +720,55 @@ document.getElementById('clearBtn').addEventListener('click', function(){
     btns[i].classList.remove('on');
     btns[i].setAttribute('aria-pressed', 'false');
   }
+  var empty = {section:'', suits:null, must:[], numbers:[], points:[]};
+  var current = decodeFilters(window.location.hash === '#all' ? '' : window.location.hash);
+  if(hasAnyFilter(current)) pushSearchHistory(empty);
+  else replaceSearchHistory(empty);
   render(HANDS, []);
 });
 
-// Initial view: all 79 hands
-render(HANDS, []);
+// In-page Back controls: step back through searches in this same tab.
+// With no earlier search in this tab, Back goes up to the filters.
+var backBtns = document.querySelectorAll('.js-back');
+for(var bb=0; bb<backBtns.length; bb++){
+  backBtns[bb].addEventListener('click', function(){
+    if(navDepth > 0){
+      window.history.back();
+    } else {
+      document.getElementById('filterForm').scrollIntoView({behavior:'smooth', block:'start'});
+    }
+  });
+}
+var toFilterBtns = document.querySelectorAll('.js-to-filters');
+for(var fb=0; fb<toFilterBtns.length; fb++){
+  toFilterBtns[fb].addEventListener('click', function(){
+    document.getElementById('filterForm').scrollIntoView({behavior:'smooth', block:'start'});
+  });
+}
+
+// Same-tab guarantee: no link on this page opens a new tab or window.
+document.addEventListener('click', function(e){
+  var t = e.target;
+  var a = t && t.closest ? t.closest('a') : null;
+  if(a){ a.removeAttribute('target'); a.target = '_self'; }
+});
+
+// Initial view: restore the search named in the URL if there is one
+// (for example after Back, Forward, or reopening the same tab), and
+// record this view as the first history step in the tab.
+(function initFromUrl(){
+  var rawHash = window.location.hash === '#all' ? '' : window.location.hash;
+  var f = decodeFilters(rawHash);
+  if(hasAnyFilter(f)){
+    setUIFromFilters(f);
+    replaceSearchHistory(f);
+    renderForFilters(f, 'none');
+  } else {
+    navDepth = 0;
+    replaceSearchHistory(f);
+    render(HANDS, []);
+  }
+})();
 </script>
 </body>
 </html>

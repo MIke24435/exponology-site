@@ -630,6 +630,31 @@ for(var i = 0; i < exBtns.length; i++){
 }
 
 renderExample("flowersDragons");
+
+/* Same-tab, back-button-friendly navigation:
+   Section links scroll in this tab and replace the current history
+   entry instead of pushing a new one. That way a single Back press
+   leaves the page, instead of stepping back through every section
+   link tapped, and nothing here ever opens a new tab or window. */
+(function(){
+  var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var links = document.querySelectorAll('a[href^="#"]');
+  for(var k = 0; k < links.length; k++){
+    links[k].addEventListener("click", function(e){
+      var hash = this.getAttribute("href");
+      if(!hash || hash === "#") return;
+      var target = document.getElementById(hash.slice(1));
+      if(!target) return;
+      e.preventDefault();
+      target.scrollIntoView({behavior: reduceMotion ? "auto" : "smooth", block: "start"});
+      if(window.history && window.history.replaceState){
+        window.history.replaceState(null, "", hash);
+      }
+      if(!target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");
+      try{ target.focus({preventScroll: true}); }catch(err){ target.focus(); }
+    });
+  }
+})();
 </script>
 </body>
 </html>
