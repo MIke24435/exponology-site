@@ -72,9 +72,16 @@
   }
   .brand{font-family:Georgia,"Times New Roman",serif;font-weight:700;font-size:1.3rem;letter-spacing:.01em;color:var(--ink);text-decoration:none}
   .brand span{color:var(--red)}
-  .sitebar nav{display:flex;gap:18px;flex-wrap:wrap}
+  .sitebar nav{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
   .sitebar nav a{color:var(--ink-soft);text-decoration:none;font-weight:600;font-size:.98rem}
   .sitebar nav a:hover{color:var(--jade);text-decoration:underline}
+  .sitebar nav a.nav-app{
+    color:#fff;background:var(--jade);font-weight:700;
+    padding:9px 16px;border-radius:999px;min-height:44px;display:inline-flex;align-items:center;
+  }
+  @media (prefers-color-scheme: dark){.sitebar nav a.nav-app{color:#0e1a13}}
+  .sitebar nav a.nav-app:hover{color:#fff;text-decoration:underline}
+  @media (prefers-color-scheme: dark){.sitebar nav a.nav-app:hover{color:#0e1a13}}
 
   /* Hero */
   .hero{padding:34px 0 8px}
@@ -110,6 +117,10 @@
     border:1px solid var(--line);border-radius:999px;padding:6px 13px;
   }
   .address-chip strong{color:var(--jade-strong)}
+  a.address-chip{text-decoration:none}
+  a.address-chip:hover{border-color:var(--jade);text-decoration:underline}
+  .app-link-row{margin-top:18px;border-top:1px solid var(--line);padding-top:18px;text-align:center}
+  .app-link-row p{color:var(--ink-soft);margin:0 0 12px}
   .stats{
     display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);
     border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:26px;max-width:34rem;
@@ -277,6 +288,7 @@
       <a href="#how">How it works</a>
       <a href="#filters">The filters</a>
       <a href="#key">Notation key</a>
+      <a class="nav-app" href="https://exponology.com/apps/mah-jongg-hand-finder/app.html">Open the Mah Jongg Hand Finder</a>
     </nav>
   </div>
 
@@ -286,10 +298,11 @@
       <h1>Find the hand that fits your tiles.</h1>
       <p class="lede">The <strong>Mah Jongg Hand Finder</strong> turns the 2026 card into a search. Instead of scanning all nine sections line by line, you say what a hand <strong>must contain</strong> &mdash; the numbers, the points, the flowers, dragons, winds and groups you&rsquo;re holding &mdash; and it shows you only the hands that fit.</p>
       <div class="cta-row">
-        <a class="btn btn-primary" href="#try">Try an example search</a>
+        <a class="btn btn-primary" href="https://exponology.com/apps/mah-jongg-hand-finder/app.html">Open the Mah Jongg Hand Finder</a>
+        <a class="btn btn-ghost" href="#try">Try an example search</a>
         <a class="btn btn-ghost" href="#how">How it works</a>
       </div>
-      <span class="address-chip">Planned home on the web: <strong>exponology.com/apps/mah-jongg-hand-finder</strong></span>
+      <a class="address-chip" href="https://exponology.com/apps/mah-jongg-hand-finder/app.html">Live now &mdash; open the <strong>Mah Jongg Hand Finder</strong> app &rarr;</a>
       <div class="stats" aria-label="Hand Finder at a glance">
         <div class="stat"><b>79</b><span>hands on the 2026 card</span></div>
         <div class="stat"><b>9</b><span>card sections covered</span></div>
@@ -321,6 +334,10 @@
         <p class="demo-count" id="demoCount"></p>
         <p class="demo-note" id="demoNote"></p>
         <div class="sample-grid" id="demoCards"></div>
+      </div>
+      <div class="app-link-row">
+        <p>Ready to run your own search against all 79 Mah Jongg hands?</p>
+        <a class="btn btn-primary" href="https://exponology.com/apps/mah-jongg-hand-finder/app.html">Open the Mah Jongg Hand Finder</a>
       </div>
     </div>
   </section>
@@ -537,9 +554,12 @@
 
   <div class="final">
     <h2>Keep it open next to your rack</h2>
-    <p>The Hand Finder is the first app at Exponology, and the address below will be its home. Open it on your phone before the Charleston, and let the card come to you.</p>
-    <a class="btn btn-primary" href="#try">See it work</a>
-    <div><span class="address-chip">exponology.com/apps/<strong>mah-jongg-hand-finder</strong></span></div>
+    <p>The Mah Jongg Hand Finder is the first app at Exponology. Open it on your phone before the Charleston, and let the card come to you.</p>
+    <div class="cta-row" style="justify-content:center;margin-top:0">
+      <a class="btn btn-primary" href="https://exponology.com/apps/mah-jongg-hand-finder/app.html">Open the Mah Jongg Hand Finder</a>
+      <a class="btn btn-ghost" href="#try">See an example search</a>
+    </div>
+    <div><a class="address-chip" href="https://exponology.com/apps/mah-jongg-hand-finder/app.html">Live now &mdash; open the <strong>Mah Jongg Hand Finder</strong> app &rarr;</a></div>
   </div>
 
   <footer>
