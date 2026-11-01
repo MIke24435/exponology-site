@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:,">
+<title>Mah Jongg Hand Finder</title>
+<style>
+  :root{
+    color-scheme: light dark;
+    --bg:#f6f1e6;
+    --bg-2:#efe7d3;
+    --surface:#fffdf7;
+    --surface-2:#fbf7ec;
+    --ink:#1c2b22;
+    --ink-soft:#4a5a50;
+    --ink-faint:#6b7a6f;
+    --line:#ddd2b8;
+    --line-strong:#c9b98f;
+    --jade:#145c43;
+    --jade-strong:#0e4a35;
+    --jade-soft:#e2ede6;
+    --red:#a61e14;
+    --red-soft:#fbe9e6;
+    --gold:#8a6d1b;
+    --gold-soft:#f7ecd0;
+    --shadow:0 1px 2px rgba(28,43,34,.06), 0 10px 30px rgba(28,43,34,.07);
+    --radius:16px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#121a15;
+      --bg-2:#0e1511;
+      --surface:#1a241e;
+      --surface-2:#1f2b23;
+      --ink:#eef2ec;
+      --ink-soft:#b9c6bb;
+      --ink-faint:#93a696;
+      --line:#33443a;
+      --line-strong:#4a5f50;
+      --jade:#5ec49a;
+      --jade-strong:#8ad8b8;
+      --jade-soft:#22392d;
+      --red:#ff9a8f;
+      --red-soft:#3d2320;
+      --gold:#e8c86a;
+      --gold-soft:#38301a;
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.25);
+    }
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family: ui-sans-system, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size:17px;
+    line-height:1.45;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:20px 16px 48px}
+  /* Header */
+  .eyebrow{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    font-size:.82rem;letter-spacing:.06em;text-transform:uppercase;font-weight:700;color:var(--jade);
+  }
+  .eyebrow::before{content:"";width:28px;height:3px;background:var(--red);border-radius:2px;display:inline-block}
+  h1{
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight:700;
+    font-size:clamp(2rem, 6vw, 3.1rem);
+    line-height:1.02;
+    letter-spacing:-.02em;
+    margin:10px 0 8px;
+  }
+  .lede{color:var(--ink-soft);font-size:1.06rem;max-width:38rem;margin:0}
+  .lede strong{color:var(--ink)}
+  /* Filter panel */
+  .panel{
+    margin-top:22px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:18px;
+  }
+  .panel h2{font-size:1rem;margin:0 0 4px}
+  .panel .hint{color:var(--ink-faint);font-size:.92rem;margin:0 0 16px}
+  .dropdowns{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:14px;
+  }
+  @media(min-width:640px){ .dropdowns{grid-template-columns:1fr 1fr} }
+  .field label{
+    display:block;font-weight:700;font-size:.92rem;margin-bottom:6px;
+  }
+  .field select{
+    width:100%;
+    min-height:52px;
+    padding:10px 12px;
+    font-size:1rem;
+    color:var(--ink);
+    background:var(--surface-2);
+    border:1.5px solid var(--line-strong);
+    border-radius:10px;
+    appearance:none;
+    background-image: linear-gradient(45deg, transparent 50%, var(--ink-soft) 50%), linear-gradient(135deg, var(--ink-soft) 50%, transparent 50%);
+    background-position: calc(100% - 18px) calc(50% - 2px), calc(100% - 12px) calc(50% - 2px);
+    background-size:6px 6px, 6px 6px;
+    background-repeat:no-repeat;
+    padding-right:36px;
+  }
+  .field select:focus{outline:3px solid var(--jade-soft);border-color:var(--jade)}
+  fieldset{
+    margin:18px 0 0;padding:0;border:0;
+  }
+  legend{font-weight:700;font-size:.92rem;padding:0;margin-bottom:4px}
+  .legend-hint{color:var(--ink-faint);font-size:.9rem;font-weight:400;margin:2px 0 10px}
+  .tiles{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+  }
+  .groups{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:8px;
+  }
+  @media(min-width:640px){ .groups{grid-template-columns:repeat(4,1fr)} }
+  .numbers{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:8px;
+  }
+  @media(min-width:640px){ .numbers{grid-template-columns:repeat(9,1fr)} }
+  .points{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+  }
+  @media(min-width:640px){ .points{grid-template-columns:repeat(7,1fr)} }
+  .num-btn, .pts-btn, .feat-btn{
+    min-height:52px;
+    padding:10px 4px;
+    font-size:1.18rem;
+    font-weight:800;
+    line-height:1;
+    color:var(--ink);
+    background:var(--surface-2);
+    border:1.5px solid var(--line-strong);
+    border-radius:10px;
+    cursor:pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .pts-btn{font-size:1.08rem}
+  .feat-btn{font-size:1rem}
+  .num-btn.on, .pts-btn.on, .feat-btn.on{
+    background:var(--jade);
+    border-color:var(--jade);
+    color:#fff;
+  }
+  @media (prefers-color-scheme: dark){ .num-btn.on, .pts-btn.on, .feat-btn.on{color:#0e1a13} }
+  .num-btn:active, .pts-btn:active, .feat-btn:active{border-color:var(--jade)}
+  .actions{
+    display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;
+  }
+  .btn{
+    border-radius:999px;
+    min-height:54px;
+    padding:12px 22px;
+    font-size:1.05rem;font-weight:700;
+    cursor:pointer;border:1.5px solid transparent;
+  }
+  .btn-primary{
+    background:var(--jade);color:#fff;flex:1 1 200px;
+  }
+  @media (prefers-color-scheme: dark){ .btn-primary{color:#0e1a13} }
+  .btn-primary:active{background:var(--jade-strong)}
+  .btn-ghost{
+    background:transparent;color:var(--ink);border-color:var(--line-strong);flex:0 1 auto;
+  }
+  /* Results */
+  .results-head{
+    display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    margin:28px 2px 12px;
+  }
+  .results-head h2{font-family:Georgia,serif;font-size:1.55rem;margin:0;letter-spacing:-.01em}
+  .count{color:var(--ink-soft);font-weight:600}
+  .active-line{color:var(--ink-faint);font-size:.93rem;margin:-4px 2px 14px}
+  .active-line strong{color:var(--ink)}
+  .list{display:grid;gap:12px}
+  @media(min-width:760px){ .list{grid-template-columns:1fr 1fr} }
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px 16px 14px;
+    box-shadow:var(--shadow);
+  }
+  .card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+  .hand-id{font-family:Georgia,serif;font-size:1.45rem;font-weight:700;line-height:1}
+  .section-name{color:var(--jade);font-size:.98rem;font-weight:700;margin-top:5px;line-height:1.25}
+  .section-name .section-label{color:var(--ink-faint);font-weight:600;text-transform:uppercase;letter-spacing:.05em;font-size:.78rem;margin-right:4px}
+  .badges{display:flex;gap:6px;flex-shrink:0}
+  .badge{
+    font-size:.82rem;font-weight:800;letter-spacing:.02em;
+    padding:5px 8px;border-radius:999px;border:1px solid var(--line);
+    background:var(--surface-2);white-space:nowrap;
+  }
+  .badge.xc-x{color:var(--jade);border-color:var(--jade)}
+  .badge.xc-c{color:var(--red);background:var(--red-soft);border-color:transparent}
+  .badge.pts{color:var(--gold);background:var(--gold-soft);border-color:transparent}
+  .notation{
+    margin:12px 0 6px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size:1.02rem;font-weight:700;line-height:1.45;
+    word-break:break-word;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:10px 11px;
+  }
+  .note{color:var(--ink-soft);font-size:.95rem;margin:0 0 10px}
+  .note:empty{display:none}
+  .tags{display:flex;flex-wrap:wrap;gap:6px}
+  .tag{
+    font-size:.83rem;font-weight:600;
+    padding:4px 8px;border-radius:999px;
+    background:var(--jade-soft);color:var(--jade-strong);
+  }
+  .tag.neutral{background:var(--surface-2);color:var(--ink-soft);border:1px solid var(--line)}
+  .empty{
+    background:var(--surface);border:1.5px dashed var(--line-strong);border-radius:var(--radius);
+    padding:26px 18px;text-align:center;
+  }
+  .empty h3{margin:0 0 6px;font-size:1.15rem}
+  .empty p{color:var(--ink-soft);margin:0}
+  footer{margin-top:28px;color:var(--ink-faint);font-size:.88rem;line-height:1.5}
+  footer a{color:var(--jade);font-weight:600}
+  :focus-visible{outline:3px solid var(--jade-soft);outline-offset:2px}
+  @media (prefers-reduced-motion: reduce){ *{scroll-behavior:auto !important} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">2026 Card &bull; 79 Hands</div>
+    <h1>Mah Jongg Hand Finder</h1>
+    <p class="lede">Pick a section and number of suits, tap the numbers a hand <strong>must contain</strong>, tap the <strong>points</strong> you want, and turn on the tiles and groups it <strong>must have</strong>, then tap <strong>Apply</strong>.</p>
+  </header>
+
+  <form class="panel" id="filterForm" novalidate>
+    <h2>Find hands</h2>
+    <p class="hint">Leave a dropdown on &ldquo;Any&rdquo; if you don&rsquo;t want to filter on it.</p>
+
+    <div class="dropdowns">
+      <div class="field">
+        <label for="section">Section</label>
+        <select id="section" name="section">
+          <option value="">Any section</option>
+          <option value="A - 2026">A &mdash; 2026</option>
+          <option value="B - 2468">B &mdash; 2468</option>
+          <option value="C - Any Like Numbers">C &mdash; Any Like Numbers</option>
+          <option value="D - Quints">D &mdash; Quints</option>
+          <option value="E - Consecutive Run">E &mdash; Consecutive Run</option>
+          <option value="F - 13579">F &mdash; 13579</option>
+          <option value="G - Winds-Dragons">G &mdash; Winds&ndash;Dragons</option>
+          <option value="H - 369">H &mdash; 369</option>
+          <option value="I - Singles and Pairs">I &mdash; Singles and Pairs</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="suits">Number of suits</label>
+        <select id="suits" name="suits">
+          <option value="">Any number</option>
+          <option value="0">0 suits</option>
+          <option value="1">1 suit</option>
+          <option value="2">2 suits</option>
+          <option value="3">3 suits</option>
+        </select>
+      </div>
+    </div>
+
+    <fieldset>
+      <legend>Numbers in hand</legend>
+      <p class="legend-hint">Tap a number to turn it on or off. A hand must contain <strong>every</strong> number you turn on. Letters in a hand are placeholders that can stand for a number you pick, so a hand counts when its letters could be the numbers you picked.</p>
+      <div class="numbers" id="numbers" role="group" aria-label="Numbers the hand must contain">
+        <button type="button" class="num-btn" data-num="1" aria-pressed="false">1</button>
+        <button type="button" class="num-btn" data-num="2" aria-pressed="false">2</button>
+        <button type="button" class="num-btn" data-num="3" aria-pressed="false">3</button>
+        <button type="button" class="num-btn" data-num="4" aria-pressed="false">4</button>
+        <button type="button" class="num-btn" data-num="5" aria-pressed="false">5</button>
+        <button type="button" class="num-btn" data-num="6" aria-pressed="false">6</button>
+        <button type="button" class="num-btn" data-num="7" aria-pressed="false">7</button>
+        <button type="button" class="num-btn" data-num="8" aria-pressed="false">8</button>
+        <button type="button" class="num-btn" data-num="9" aria-pressed="false">9</button>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Points</legend>
+      <p class="legend-hint">Tap a point value to turn it on or off. A hand must be worth <strong>one</strong> of the values you turn on.</p>
+      <div class="points" id="points" role="group" aria-label="Point values to include">
+        <button type="button" class="pts-btn" data-pts="25" aria-pressed="false">25</button>
+        <button type="button" class="pts-btn" data-pts="30" aria-pressed="false">30</button>
+        <button type="button" class="pts-btn" data-pts="35" aria-pressed="false">35</button>
+        <button type="button" class="pts-btn" data-pts="40" aria-pressed="false">40</button>
+        <button type="button" class="pts-btn" data-pts="45" aria-pressed="false">45</button>
+        <button type="button" class="pts-btn" data-pts="50" aria-pressed="false">50</button>
+        <button type="button" class="pts-btn" data-pts="75" aria-pressed="false">75</button>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Must have &mdash; tiles</legend>
+      <p class="legend-hint">Tap to turn on or off. A hand must have <strong>every</strong> tile you turn on. Dragons include <strong>0</strong> (soap).</p>
+      <div class="tiles" id="tiles" role="group" aria-label="Tiles the hand must have">
+        <button type="button" class="feat-btn" data-feat="flowers" aria-pressed="false">Flowers</button>
+        <button type="button" class="feat-btn" data-feat="dragons" aria-pressed="false">Dragons</button>
+        <button type="button" class="feat-btn" data-feat="winds" aria-pressed="false">Winds</button>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Must have &mdash; groups</legend>
+      <p class="legend-hint">Tap to turn on or off. A hand must have <strong>every</strong> group you turn on &mdash; pairs are 2 of a kind, pongs 3, kongs 4, quints 5.</p>
+      <div class="groups" id="groups" role="group" aria-label="Groups the hand must have">
+        <button type="button" class="feat-btn" data-feat="pairs" aria-pressed="false">Pairs</button>
+        <button type="button" class="feat-btn" data-feat="pongs" aria-pressed="false">Pongs</button>
+        <button type="button" class="feat-btn" data-feat="kongs" aria-pressed="false">Kongs</button>
+        <button type="button" class="feat-btn" data-feat="quints" aria-pressed="false">Quints</button>
+      </div>
+    </fieldset>
+
+    <div class="actions">
+      <button type="submit" class="btn btn-primary">Apply</button>
+      <button type="button" class="btn btn-ghost" id="clearBtn">Clear all</button>
+    </div>
+  </form>
+
+  <section aria-live="polite">
+    <div class="results-head">
+      <h2 id="resultsTitle">All hands</h2>
+      <div class="count" id="resultsCount">79 hands</div>
+    </div>
+    <p class="active-line" id="activeLine">No filters applied &mdash; showing the full 2026 card.</p>
+    <div class="list" id="results"></div>
+    <div class="empty" id="emptyState" hidden>
+      <h3>No hands match</h3>
+      <p>Try turning off a tile, a group, a number or a point value, or set a dropdown back to &ldquo;Any&rdquo;.</p>
+    </div>
+  </section>
+
+  <footer>
+    Hands and points are from the 2026 National Mah Jongg League card &mdash; notation only. In the notation, brackets show suits and <strong>0</strong> counts as a dragon (soap). Letters are placeholders: the same letter repeated, like <strong>aaaa</strong>, is one number you choose, and different letters together, like <strong>a b c</strong>, are numbers in a sequence. <strong>N</strong> is the North Wind &mdash; <strong>NNNN</strong> is four North Wind tiles, not any wind.
+  </footer>
+</div>
+
+<script>
+var HANDS = [{"id": "A1", "section": "A - 2026", "hand": "(222) 000 [2222 6666]", "note": "any 2 suits", "xc": "X", "pts": 25, "suits": 2, "flowers": false, "dragons": true, "winds": false, "pairs": false, "pongs": true, "kongs": true, "quints": false, "order": 1}, {"id": "A2.1", "section": "A - 2026", "hand": "(2) 0 (26 DDD) [2222 DDD]", "note": "any 2 suits with matching dragons", "xc": "X", "pts": 25, "suits": 2, "flowers": false, "dragons": true, "winds": false, "pairs": false, "pongs": true, "kongs": true, "quints": false, "order": 2}, {"id": "A2.2", "section": "A - 2026", "hand": "(2) 0 (26 DDD) [6666 DDD]", "note": "any 2 suits with matching dragons", "xc": "X", "pts": 25, "suits": 2, "flowers": false, "dragons": true, "winds": false, "pairs": false, "pongs": true, "kongs": true, "quints": false, "order": 3}, {"id": "A3", "section": "A - 2026", "hand": "FFF (2) 0 (26) [222] {6666}", "note": "any 3 suits", "xc": "X", "pts": 25, "suits": 3, "flowers": true, "dragons": true, "winds": false, "pairs": false, "pongs": true, "kongs": true, "quints": false, "order": 4}, {"id": "A4", "section": "A - 2026", "hand": "(22) 00 [222 666] NEWS", "note": "any 2 suits", "xc": "X", "pts": 30, "suits": 2, "flowers": false, "dragons": true, "winds": true, "pairs": true, "pongs": true, "kongs": false, "quints": false, "order": 5}, {"id": "B1.1", "section": "B - 2468", "hand": "(222 444 6666 8888)", "note": "any 1 suit", "xc": "X", "pts": 25, "suits": 1, "flowers": false, "dragons": false, "winds": false, "pairs": false, "pongs": true, "kongs": true, "quints": false, "order": 6}, {"id": "B1.2", "section": "B - 2468", "hand": "(222 444) [6666 8888]", "note": "any 2 suits", "xc": "X", "pts": 25, "suits": 2, "flowers": false, "dragons": false, "winds": false, "pairs": false, "pongs": true, "kongs": true, "quints": false, "order": 7}, {"id": "B2", "section": "B - 2468", "hand": "FF (2222 8888) [44 66]", "note": "any 2 suits", "xc": "X", "pts": 30, "suits": 2, "flowers": true, "dragons": false, "winds": false, "pairs": true, "pongs": false, "kongs": true, "quints": false, "order": 8}, {"id": "B3", "section": "B - 2468", "hand": "EE (22 444 666 88) WW", "note": "any 1 suit, East and West only", "xc": "X", "pts": 30, "suits": 1, "flowers": false, "dragons": false, "winds": true, "pairs": true, "pongs": true, "kongs": false, "quints": false, "order": 9}, {"id": "B4", "section": "B - 2468", "hand": "(2222 DDD) [8888 DDD]", "note": "any 2 suits with matching dragons, these numbers only", "xc": "X", "pts": 25, "suits": 2, "flowers": false, "dragons": true, "winds": false, "pairs": false, "pongs": true, "kongs": true, "quints": false, "order": 10}, {"id": "B5", "section": "B - 2468", "hand": "FFF (22 44 666 8888)", "note": "any 1 suit", "xc": "X", "pts": 25, "suits": 1, "flowers": true, "dragons": false, "winds": false, "pairs": true, "pongs": true, "kongs": true, "quints": false, "order": 11}, {"id": "B6.1", "section": "B - 2468", "hand": "(2468) [2222 D] {2222 D}", "note": "any 3 suits with matching dragon", "xc": "X", "pts": 25, "suits": 3, "flowers": false, "dragons": true, "winds": false, "pairs": false, "pongs": false, "kongs": true, "quints": false, "order": 12}, {"id": "B6.2", "section": "B - 2468", "hand": "(2468) [4444 D] {4444 D}", "note": "any 3 suits with matching dragon", "xc": "X", "pts": 25, "suits": 3, "flowers": false, "dragons": true, "winds": false, "pairs": false, "pongs": false, "kongs": true, "quints": false, "order": 13}, {"id": "B6.3", "section": "B - 2468", "hand": "(2468) [6666 D] {6666 D}", "note": "any 3 suits with matching dragon", "xc": "X", "pts": 25, "suits": 3, "flowers": false, "dragons": true, "winds": false, "pairs": false, "pongs": false, "kongs": true, "quints": false, "order": 14}, {"id": "B6.4", "section": "B - 2468", "hand": "(2468) [8888 D] {8888 D}", "note": "any 3 suits with matching dragon", "xc": "X", "pts": 25, "suits": 3, "flowers": false, "dragons": true, "winds": false, "pairs": false, "pongs": false, "kongs": true, "quints": false, "order": 15}, {"id": "B7.1", "section": "B - 2468", "hand": "FFF (2468) FFF [2222]", "note": "any 2 suits", "xc": "X", "pts": 30, "suits": 2, "flowers": true, "dragons": false, "winds": false, "pairs": false, "pongs": true, "kongs": true, "quints": false, "order": 16}, {"id": "B7.2", "section": "B - 2468", "hand": "FFF (2468) FFF [4444]", "note": "any 2 suits", "xc": "X", "pts": 30, "suits": 2, "flowers": true, "dragons": false, "winds": false, "pairs": false, "pongs": true, "kongs": true, "quints": false, "order": 17}, {"id": "B7.3", "section": "B - 2468", "hand": "FFF (2468) FFF [6666]", "note": "any 2 suits", "xc": "X", "pts": 30, "suits": 2, "flowers": true, "dragons": false, "winds": false, "pairs": false, "pongs": true, "kongs": true, "quints": false, "order": 18}, {"id": "B7.4", "section": "B - 2468", "hand": "FFF (2468) FFF [8888]", "note": "any 2 suits", "xc": "X", "pts": 30, "suits": 2, "flowers": true, "dragons": false, "winds": false, "pairs": false, "pongs": true, "kongs": true, "quints": false, "order": 19}, {"id": "B8", "section": "B - 2468", "hand": "FF (246 888) [246 888]", "note": "any 2 suits", "xc": "C", "pts": 30, "suits": 2, "flowers": true, "dragons": false, "winds": false, "pairs": true, "pongs": true, "kongs": false, "quints": false, "order": 20}, {"id": "C1", "section": "C - Any Like Numbers", "hand": "(aaaa) FFFFFF [aaaa]", "note": "any 2 suits", "xc": "X", "pts": 30, "suits": 2, "flowers": true, "dragons": false, "winds": false, "pairs": false, "pongs": false, "kongs": true, "quints": true, "order": 21, "gen": {"t": "one", "d": [1, 2, 3, 4, 5, 6, 7, 8, 9]}}, {"id": "C2", "section": "C - Any Like Numbers", "hand": "(aaaa D) [aaa D] {aaaa D}", "note": "any 3 suits with matching dragon", "xc": "X", "pts": 25, "suits": 3, "flowers": false, "dragons": true, "winds": false, "pairs": false, "pongs": true, "kongs": true, "quints": false, "order": 22, "gen": {"t": "one", "d": [1, 2, 3, 4, 5, 6, 7, 8, 9]}}, {"id": "C3", "section": "C - Any Like Numbers", "hand": "FF (aaaa) [aa] {aaaa} DD", "note": "any 3 suits with any dragon", "xc": "X", "pts": 25, "suits": 3, "flowers": true, "dragons": true, "winds": false, "pairs": true, "pongs": false, "kongs": true, "quints": false, "order": 23, "gen": {"t": "one", "d": [1, 2, 3, 4, 5, 6, 7, 8, 9]}}, {"id": "D1", "section": "D - Quints", "hand": "(aaaaa) [aaaa] {aaaaa}", "note": "any 3 suits, any like numbers", "xc": "X", "pts": 40, "suits": 3, "flowers": false, "dragons": false, "winds": false, "pairs": false, "pongs": false, "kongs": true, "quints": true, "order": 24, "gen": {"t": "one", "d": [1, 2, 3, 4, 5, 6, 7, 8, 9]}}, {"id": "D2", "section": "D - Quints", "hand": "FF (aaaaa bb ccccc)", "note": "any 1 suit, any 3 consecutive numbers", "xc": "X", "pts": 45, "suits": 1, "flowers": true, "dragons": false, "winds": false, "pairs": true, "pongs": false, "kongs": false, "quints": true, "order": 25, "gen": {"t": "run", "k": 3}}, {"id": "D3", "section": "D - Quints", "hand": "(aaaaa bbbbb) [DDDD]", "note": "any 2 numbers in 1 suit with opposite dragon", "xc": "X", "pts": 40, "suits": 1, "flowers": false, "dragons": true, "winds": false, "pairs": false, "pongs": false, "kongs": true, "quints": true, "order": 26, "gen": {"t": "any2"}}, {"id": "E1.1", "section": "E - Consecutive Run", "hand": "(11 222 33 444 5555)", "note": "any 1 suit, 1 through 5", "xc": "X", "pts": 25, "suits": 1, "flowers": false, "dragons": false, "winds": false, "pairs": true, "pongs": true, "kongs": true, "quints": false, "order": 27}, {"id": "E1.2", "section": "E - Consecutive Run", "hand": "(55 666 77 888 9999)", "note": "any 1 suit, 5 through 9", "xc": "X", "pts": 25, "suits": 1, "flowers": false, "dragons": false, "winds": false, "pairs": true, "pongs": true, "kongs": true, "quints": false, "order": 28}, {"id": "E2.1", "section": "E - Consecutive Run", "hand": "FFF (aaaa bcd eeee)", "note": "any 1 suit, any 5 consecutive numbers", "xc": "X", "pts": 25, "suits": 1, "flowers": true, "dragons": false, "winds": false, "pairs": false, "pongs": true, "kongs": true, "quints": false, "order": 29, "gen": {"t": "run", "k": 5}}, {"id": "E2.2", "section": "E - Consecutive Run", "hand": "FFF (aaaa) [bcd] (eeee)", "note": "any 2 suits, any 5 consecutive numbers", "xc": "X", "pts": 25, "suits": 2, "flowers": true, "dragons": false, "winds": false, "pairs": false, "pongs": true, "kongs": true, "quints": false, "order": 30, "gen": {"t": "run", "k": 5}}, {"id": "E3", "section": "E - Consecutive Run", "hand": "(aa bb) [aaa bbb] {cccc}", "note": "any 3 suits, any 3 consecutive numbers", "xc": "X", "pts": 25, "suits": 3, "flowers": false, "dragons": false, "winds": false, "pairs": true, "pongs": true, "kongs": true, "quints": false, "order": 31, "gen": {"t": "run", "k": 3}}, {"id": "E4.1", "section": "E - Consecutive Run", "hand": "(aaa bbb cccc dddd)", "note": "any 1 suit, any 4 consecutive numbers", "xc": "X", "pts": 25, "suits": 1, "flowers": false, "dragons": false, "winds": false, "pairs": false, "pongs": true, "kongs": true, "quints": false, "order": 32, "gen": {"t": "run", "k": 4}}, {"id": "E4.2", "section": "E - Consecutive Run", "hand": "(aaa bbb) [cccc dddd]", "note": "any 2 suits, any 4 consecutive numbers", "xc": "X", "pts": 25, "suits": 2, "flowers": false, "dragons": false, "winds": false, "pairs": false, "pongs": true, "kongs": true, "quints": false, "order": 33, "gen": {"t": "run", "k": 4}}, {"id": "E5.1", "section": "E - Consecutive Run", "hand": "FFF (aa bb ccc DDDD)", "note": "any 1 suit, dragons match", "xc": "X", "pts": 25, "suits": 1, "flowers": true, "dragons": true, "winds": false, "pairs": true, "pongs": true, "kongs": true, "quints": false, "order": 34, "gen": {"t": "run", "k": 3}}, {"id": "E5.2", "section": "E - Consecutive Run", "hand": "FFF (aa ccc) [bb DDDD]", "note": "any 2 suits, dragons match the middle number", "xc": "X", "pts": 25, "suits": 2, "flowers": true, "dragons": true, "winds": false, "pairs": true, "pongs": true, "kongs": true, "quints": false, "order": 35, "gen": {"t": "run", "k": 3}}, {"id": "E6", "section": "E - Consecutive Run", "hand": "(aaaa) FFFFFF (bbbb)", "note": "any 1 suit, any 2 consecutive numbers", "xc": "X", "pts": 30, "suits": 1, "flowers": true, "dragons": false, "winds": false, "pairs": false, "pongs": false, "kongs": true, "quints": true, "order": 36, "gen": {"t": "run", "k": 2}}, {"id": "E7.1", "section": "E - Consecutive Run", "hand": "FF (aaaa bbbb cccc)", "note": "any 1 suit, any 3 consecutive numbers", "xc": "X", "pts": 25, "suits": 1, "flowers": true, "dragons": false, "winds": false, "pairs": true, "pongs": false, "kongs": true, "quints": false, "order": 37, "gen": {"t": "run", "k": 3}}, {"id": "E7.2", "section": "E - Consecutive Run", "hand": "FF (aaaa) [bbbb] {cccc}", "note": "any 3 suits, any 3 consecutive numbers", "xc": "X", "pts": 25, "suits": 3, "flowers": true, "dragons": false, "winds": false, "pairs": true, "pongs": false, "kongs": true, "quints": false, "order": 38, "gen": {"t": "run", "k": 3}}, {"id": "E8", "section": "E - Consecutive Run", "hand": "(a bb ccc) [a bb ccc] {dd}", "note": "any 3 suits, any 4 consecutive numbers", "xc": "C", "pts": 35, "suits": 3, "flowers": false, "dragons": false, "winds": false, "pairs": true, "pongs": true, "kongs": false, "quints": false, "order": 39, "gen": {"t": "run", "k": 4}}, {"id": "F1.1", "section": "F - 13579", "hand": "(11 333 55 777 9999)", "note": "any 1 suit", "xc": "X", "pts": 25, "suits": 1, "flowers": false, "dragons": false, "winds": false, "pairs": true, "pongs": true, "kongs": true, "quints": false, "order": 40}, {"id": "F1.2", "section": "F - 13579", "hand": "(11 333) [55 777] {9999}", "note": "any 3 suits", "xc": "X", "pts": 25, "suits": 3, "flowers": false, "dragons": false, "winds": false, "pairs": true, "pongs": true, "kongs": true, "quints": false, "order": 41}, {"id": "F2.1", "section": "F - 13579", "hand": "(111 333) [3333 5555]", "note": "any 2 suits", "xc": "X", "pts": 25, "suits": 2, "flowers": false, "dragons": false, "winds": false, "pairs": false, "pongs": true, "kongs": true, "quints": false, "order": 42}, {"id": "F2.2", "section": "F - 13579", "hand": "(555 777) [7777 9999]", "note": "any 2 suits", "xc": "X", "pts": 25, "suits": 2, "flowers": false, "dragons": false, "winds": false, "pairs": false, "pongs": true, "kongs": true, "quints": false, "order": 43}, {"id": "F3.1", "section": "F - 13579", "hand": "NN (1111 33 5555) SS", "note": "any 1 suit, North and South only", "xc": "X", "pts": 30, "suits": 1, "flowers": false, "dragons": false, "winds": true, "pairs": true, "pongs": false, "kongs": true, "quints": false, "order": 44}, {"id": "F3.2", "section": "F - 13579", "hand": "NN (5555 77 9999) SS", "note": "any 1 suit, North and South only", "xc": "X", "pts": 30, "suits": 1, "flowers": false, "dragons": false, "winds": true, "pairs": true, "pongs": false, "kongs": true, "quints": false, "order": 45}, {"id": "F4", "section": "F - 13579", "hand": "(aa 13579−a) [aaaa] {aaaa}", "note": "any 3 suits, pair any odd number, kongs match pair. Example: (113579) [1111] {1111}", "xc": "X", "pts": 25, "suits": 3, "flowers": false, "dragons": false, "winds": false, "pairs": true, "pongs": false, "kongs": true, "quints": false, "order": 46, "gen": {"t": "one", "d": [1, 3, 5, 7, 9]}}, {"id": "F5.1", "section": "F - 13579", "hand": "FFF (11 33 555 DDDD)", "note": "any 1 suit with matching dragon", "xc": "X", "pts": 25, "suits": 1, "flowers": true, "dragons": true, "winds": false, "pairs": true, "pongs": true, "kongs": true, "quints": false, "order": 47}, {"id": "F5.2", "section": "F - 13579", "hand": "FFF (55 77 999 DDDD)", "note": "any 1 suit with matching dragon", "xc": "X", "pts": 25, "suits": 1, "flowers": true, "dragons": true, "winds": false, "pairs": true, "pongs": true, "kongs": true, "quints": false, "order": 48}, {"id": "F6.1", "section": "F - 13579", "hand": "(11 33) [111 333] {5555}", "note": "any 3 suits", "xc": "X", "pts": 25, "suits": 3, "flowers": false, "dragons": false, "winds": false, "pairs": true, "pongs": true, "kongs": true, "quints": false, "order": 49}, {"id": "F6.2", "section": "F - 13579", "hand": "(55 77) [555 777] {9999}", "note": "any 3 suits", "xc": "X", "pts": 25, "suits": 3, "flowers": false, "dragons": false, "winds": false, "pairs": true, "pongs": true, "kongs": true, "quints": false, "order": 50}, {"id": "F7.1", "section": "F - 13579", "hand": "(1111 33 55 77 9999)", "note": "any 1 suit", "xc": "X", "pts": 30, "suits": 1, "flowers": false, "dragons": false, "winds": false, "pairs": true, "pongs": false, "kongs": true, "quints": false, "order": 51}, {"id": "F7.2", "section": "F - 13579", "hand": "(1111) [33 55 77] (9999)", "note": "any 2 suits", "xc": "X", "pts": 30, "suits": 2, "flowers": false, "dragons": false, "winds": false, "pairs": true, "pongs": false, "kongs": true, "quints": false, "order": 52}, {"id": "F8.1", "section": "F - 13579", "hand": "FF (11 33 55) [111] {111}", "note": "any 3 suits", "xc": "C", "pts": 35, "suits": 3, "flowers": true, "dragons": false, "winds": false, "pairs": true, "pongs": true, "kongs": false, "quints": false, "order": 53}, {"id": "F8.2", "section": "F - 13579", "hand": "FF (55 77 99) [555] {555}", "note": "any 3 suits", "xc": "C", "pts": 35, "suits": 3, "flowers": true, "dragons": false, "winds": false, "pairs": true, "pongs": true, "kongs": false, "quints": false, "order": 54}, {"id": "F9", "section": "F - 13579", "hand": "FF (135 777 999) [DDD]", "note": "any 1 suit with opposite dragon", "xc": "C", "pts": 30, "suits": 1, "flowers": true, "dragons": true, "winds": false, "pairs": true, "pongs": true, "kongs": false, "quints": false, "order": 55}, {"id": "G1.1", "section": "G - Winds-Dragons", "hand": "NNNN EEE WWW SSSS", "note": "", "xc": "X", "pts": 25, "suits": 0, "flowers": false, "dragons": false, "winds": true, "pairs": false, "pongs": true, "kongs": true, "quints": false, "order": 56}, {"id": "G1.2", "section": "G - Winds-Dragons", "hand": "NNN EEEE WWWW SSS", "note": "", "xc": "X", "pts": 25, "suits": 0, "flowers": false, "dragons": false, "winds": true, "pairs": false, "pongs": true, "kongs": true, "quints": false, "order": 57}, {"id": "G2", "section": "G - Winds-Dragons", "hand": "(abcd DDD) [DDD] {DDDD}", "note": "any 4 consecutive numbers in any 1 suit, any 3 dragons", "xc": "X", "pts": 25, "suits": 1, "flowers": false, "dragons": true, "winds": false, "pairs": false, "pongs": true, "kongs": true, "quints": false, "order": 58, "gen": {"t": "run", "k": 4}}, {"id": "G3", "section": "G - Winds-Dragons", "hand": "NNN (aaaa) [aaaa] SSS", "note": "any like odd numbers in any 2 suits", "xc": "X", "pts": 25, "suits": 2, "flowers": false, "dragons": false, "winds": true, "pairs": false, "pongs": true, "kongs": true, "quints": false, "order": 59, "gen": {"t": "one", "d": [1, 3, 5, 7, 9]}}, {"id": "G4", "section": "G - Winds-Dragons", "hand": "EEE (aaaa) [aaaa] WWW", "note": "any like even numbers in any 2 suits", "xc": "X", "pts": 25, "suits": 2, "flowers": false, "dragons": false, "winds": true, "pairs": false, "pongs": true, "kongs": true, "quints": false, "order": 60, "gen": {"t": "one", "d": [2, 4, 6, 8]}}, {"id": "G5", "section": "G - Winds-Dragons", "hand": "FFF NNNN FFF DDDD", "note": "North Wind, any dragon", "xc": "X", "pts": 25, "suits": 0, "flowers": true, "dragons": true, "winds": true, "pairs": false, "pongs": true, "kongs": true, "quints": false, "order": 61}, {"id": "G6", "section": "G - Winds-Dragons", "hand": "(1) N (2) EE (3) WWW (4) SSSS", "note": "any 1 suit, these numbers only", "xc": "X", "pts": 25, "suits": 1, "flowers": false, "dragons": false, "winds": true, "pairs": true, "pongs": true, "kongs": true, "quints": false, "order": 62}, {"id": "G7.1", "section": "G - Winds-Dragons", "hand": "FF NNNN SSSS (DD) [DD]", "note": "any 2 dragons", "xc": "X", "pts": 25, "suits": 0, "flowers": true, "dragons": true, "winds": true, "pairs": true, "pongs": false, "kongs": true, "quints": false, "order": 63}, {"id": "G7.2", "section": "G - Winds-Dragons", "hand": "FF EEEE WWWW (DD) [DD]", "note": "any 2 dragons", "xc": "X", "pts": 25, "suits": 0, "flowers": true, "dragons": true, "winds": true, "pairs": true, "pongs": false, "kongs": true, "quints": false, "order": 64}, {"id": "G8", "section": "G - Winds-Dragons", "hand": "NN EEE (2026) WWW SS", "note": "2026 in any 1 suit", "xc": "C", "pts": 30, "suits": 1, "flowers": false, "dragons": true, "winds": true, "pairs": true, "pongs": true, "kongs": false, "quints": false, "order": 65}, {"id": "H1.1", "section": "H - 369", "hand": "(333 666) [6666 9999]", "note": "any 2 suits", "xc": "X", "pts": 25, "suits": 2, "flowers": false, "dragons": false, "winds": false, "pairs": false, "pongs": true, "kongs": true, "quints": false, "order": 66}, {"id": "H1.2", "section": "H - 369", "hand": "(333 666) [6666] {9999}", "note": "any 3 suits", "xc": "X", "pts": 25, "suits": 3, "flowers": false, "dragons": false, "winds": false, "pairs": false, "pongs": true, "kongs": true, "quints": false, "order": 67}, {"id": "H2", "section": "H - 369", "hand": "(33 66) [333 666] {9999}", "note": "any 3 suits", "xc": "X", "pts": 25, "suits": 3, "flowers": false, "dragons": false, "winds": false, "pairs": true, "pongs": true, "kongs": true, "quints": false, "order": 68}, {"id": "H3.1", "section": "H - 369", "hand": "FFF (33 666 99 DDDD)", "note": "any 1 suit with matching dragon", "xc": "X", "pts": 25, "suits": 1, "flowers": true, "dragons": true, "winds": false, "pairs": true, "pongs": true, "kongs": true, "quints": false, "order": 69}, {"id": "H3.2", "section": "H - 369", "hand": "FFF (33 666 99) [DDDD]", "note": "any 1 suit with opposite dragon", "xc": "X", "pts": 25, "suits": 1, "flowers": true, "dragons": true, "winds": false, "pairs": true, "pongs": true, "kongs": true, "quints": false, "order": 70}, {"id": "H4", "section": "H - 369", "hand": "(33 66) [666 999] NEWS", "note": "any 2 suits", "xc": "X", "pts": 30, "suits": 2, "flowers": false, "dragons": false, "winds": true, "pairs": true, "pongs": true, "kongs": false, "quints": false, "order": 71}, {"id": "H5", "section": "H - 369", "hand": "FF (aa 369−a) [aaaa] {aaaa}", "note": "any 3 suits, pair 3, 6 or 9, kongs match pair", "xc": "X", "pts": 25, "suits": 3, "flowers": true, "dragons": false, "winds": false, "pairs": true, "pongs": false, "kongs": true, "quints": false, "order": 72, "gen": {"t": "one", "d": [3, 6, 9]}}, {"id": "H6", "section": "H - 369", "hand": "FF (333 666 999) [369]", "note": "any 2 suits", "xc": "C", "pts": 30, "suits": 2, "flowers": true, "dragons": false, "winds": false, "pairs": true, "pongs": true, "kongs": false, "quints": false, "order": 73}, {"id": "I1", "section": "I - Singles and Pairs", "hand": "NN EE WW SS (aD) [aD] {aD}", "note": "any 3 suits, any like numbers with matching dragon", "xc": "C", "pts": 50, "suits": 3, "flowers": false, "dragons": true, "winds": true, "pairs": true, "pongs": false, "kongs": false, "quints": false, "order": 74, "gen": {"t": "one", "d": [1, 2, 3, 4, 5, 6, 7, 8, 9]}}, {"id": "I2", "section": "I - Singles and Pairs", "hand": "(2 4 66 88) [2 4 66 88] {88}", "note": "any 3 suits, these numbers only", "xc": "C", "pts": 50, "suits": 3, "flowers": false, "dragons": false, "winds": false, "pairs": true, "pongs": false, "kongs": false, "quints": false, "order": 75}, {"id": "I3", "section": "I - Singles and Pairs", "hand": "FF (3369) [3669] {3699}", "note": "any 3 suits", "xc": "C", "pts": 50, "suits": 3, "flowers": true, "dragons": false, "winds": false, "pairs": true, "pongs": false, "kongs": false, "quints": false, "order": 76}, {"id": "I4", "section": "I - Singles and Pairs", "hand": "(aa bb cc dd ee ff gg)", "note": "any 1 suit, any 7 consecutive numbers", "xc": "C", "pts": 50, "suits": 1, "flowers": false, "dragons": false, "winds": false, "pairs": true, "pongs": false, "kongs": false, "quints": false, "order": 77, "gen": {"t": "run", "k": 7}}, {"id": "I5", "section": "I - Singles and Pairs", "hand": "(11 357 99) [11 357 99]", "note": "any 2 suits", "xc": "C", "pts": 50, "suits": 2, "flowers": false, "dragons": false, "winds": false, "pairs": true, "pongs": false, "kongs": false, "quints": false, "order": 78}, {"id": "I6", "section": "I - Singles and Pairs", "hand": "FF (2026) [2026] {2026}", "note": "any 3 suits", "xc": "C", "pts": 75, "suits": 3, "flowers": true, "dragons": true, "winds": false, "pairs": true, "pongs": false, "kongs": false, "quints": false, "order": 79}];
+
+var FEATURES = [
+  {key:'flowers', label:'Flowers'},
+  {key:'dragons', label:'Dragons'},
+  {key:'winds', label:'Winds'},
+  {key:'pairs', label:'Pairs'},
+  {key:'pongs', label:'Pongs'},
+  {key:'kongs', label:'Kongs'},
+  {key:'quints', label:'Quints'}
+];
+
+function esc(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+function render(list, activeLabels){
+  var resultsEl = document.getElementById('results');
+  var emptyEl = document.getElementById('emptyState');
+  var countEl = document.getElementById('resultsCount');
+  var titleEl = document.getElementById('resultsTitle');
+  var activeEl = document.getElementById('activeLine');
+
+  countEl.textContent = list.length + (list.length===1 ? ' hand' : ' hands');
+  titleEl.textContent = activeLabels.length ? 'Matching hands' : 'All hands';
+
+  if(activeLabels.length){
+    activeEl.innerHTML = 'Filtering on: <strong>' + esc(activeLabels.join('  ·  ')) + '</strong>';
+  } else {
+    activeEl.textContent = 'No filters applied — showing the full 2026 card.';
+  }
+
+  if(!list.length){
+    resultsEl.innerHTML = '';
+    emptyEl.hidden = false;
+    return;
+  }
+  emptyEl.hidden = true;
+
+  var html = list.map(function(h){
+    var tags = [];
+    tags.push('<span class="tag neutral">' + h.suits + (h.suits===1 ? ' suit' : ' suits') + '</span>');
+    FEATURES.forEach(function(f){
+      if(h[f.key]) tags.push('<span class="tag">' + f.label + '</span>');
+    });
+    var xcClass = h.xc === 'C' ? 'xc-c' : 'xc-x';
+    var xcLabel = h.xc === 'C' ? 'C · Concealed' : 'X · Exposed';
+    var sectionDisplay = h.section.replace(' - ', ' — ');
+    return '<article class="card">' +
+      '<div class="card-top"><div><div class="hand-id">' + esc(h.id) + '</div><div class="section-name"><span class="section-label">Section</span>' + esc(sectionDisplay) + '</div></div>' +
+      '<div class="badges"><span class="badge ' + xcClass + '">' + esc(xcLabel) + '</span><span class="badge pts">' + esc(h.pts) + ' pts</span></div></div>' +
+      '<div class="notation">' + esc(h.hand) + '</div>' +
+      (h.note ? '<p class="note">' + esc(h.note) + '</p>' : '<p class="note"></p>') +
+      '<div class="tags">' + tags.join('') + '</div>' +
+      '</article>';
+  }).join('');
+  resultsEl.innerHTML = html;
+}
+
+function selectedNumbers(){
+  var nums = [];
+  var btns = document.querySelectorAll('.num-btn.on');
+  for(var i=0;i<btns.length;i++){ nums.push(btns[i].getAttribute('data-num')); }
+  return nums;
+}
+
+function selectedPoints(){
+  var pts = [];
+  var btns = document.querySelectorAll('.pts-btn.on');
+  for(var i=0;i<btns.length;i++){ pts.push(parseInt(btns[i].getAttribute('data-pts'), 10)); }
+  return pts;
+}
+
+function selectedFeatures(){
+  var feats = [];
+  var btns = document.querySelectorAll('.feat-btn.on');
+  for(var i=0;i<btns.length;i++){ feats.push(btns[i].getAttribute('data-feat')); }
+  return feats;
+}
+
+function getFilters(){
+  var section = document.getElementById('section').value;
+  var suitsVal = document.getElementById('suits').value;
+  var suits = suitsVal === '' ? null : parseInt(suitsVal, 10);
+  return {section:section, suits:suits, must:selectedFeatures(), numbers:selectedNumbers(), points:selectedPoints()};
+}
+
+function explicitDigits(h){
+  var set = {};
+  for(var i=0;i<h.hand.length;i++){
+    var c = h.hand.charAt(i);
+    if(c >= '1' && c <= '9') set[c] = true;
+  }
+  return set;
+}
+
+function copySet(s){
+  var out = {};
+  for(var k in s){ if(s.hasOwnProperty(k)) out[k] = true; }
+  return out;
+}
+
+// Generate every digit set a hand can actually contain: its written digits
+// plus one full assignment of its letter placeholders. A repeated letter is
+// a single chosen number; different letters form a sequence, so assignments
+// are generated whole and tested whole — never letter by letter.
+function candidateDigitSets(h){
+  var base = explicitDigits(h);
+  if(!h.gen) return [base];
+  var sets = [];
+  var v, s, a, b, cand;
+  if(h.gen.t === 'one'){
+    for(v=0; v<h.gen.d.length; v++){
+      cand = copySet(base); cand[String(h.gen.d[v])] = true; sets.push(cand);
+    }
+  } else if(h.gen.t === 'run'){
+    for(s=1; s + h.gen.k - 1 <= 9; s++){
+      cand = copySet(base);
+      for(v=0; v<h.gen.k; v++) cand[String(s+v)] = true;
+      sets.push(cand);
+    }
+  } else if(h.gen.t === 'any2'){
+    for(a=1; a<=9; a++){
+      for(b=1; b<=9; b++){
+        if(a === b) continue;
+        cand = copySet(base); cand[String(a)] = true; cand[String(b)] = true; sets.push(cand);
+      }
+    }
+  }
+  return sets.length ? sets : [base];
+}
+
+function handMatchesNumbers(h, picks){
+  if(!picks.length) return true;
+  var sets = candidateDigitSets(h);
+  for(var i=0;i<sets.length;i++){
+    var ok = true;
+    for(var j=0;j<picks.length;j++){
+      if(!sets[i][String(picks[j])]){ ok = false; break; }
+    }
+    if(ok) return true;
+  }
+  return false;
+}
+
+function applyFilters(){
+  var f = getFilters();
+  var labels = [];
+  if(f.section) labels.push(f.section);
+  if(f.suits !== null) labels.push(f.suits + (f.suits===1 ? ' suit' : ' suits'));
+  if(f.numbers.length) labels.push('Numbers: ' + f.numbers.join(', '));
+  if(f.points.length) labels.push('Points: ' + f.points.join(', ') + ' pts');
+  f.must.forEach(function(k){
+    var feat = FEATURES.filter(function(x){return x.key===k})[0];
+    if(feat) labels.push(feat.label);
+  });
+
+  var pickInts = f.numbers.map(function(n){ return parseInt(n, 10); });
+  var list = HANDS.filter(function(h){
+    if(f.section && h.section !== f.section) return false;
+    if(f.suits !== null && h.suits !== f.suits) return false;
+    if(!handMatchesNumbers(h, pickInts)) return false;
+    if(f.points.length && f.points.indexOf(h.pts) === -1) return false;
+    for(var i=0;i<f.must.length;i++){ if(!h[f.must[i]]) return false; }
+    return true;
+  });
+  // HANDS already in card order
+  render(list, labels);
+  // Move focus of reading to results on small screens after an explicit Apply
+  document.getElementById('resultsTitle').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+document.getElementById('filterForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  applyFilters();
+});
+
+var numBtns = document.querySelectorAll('.num-btn');
+for(var b=0;b<numBtns.length;b++){
+  numBtns[b].addEventListener('click', function(){
+    var on = this.classList.toggle('on');
+    this.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+}
+
+var ptsBtns = document.querySelectorAll('.pts-btn');
+for(var p=0;p<ptsBtns.length;p++){
+  ptsBtns[p].addEventListener('click', function(){
+    var on = this.classList.toggle('on');
+    this.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+}
+
+var featBtns = document.querySelectorAll('.feat-btn');
+for(var t=0;t<featBtns.length;t++){
+  featBtns[t].addEventListener('click', function(){
+    var on = this.classList.toggle('on');
+    this.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+}
+
+document.getElementById('clearBtn').addEventListener('click', function(){
+  document.getElementById('filterForm').reset();
+  var btns = document.querySelectorAll('.num-btn.on, .pts-btn.on, .feat-btn.on');
+  for(var i=0;i<btns.length;i++){
+    btns[i].classList.remove('on');
+    btns[i].setAttribute('aria-pressed', 'false');
+  }
+  render(HANDS, []);
+});
+
+// Initial view: all 79 hands
+render(HANDS, []);
+</script>
+</body>
+</html>
