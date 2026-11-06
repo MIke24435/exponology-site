@@ -1,0 +1,2337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CipherDesk">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#10160f">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="Classic newspaper cryptograms — CipherDesk">
+<title>CipherDesk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: dark;
+  --page-max: 800px;
+  --bg: #10160f;
+  --bg2: #232b21;
+  --paper: #1a211a;
+  --ink: #edeae0;
+  --muted: #bfc7ba;
+  --accent: #7bc79b;
+  --correct: #7bc79b;
+  --wrong: #e88a7d;
+  --gold: #d8ab4e;
+  --border: #39412f;
+  --line-strong: #55614a;
+  --shadow: rgba(0,0,0,0.5);
+  --cipher: #bfc7ba;
+  --blank: #4a5f50;
+  --sel: #38301a;
+  --sel-border: #d8ab4e;
+  --btn: #1a211a;
+  --btn-hover: #232b21;
+  --kb: #1a211a;
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; height: 100%; scroll-behavior: smooth; }
+body {
+  margin: 0;
+  min-height: 100%;
+  min-height: 100dvh;
+  font-family: "Public Sans", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  padding: calc(12px + var(--safe-t)) calc(28px + var(--safe-r)) calc(12px + var(--safe-b)) calc(28px + var(--safe-l));
+  line-height: 1.45;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+button, select, input, textarea {
+  font-family: inherit;
+  font-size: 1rem;
+  color: inherit;
+}
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--accent);
+}
+.eyebrow::before {
+  content: "";
+  width: 28px;
+  height: 3px;
+  background: var(--wrong);
+  border-radius: 2px;
+  display: inline-block;
+}
+h1 {
+  font-family: "Newsreader", Georgia, "Times New Roman", serif;
+  font-weight: 700;
+  font-size: clamp(2rem, 6vw, 3.1rem);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  margin: 10px 0 8px;
+  color: var(--ink);
+}
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 8px 0 6px;
+  border-bottom: 1px solid var(--border);
+}
+.wordmark {
+  font-family: "Newsreader", Georgia, serif;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  text-decoration: none;
+  line-height: 1;
+}
+.wordmark .dot { color: #e88a7d; }
+.wordmark small {
+  display: block;
+  font-family: "Public Sans", sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 5px;
+}
+.subtitle, .lede { font-size: 1.06rem; color: var(--muted); margin: 0; max-width: 38rem; }
+.header {
+  margin: 0 auto 10px;
+  max-width: var(--page-max);
+}
+.controls-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  max-width: var(--page-max);
+  margin: 0 auto 12px;
+}
+.stat {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.95rem;
+  color: var(--muted);
+  padding: 6px 10px;
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.icon-btn, .tool-btn, .cat-btn, .kb-key, .map-cell {
+  min-height: 44px;
+  min-width: 44px;
+  border: 1px solid var(--border);
+  background: var(--btn);
+  border-radius: 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 12px;
+  transition: background 0.15s, border-color 0.15s;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+}
+.icon-btn:active, .tool-btn:active, .cat-btn:active, .kb-key:active {
+  background: var(--btn-hover);
+}
+.tool-btn { font-size: 0.9rem; font-weight: 600; }
+.tool-btn.primary {
+  background: var(--accent);
+  color: #0e2417;
+  border-color: var(--accent);
+}
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: var(--page-max);
+  margin: 0 auto 12px;
+  align-items: center;
+}
+.toolbar-spacer {
+  flex: 0 0 20px;
+  width: 20px;
+  height: 1px;
+}
+.cats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: var(--page-max);
+  margin: 0 auto 14px;
+}
+.cat-btn {
+  font-size: 0.82rem;
+  padding: 8px 12px;
+  border-radius: 999px;
+  color: var(--muted);
+}
+.cat-btn.active {
+  background: var(--accent);
+  color: #0e2417;
+  border-color: var(--accent);
+  font-weight: 700;
+}
+.empty-saved {
+  width: 100%;
+  text-align: center;
+  padding: 36px 18px;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.55;
+  font-style: italic;
+}
+.empty-saved strong { color: var(--accent); font-style: normal; }
+.tool-btn.danger {
+  color: var(--wrong);
+  border-color: var(--wrong);
+}
+.tool-btn.hidden { display: none; }
+.author-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 4px;
+}
+.author-row .author { margin: 0; }
+.saved-actions { display: flex; gap: 6px; align-items: center; }
+.saved-actions.hidden { display: none; }
+.saved-actions .mini-btn {
+  font-size: 0.78rem;
+  padding: 5px 10px;
+  border-radius: 999px;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+}
+.saved-actions .mini-btn:hover { color: var(--ink); border-color: var(--accent); }
+.main {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "puzzle"
+    "keyboard"
+    "side";
+  align-items: start;
+}
+.main > .panel:not(.side) { grid-area: puzzle; }
+.main > .keyboard { grid-area: keyboard; margin: 0; max-width: none; }
+.main > .side { grid-area: side; }
+@media (min-width: 760px) {
+  .map-grid { grid-template-columns: repeat(4, 1fr); }
+}
+/* The wider side margins live at page level (body padding + the
+   --page-max column above), not inside the puzzle panel — so the
+   panel's own side padding stays modest and the puzzle keeps its width. */
+.panel {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 2px 12px var(--shadow);
+  padding: 16px 12px;
+}
+.puzzle-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.puzzle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 2px;
+  justify-content: center;
+  padding: 8px 0 4px;
+  min-height: 120px;
+}
+.word {
+  display: inline-flex;
+  gap: 3px;
+  margin: 0 8px 14px 0;
+}
+.cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 36px;
+  min-width: 32px;
+}
+.cell.space { width: 14px; }
+.cell.punct .guess {
+  border: none;
+  background: transparent;
+  min-height: auto;
+  font-size: 1.2rem;
+  color: var(--ink);
+  pointer-events: none;
+}
+.guess {
+  width: 100%;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  font-weight: 700;
+  border-bottom: 2px solid var(--blank);
+  cursor: pointer;
+  border-radius: 4px 4px 0 0;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.guess.filled { border-bottom-color: var(--ink); }
+.guess.selected {
+  background: var(--sel);
+  border-bottom-color: var(--sel-border);
+  outline: 2px solid var(--sel-border);
+  outline-offset: -2px;
+}
+.guess.wrong { color: var(--wrong); border-bottom-color: var(--wrong); }
+.guess.ok { color: var(--correct); }
+.cipher-letter {
+  font-size: 0.95rem;
+  color: var(--cipher);
+  margin-top: 3px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.freq {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-top: 1px;
+  font-variant-numeric: tabular-nums;
+}
+.author {
+  text-align: center;
+  margin-top: 8px;
+  font-family: "Newsreader", Georgia, "Times New Roman", serif;
+  font-style: italic;
+  color: var(--muted);
+  font-size: 1.05rem;
+  min-height: 1.5em;
+}
+.author.revealed {
+  color: var(--accent);
+  font-weight: 600;
+  font-style: normal;
+}
+.solved-banner {
+  display: none;
+  text-align: center;
+  padding: 10px;
+  background: color-mix(in srgb, var(--correct) 18%, var(--paper));
+  border: 1px solid var(--correct);
+  border-radius: 10px;
+  color: var(--correct);
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.solved-banner.show { display: block; }
+.side h3 {
+  margin: 0 0 10px;
+  font-family: "Newsreader", Georgia, "Times New Roman", serif;
+  font-size: 0.95rem;
+  color: var(--accent);
+}
+.map-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+.map-cell {
+  justify-content: space-between;
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+.map-cell .c { color: var(--cipher); font-weight: 700; }
+.map-cell .arrow { color: var(--muted); margin: 0 4px; }
+.map-cell .p { font-weight: 700; min-width: 1ch; }
+.map-cell.empty .p { color: var(--blank); }
+.map-cell.selected {
+  outline: 2px solid var(--sel-border);
+  background: var(--sel);
+}
+.side-meta {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+.side-meta h4 {
+  margin: 0 0 6px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.01em;
+}
+.side-meta .meta-body {
+  color: var(--ink);
+  word-break: break-word;
+}
+.side-meta .meta-empty {
+  color: var(--muted);
+  font-style: italic;
+}
+.side-meta .hint-pair {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.side-meta .hint-pair .c { color: var(--cipher); }
+.side-meta .hint-pair .arrow { color: var(--muted); margin: 0 1px; }
+
+/* Help links + panel (Hand Finder layout) */
+.help-link {
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 0.95rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 2px;
+  white-space: nowrap;
+  padding: 6px 2px;
+}
+.help-link:active { color: var(--wrong); }
+#help, #help-use, #help-read { scroll-margin-top: 18px; }
+.hint {
+  max-width: var(--page-max);
+  margin: 0 auto 12px;
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+.side-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.help-panel { max-width: var(--page-max); margin: 28px auto 0; padding: 20px 18px 8px; }
+.help-panel > h2 {
+  font-family: "Newsreader", Georgia, "Times New Roman", serif;
+  font-size: 1.7rem;
+  margin: 0 0 4px;
+}
+.help-panel .help-intro { color: var(--muted); margin: 0 0 6px; max-width: 38rem; }
+.help-section { border-top: 1px solid var(--border); padding: 16px 0 14px; margin-top: 14px; }
+.help-section h3 {
+  font-family: "Newsreader", Georgia, "Times New Roman", serif;
+  font-size: 1.28rem;
+  margin: 0 0 12px;
+  line-height: 1.2;
+}
+.help-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+@media (min-width: 640px) {
+  .help-steps { grid-template-columns: 1fr 1fr; }
+  .help-steps li:last-child { grid-column: 1 / -1; }
+}
+.help-steps li {
+  display: flex; gap: 10px; align-items: flex-start;
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 10px 12px; font-size: 0.95rem; color: var(--muted);
+}
+.help-steps li strong { color: var(--ink); }
+.step-num {
+  flex: 0 0 26px; width: 26px; height: 26px; border-radius: 50%;
+  background: var(--accent); color: #0e2417; font-weight: 800; font-size: 0.9rem;
+  display: flex; align-items: center; justify-content: center; margin-top: 1px;
+}
+.help-example {
+  border: 1px solid var(--line-strong); border-radius: 12px;
+  padding: 14px; background: var(--bg2); margin-bottom: 14px;
+}
+.help-example .ex-label {
+  font-size: 0.78rem; font-weight: 800; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--gold); margin-bottom: 8px;
+}
+.help-example .example-cell { display: flex; gap: 8px; margin: 0 0 8px; }
+.help-example .example-cell .guess { cursor: default; }
+.help-example .example-note { font-size: 0.9rem; color: var(--muted); margin: 0; }
+.read-grid { display: grid; gap: 8px; }
+@media (min-width: 640px) { .read-grid { grid-template-columns: 1fr 1fr; } }
+.read-item {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 10px 12px; font-size: 0.95rem; color: var(--muted);
+}
+.read-item strong { color: var(--ink); display: block; margin-bottom: 2px; }
+.keyboard {
+  max-width: var(--page-max);
+  width: 100%;
+  margin: 14px auto 0;
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  gap: 6px;
+  padding: 10px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+.kb-key {
+  font-weight: 700;
+  font-size: 1.05rem;
+  background: var(--kb);
+  padding: 0;
+  /* The shared button rule sets min-width: 44px, which forces nine
+     keys + gaps to ~464px — wider than a phone in portrait and the
+     cause of the sideways overflow. Keys must be free to shrink
+     below 44px wide; the 44px min-height keeps them tappable. */
+  min-width: 0;
+}
+.kb-key.used {
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+.kb-key.clear-key {
+  grid-column: span 2;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+/* Narrow screens (iPhone portrait): shrink the keyboard's gaps and
+   padding, and ease the page side padding, so all nine keys in a row
+   fit inside the viewport with nothing cut off and no sideways
+   scroll. Desktop and landscape widths are untouched. */
+@media (max-width: 480px) {
+  body {
+    padding-left: calc(12px + var(--safe-l));
+    padding-right: calc(12px + var(--safe-r));
+  }
+  .keyboard {
+    gap: 4px;
+    padding: 6px;
+    border-radius: 12px;
+  }
+  .kb-key {
+    min-width: 0;
+    min-height: 44px;
+    padding: 0 1px;
+    font-size: 0.98rem;
+    border-radius: 8px;
+  }
+  .kb-key.clear-key {
+    font-size: 0.8rem;
+  }
+}
+.notice {
+  max-width: var(--page-max);
+  margin: 0 auto 12px;
+  padding: 12px 14px;
+  background: var(--bg2);
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  color: var(--ink);
+  font-size: 0.95rem;
+  display: none;
+}
+.notice.show { display: block; }
+.modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 100;
+  align-items: flex-end;
+  justify-content: center;
+  padding: var(--safe-t) var(--safe-r) var(--safe-b) var(--safe-l);
+}
+.modal-backdrop.open { display: flex; }
+@media (min-width: 600px) {
+  .modal-backdrop { align-items: center; }
+}
+.modal {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 16px 16px 0 0;
+  width: 100%;
+  max-width: 520px;
+  max-height: min(90vh, 90dvh);
+  overflow: auto;
+  padding: 20px;
+  box-shadow: 0 -4px 30px var(--shadow);
+}
+@media (min-width: 600px) {
+  .modal { border-radius: 16px; }
+}
+.modal h2 { margin: 0 0 12px; font-family: "Newsreader", Georgia, "Times New Roman", serif; color: var(--accent); font-size: 1.25rem; }
+.modal label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 10px 0 4px;
+}
+.modal textarea {
+  width: 100%;
+  min-height: 90px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  resize: vertical;
+}
+.modal input[type="text"] {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+}
+.modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+  justify-content: flex-end;
+}
+.hint-text { font-size: 0.9rem; color: var(--muted); margin: 0 0 8px; }
+.lib-status {
+  font-size: 0.85rem;
+  color: var(--muted);
+  max-width: var(--page-max);
+  margin: -4px auto 10px;
+  min-height: 1.2em;
+  padding: 0 4px;
+}
+.lib-status.active { color: var(--accent, #b45309); }
+.print-only { display: none; }
+@media print {
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    padding: 0.5in;
+  }
+  .controls-row, .toolbar, .cats, .keyboard, .side, .modal-backdrop,
+  .icon-btn, .tool-btn, .freq, .solved-banner, .no-print,
+  .help-panel, .hint, .notice, .topbar .help-link { display: none !important; }
+  .main { display: block; }
+  .panel {
+    box-shadow: none;
+    border: none;
+    padding: 0;
+    background: transparent;
+  }
+  .guess {
+    border-bottom: 1.5pt solid #000;
+    color: transparent !important;
+    min-height: 28pt;
+  }
+  .cipher-letter { color: #000; font-size: 9pt; }
+  .author { display: none; }
+  h1 { color: #000; }
+  .print-only { display: block !important; margin-top: 1em; font-size: 10pt; color: #333; }
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a class="wordmark" href="https://exponology.com/">Exponology<span class="dot">.</span><small>exponology.com</small></a>
+  <a class="help-link" href="#help">Help</a>
+</div>
+<div class="header">
+  <div class="eyebrow">71 quotes &bull; 9 categories</div>
+  <h1>CipherDesk</h1>
+  <p class="subtitle lede">Newspaper cryptograms · desk edition</p>
+</div>
+<div class="controls-row no-print">
+  <span class="stat" id="timer" aria-live="polite">0:00</span>
+  <button type="button" class="icon-btn" id="printBtn" aria-label="Print puzzle" title="Print">⎙</button>
+</div>
+
+<div class="cats no-print" id="cats" role="tablist" aria-label="Categories"></div>
+
+<div class="toolbar no-print">
+  <button type="button" class="tool-btn" id="hintBtn" title="Reveal one letter">Hint</button>
+  <button type="button" class="tool-btn" id="checkBtn" title="Check answers">Check</button>
+  <button type="button" class="tool-btn" id="undoBtn" title="Undo">Undo</button>
+  <button type="button" class="tool-btn" id="resetBtn" title="Clear guesses">Reset</button>
+  <span class="toolbar-spacer" aria-hidden="true"></span>
+  <button type="button" class="tool-btn" id="pasteBtn" title="Create cryptogram">Create</button>
+  <button type="button" class="tool-btn" id="exportSavedBtn" title="Open ~/Downloads/CipherDesk/saved-puzzles.json (loads and updates in place)">Link library file</button>
+  <button type="button" class="tool-btn hidden" id="downloadCopyBtn" title="Download a copy of saved-puzzles.json">Download copy</button>
+</div>
+<div class="lib-status no-print" id="libStatus" aria-live="polite"></div>
+<div class="notice no-print" id="notice" role="status" aria-live="polite"></div>
+
+<p class="hint no-print">Tap a cipher letter, then tap a letter on the keyboard — your guess fills in everywhere that letter appears. <a class="help-link" href="#help-use">Help</a></p>
+
+<div class="main">
+  <div class="panel">
+    <div class="solved-banner" id="solvedBanner">Solved! Well done.</div>
+    <div class="puzzle-wrap">
+      <div class="puzzle" id="puzzle" role="group" aria-label="Cryptogram puzzle"></div>
+    </div>
+    <div class="author-row">
+      <div class="author" id="author"></div>
+      <div class="saved-actions no-print hidden" id="savedActions">
+        <button type="button" class="mini-btn" id="deleteSavedBtn" title="Remove this puzzle from Saved">Remove from Saved</button>
+      </div>
+    </div>
+    <p class="print-only">CipherDesk — fill in the blanks. Each letter stands for another letter (never itself).</p>
+  </div>
+  <div class="keyboard no-print" id="keyboard" aria-label="On-screen keyboard"></div>
+  <aside class="panel side no-print">
+    <div class="side-head"><h3>Substitution map</h3><a class="help-link" href="#help-read">Help</a></div>
+    <div class="map-grid" id="map"></div>
+    <div class="side-meta" id="hintLogPanel" aria-live="polite">
+      <h4>Hints given</h4>
+      <div class="meta-body" id="hintLog"></div>
+    </div>
+  </aside>
+</div>
+
+<section class="panel help-panel" id="help" aria-label="Help">
+  <h2>Help</h2>
+  <p class="help-intro">Two short guides — how to use CipherDesk, and how to read the board.</p>
+
+  <div class="help-section" id="help-use">
+    <h3>How to use CipherDesk</h3>
+    <ol class="help-steps">
+      <li><span class="step-num">1</span><span><strong>Tap a category tab.</strong> Choose All, Saved, or a subject — Wisdom, Science, Leadership, Wit, History, Sports or Comedy. Every tap deals a new puzzle for that category, even tapping the one already selected. A quote is dealt and encoded with a fresh cipher — dealt from the reviewed quotes snapshot (quotes.json, with a copy built into the page), and from the 60 built-ins when the snapshot can&rsquo;t be reached.</span></li>
+      <li><span class="step-num">2</span><span><strong>Fill in the blanks.</strong> Tap a cipher letter, then tap a letter on the keyboard — or type it. Your guess fills in everywhere that letter appears.</span></li>
+      <li><span class="step-num">3</span><span><strong>Hint, Check, Undo, Reset.</strong> Hint reveals one letter — the most frequent one you haven&rsquo;t got right yet. Check marks wrong guesses in red. Undo takes back the last guess; Reset clears them all.</span></li>
+      <li><span class="step-num">4</span><span><strong>Create &amp; Scramble.</strong> Use Create to load a cryptogram of your own, or type a solution and Scramble turns it into a cipher. Created puzzles live in the Saved tab.</span></li>
+      <li><span class="step-num">5</span><span><strong>Timer and print.</strong> The timer starts with your first guess and stops when you solve. The printer button prints just the puzzle, ready to solve on paper.</span></li>
+    </ol>
+  </div>
+
+  <div class="help-section" id="help-read">
+    <h3>How to read the board and solve a cryptogram</h3>
+    <div class="help-example" aria-label="Example board cell">
+      <div class="ex-label">Example cell</div>
+      <div class="example-cell" aria-hidden="true">
+        <span class="cell"><span class="guess filled">E</span><span class="cipher-letter">H</span><span class="freq">4</span></span>
+      </div>
+      <p class="example-note">Your guess (E) on top, the cipher letter (H) under it, and how often it appears in this puzzle (4) at the bottom.</p>
+    </div>
+    <div class="read-grid">
+      <div class="read-item"><strong>Never itself</strong>The same cipher letter always stands for the same real letter — and never itself. One whole guess is ruled out before you start.</div>
+      <div class="read-item"><strong>Spaces &amp; punctuation</strong>Word breaks and punctuation stay where they are — one-letter words and apostrophes are clues, not decoration.</div>
+      <div class="read-item"><strong>Substitution map</strong>The map below the keyboard holds every pairing; Hints given underneath lists each letter Hint revealed.</div>
+      <div class="read-item"><strong>Hint &amp; Check</strong>Hint reveals a single letter and logs it under Hints given. Check marks only your wrong letters, in red, so you can fix them and keep solving.</div>
+      <div class="read-item"><strong>Start with the busy letters</strong>The frequent ones are usually E, T, A — the tiny number under each cipher letter tells you how often it appears.</div>
+      <div class="read-item"><strong>Solved</strong>When every letter matches, the author is revealed, &ldquo;Solved! Well done.&rdquo; appears, and the timer stops.</div>
+    </div>
+  </div>
+</section>
+
+<div class="modal-backdrop" id="removalModal" role="dialog" aria-modal="true" aria-labelledby="removalTitle">
+  <div class="modal">
+    <h2 id="removalTitle">Are you sure?</h2>
+    <p class="hint-text" id="removalText"></p>
+    <div class="modal-actions">
+      <button type="button" class="tool-btn" id="removalCancel">Cancel</button>
+      <button type="button" class="tool-btn primary" id="removalOk">Remove</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="pasteModal" role="dialog" aria-modal="true" aria-labelledby="pasteTitle">
+  <div class="modal">
+    <h2 id="pasteTitle">Create a cryptogram</h2>
+    <p class="hint-text">Paste ciphertext from a newspaper or book, or type the solution and click <strong>Scramble solution</strong> to make the ciphertext. Optionally keep the solution so Check can mark wrong letters.</p>
+    <label for="pasteCipher">Ciphertext</label>
+    <textarea id="pasteCipher" placeholder="XYZ ABC DEF…" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"></textarea>
+    <label for="pastePlain">Known solution (optional)</label>
+    <textarea id="pastePlain" placeholder="THE QUICK BROWN…" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"></textarea>
+    <div class="modal-actions" style="margin: 0 0 10px; justify-content: flex-start;">
+      <button type="button" class="tool-btn" id="scrambleSolutionBtn" title="Encode the solution into ciphertext">Scramble solution</button>
+    </div>
+    <label for="pasteAuthor">Author (optional)</label>
+    <input type="text" id="pasteAuthor" placeholder="Attribution shown when solved" autocomplete="off" autocorrect="off" spellcheck="false">
+    <div class="modal-actions">
+      <button type="button" class="tool-btn" id="pasteCancel">Cancel</button>
+      <button type="button" class="tool-btn primary" id="pasteApply">Load puzzle</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+"use strict";
+
+var QUOTES = [
+  { t: "The only thing we have to fear is fear itself.", a: "Franklin D. Roosevelt", c: "Leadership" },
+  { t: "I think, therefore I am.", a: "René Descartes", c: "Wisdom" },
+  { t: "To be yourself in a world that is constantly trying to make you something else is the greatest accomplishment.", a: "Ralph Waldo Emerson", c: "Wisdom" },
+  { t: "Knowledge is power.", a: "Francis Bacon", c: "Science" },
+  { t: "The unexamined life is not worth living.", a: "Socrates", c: "Wisdom" },
+  { t: "Imagination is more important than knowledge.", a: "Albert Einstein", c: "Science" },
+  { t: "Speak softly and carry a big stick.", a: "Theodore Roosevelt", c: "Leadership" },
+  { t: "Wit is educated insolence.", a: "Aristotle", c: "Wit" },
+  { t: "History is written by the victors.", a: "Attributed to Winston Churchill", c: "History" },
+  { t: "It ain't over till it's over.", a: "Yogi Berra", c: "Sports" },
+  { t: "I can resist everything except temptation.", a: "Oscar Wilde", c: "Comedy" },
+  { t: "Genius is one percent inspiration and ninety-nine percent perspiration.", a: "Thomas Edison", c: "Science" },
+  { t: "The journey of a thousand miles begins with one step.", a: "Lao Tzu", c: "Wisdom" },
+  { t: "Give me liberty or give me death.", a: "Patrick Henry", c: "History" },
+  { t: "A house divided against itself cannot stand.", a: "Abraham Lincoln", c: "Leadership" },
+  { t: "Brevity is the soul of wit.", a: "William Shakespeare", c: "Wit" },
+  { t: "Float like a butterfly, sting like a bee.", a: "Muhammad Ali", c: "Sports" },
+  { t: "I have nothing to offer but blood, toil, tears and sweat.", a: "Winston Churchill", c: "History" },
+  { t: "Be yourself; everyone else is already taken.", a: "Oscar Wilde", c: "Wit" },
+  { t: "The important thing is not to stop questioning.", a: "Albert Einstein", c: "Science" },
+  { t: "Fortune favors the bold.", a: "Virgil", c: "Leadership" },
+  { t: "All that glitters is not gold.", a: "William Shakespeare", c: "Wisdom" },
+  { t: "You miss one hundred percent of the shots you don't take.", a: "Wayne Gretzky", c: "Sports" },
+  { t: "I am so clever that sometimes I don't understand a single word of what I am saying.", a: "Oscar Wilde", c: "Comedy" },
+  { t: "In the middle of difficulty lies opportunity.", a: "Albert Einstein", c: "Wisdom" },
+  { t: "Science is organized knowledge.", a: "Herbert Spencer", c: "Science" },
+  { t: "Leadership is the capacity to translate vision into reality.", a: "Warren Bennis", c: "Leadership" },
+  { t: "The pen is mightier than the sword.", a: "Edward Bulwer-Lytton", c: "Wit" },
+  { t: "Those who cannot remember the past are condemned to repeat it.", a: "George Santayana", c: "History" },
+  { t: "Winning isn't everything, it's the only thing.", a: "Vince Lombardi", c: "Sports" },
+  { t: "I never forget a face, but in your case I'll be glad to make an exception.", a: "Groucho Marx", c: "Comedy" },
+  { t: "That which does not kill us makes us stronger.", a: "Friedrich Nietzsche", c: "Wisdom" },
+  { t: "If I have seen further it is by standing on the shoulders of giants.", a: "Isaac Newton", c: "Science" },
+  { t: "Do what you can, with what you have, where you are.", a: "Theodore Roosevelt", c: "Leadership" },
+  { t: "A witty saying proves nothing.", a: "Voltaire", c: "Wit" },
+  { t: "The only thing necessary for the triumph of evil is for good men to do nothing.", a: "Edmund Burke", c: "History" },
+  { t: "Champions keep playing until they get it right.", a: "Billie Jean King", c: "Sports" },
+  { t: "Outside of a dog, a book is man's best friend. Inside of a dog it's too dark to read.", a: "Groucho Marx", c: "Comedy" },
+  { t: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.", a: "Aristotle", c: "Wisdom" },
+  { t: "Eureka!", a: "Archimedes", c: "Science" },
+  { t: "The best way to predict the future is to create it.", a: "Peter Drucker", c: "Leadership" },
+  { t: "Common sense is not so common.", a: "Voltaire", c: "Wit" },
+  { t: "Four score and seven years ago our fathers brought forth on this continent a new nation.", a: "Abraham Lincoln", c: "History" },
+  { t: "It's not whether you get knocked down, it's whether you get up.", a: "Vince Lombardi", c: "Sports" },
+  { t: "Age is something that doesn't matter, unless you are a cheese.", a: "Luis Buñuel", c: "Comedy" },
+  { t: "Know thyself.", a: "Inscription at Delphi", c: "Wisdom" },
+  { t: "Nature abhors a vacuum.", a: "Aristotle", c: "Science" },
+  { t: "A leader is a dealer in hope.", a: "Napoleon Bonaparte", c: "Leadership" },
+  { t: "The pure and simple truth is rarely pure and never simple.", a: "Oscar Wilde", c: "Wit" },
+  { t: "Veni, vidi, vici.", a: "Julius Caesar", c: "History" },
+  { t: "Hard work beats talent when talent doesn't work hard.", a: "Tim Notke", c: "Sports" },
+  { t: "I intend to live forever. So far, so good.", a: "Steven Wright", c: "Comedy" },
+  { t: "Life is what happens when you are busy making other plans.", a: "John Lennon", c: "Wisdom" },
+  { t: "The whole of science is nothing more than a refinement of everyday thinking.", a: "Albert Einstein", c: "Science" },
+  { t: "Management is doing things right; leadership is doing the right things.", a: "Peter Drucker", c: "Leadership" },
+  { t: "Sarcasm is the lowest form of wit but the highest form of intelligence.", a: "Oscar Wilde", c: "Wit" },
+  { t: "Never in the field of human conflict was so much owed by so many to so few.", a: "Winston Churchill", c: "History" },
+  { t: "You can't put a limit on anything. The more you dream, the farther you get.", a: "Michael Phelps", c: "Sports" },
+  { t: "Behind every great man is a woman rolling her eyes.", a: "Jim Carrey", c: "Comedy" },
+  { t: "What we think, we become.", a: "Buddha", c: "Wisdom" }
+];
+
+// Reviewed quote snapshot (Notion CipherDesk Quotes export, Approved rows
+// only), inlined at build time from quotes.json. At load the app first
+// tries fetch("quotes.json") — on exponology.com that file sits beside
+// the app — and uses this embedded copy when the fetch fails or returns
+// nothing usable. The built-in QUOTES above remain the final fallback.
+var SNAPSHOT = {
+  exported: "2026-11-05",
+  count: 71,
+  by_category: { "Comedy": 7, "History": 8, "Leadership": 10, "Science": 10, "Sports": 8, "Wisdom": 20, "Wit": 8 },
+  quotes: [
+    { t: "Age is something that doesn't matter, unless you are a cheese.", a: "Luis Buñuel", c: "Comedy" },
+    { t: "Behind every great man is a woman rolling her eyes.", a: "Jim Carrey", c: "Comedy" },
+    { t: "I am so clever that sometimes I don't understand a single word of what I am saying.", a: "Oscar Wilde", c: "Comedy" },
+    { t: "I can resist everything except temptation.", a: "Oscar Wilde", c: "Comedy" },
+    { t: "I intend to live forever. So far, so good.", a: "Steven Wright", c: "Comedy" },
+    { t: "I never forget a face, but in your case I'll be glad to make an exception.", a: "Groucho Marx", c: "Comedy" },
+    { t: "Outside of a dog, a book is man's best friend. Inside of a dog it's too dark to read.", a: "Groucho Marx", c: "Comedy" },
+    { t: "Four score and seven years ago our fathers brought forth on this continent a new nation.", a: "Abraham Lincoln", c: "History" },
+    { t: "Give me liberty or give me death.", a: "Patrick Henry", c: "History" },
+    { t: "History is written by the victors.", a: "Attributed to Winston Churchill", c: "History" },
+    { t: "I have nothing to offer but blood, toil, tears and sweat.", a: "Winston Churchill", c: "History" },
+    { t: "Never in the field of human conflict was so much owed by so many to so few.", a: "Winston Churchill", c: "History" },
+    { t: "The only thing necessary for the triumph of evil is for good men to do nothing.", a: "Edmund Burke", c: "History" },
+    { t: "Those who cannot remember the past are condemned to repeat it.", a: "George Santayana", c: "History" },
+    { t: "Veni, vidi, vici.", a: "Julius Caesar", c: "History" },
+    { t: "A house divided against itself cannot stand.", a: "Abraham Lincoln", c: "Leadership" },
+    { t: "A leader is a dealer in hope.", a: "Napoleon Bonaparte", c: "Leadership" },
+    { t: "Do what you can, with what you have, where you are.", a: "Theodore Roosevelt", c: "Leadership" },
+    { t: "Fortune favors the bold.", a: "Virgil", c: "Leadership" },
+    { t: "Leadership is the capacity to translate vision into reality.", a: "Warren Bennis", c: "Leadership" },
+    { t: "Management is doing things right; leadership is doing the right things.", a: "Peter Drucker", c: "Leadership" },
+    { t: "One who thinks and reflects develops his foresight and vision.", a: "Ali ibn Abi Talib (R.A)", c: "Leadership" },
+    { t: "Speak softly and carry a big stick.", a: "Theodore Roosevelt", c: "Leadership" },
+    { t: "The best way to predict the future is to create it.", a: "Peter Drucker", c: "Leadership" },
+    { t: "The only thing we have to fear is fear itself.", a: "Franklin D. Roosevelt", c: "Leadership" },
+    { t: "English is necessary as at present original works of science are in English. I believe that in two decades times original works of science will start coming out in our languages. Then we can move over like the Japanese.", a: "Abdul Kalam", c: "Science" },
+    { t: "Eureka!", a: "Archimedes", c: "Science" },
+    { t: "Genius is one percent inspiration and ninety-nine percent perspiration.", a: "Thomas Edison", c: "Science" },
+    { t: "If I have seen further it is by standing on the shoulders of giants.", a: "Isaac Newton", c: "Science" },
+    { t: "Imagination is more important than knowledge.", a: "Albert Einstein", c: "Science" },
+    { t: "Knowledge is power.", a: "Francis Bacon", c: "Science" },
+    { t: "Nature abhors a vacuum.", a: "Aristotle", c: "Science" },
+    { t: "Science is organized knowledge.", a: "Herbert Spencer", c: "Science" },
+    { t: "The important thing is not to stop questioning.", a: "Albert Einstein", c: "Science" },
+    { t: "The whole of science is nothing more than a refinement of everyday thinking.", a: "Albert Einstein", c: "Science" },
+    { t: "Champions keep playing until they get it right.", a: "Billie Jean King", c: "Sports" },
+    { t: "Float like a butterfly, sting like a bee.", a: "Muhammad Ali", c: "Sports" },
+    { t: "Hard work beats talent when talent doesn't work hard.", a: "Tim Notke", c: "Sports" },
+    { t: "It ain't over till it's over.", a: "Yogi Berra", c: "Sports" },
+    { t: "It's not whether you get knocked down, it's whether you get up.", a: "Vince Lombardi", c: "Sports" },
+    { t: "Winning isn't everything, it's the only thing.", a: "Vince Lombardi", c: "Sports" },
+    { t: "You can't put a limit on anything. The more you dream, the farther you get.", a: "Michael Phelps", c: "Sports" },
+    { t: "You miss one hundred percent of the shots you don't take.", a: "Wayne Gretzky", c: "Sports" },
+    { t: "All that glitters is not gold.", a: "William Shakespeare", c: "Wisdom" },
+    { t: "Dream is not that which you see while sleeping it is something that does not let you sleep.", a: "Abdul Kalam", c: "Wisdom" },
+    { t: "I think, therefore I am.", a: "René Descartes", c: "Wisdom" },
+    { t: "In the middle of difficulty lies opportunity.", a: "Albert Einstein", c: "Wisdom" },
+    { t: "Know thyself.", a: "Inscription at Delphi", c: "Wisdom" },
+    { t: "Life is what happens when you are busy making other plans.", a: "John Lennon", c: "Wisdom" },
+    { t: "Money Has Never Made Man Happy, Nor Will It, There Is Nothing In Its Nature To Produce Happiness. The More Of It One Has The More One Wants.", a: "Benjamin Franklin", c: "Wisdom" },
+    { t: "My soul is from elsewhere, I'm sure of that, and I intend to end up there.", a: "Rumi", c: "Wisdom" },
+    { t: "Stay in college, get the knowledge. And stay there until you're through. If they can make penicillin out of moldy bread, they can sure make something out of you. Advice to a young person to continue his education.", a: "Muhammad Ali", c: "Wisdom" },
+    { t: "That which does not kill us makes us stronger.", a: "Friedrich Nietzsche", c: "Wisdom" },
+    { t: "The greatest truth is honesty, and the greatest falsehood is dishonesty.", a: "Abu Bakr (R.A)", c: "Wisdom" },
+    { t: "The journey of a thousand miles begins with one step.", a: "Lao Tzu", c: "Wisdom" },
+    { t: "The truth was a mirror in the hands of God. It fell, and broke into pieces. Everybody took a piece of it, and they looked at it and thought they had the truth.", a: "Rumi", c: "Wisdom" },
+    { t: "The unexamined life is not worth living.", a: "Socrates", c: "Wisdom" },
+    { t: "To be yourself in a world that is constantly trying to make you something else is the greatest accomplishment.", a: "Ralph Waldo Emerson", c: "Wisdom" },
+    { t: "Try as much as you can to mention death. For if you were having hard times in your life, then it would give you more hope and would ease things for you. And if you were having abundant affluence of living in luxury, then it would make it less luxurious.", a: "Umar ibn Al-Khattāb (R.A)", c: "Wisdom" },
+    { t: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.", a: "Aristotle", c: "Wisdom" },
+    { t: "We Continue To Shape Our Personality All Our Life. If We Knew Ourselves Perfectly, We Should Die.", a: "Albert Camus", c: "Wisdom" },
+    { t: "What we think, we become.", a: "Buddha", c: "Wisdom" },
+    { t: "When I Look Into The Future, It'S So Bright It Burns My Eyes.", a: "Oprah Winfrey", c: "Wisdom" },
+    { t: "A witty saying proves nothing.", a: "Voltaire", c: "Wit" },
+    { t: "Be yourself; everyone else is already taken.", a: "Oscar Wilde", c: "Wit" },
+    { t: "Brevity is the soul of wit.", a: "William Shakespeare", c: "Wit" },
+    { t: "Common sense is not so common.", a: "Voltaire", c: "Wit" },
+    { t: "Sarcasm is the lowest form of wit but the highest form of intelligence.", a: "Oscar Wilde", c: "Wit" },
+    { t: "The pen is mightier than the sword.", a: "Edward Bulwer-Lytton", c: "Wit" },
+    { t: "The pure and simple truth is rarely pure and never simple.", a: "Oscar Wilde", c: "Wit" },
+    { t: "Wit is educated insolence.", a: "Aristotle", c: "Wit" }
+  ]
+};
+
+var CATS = ["All","Saved","Wisdom","Science","Leadership","Wit","History","Sports","Comedy"];
+var STORAGE_KEY = "cipherdesk_v1";
+var SAVED_KEY = "cipherdesk_saved_v1";
+var LIBRARY_HANDLE_DB = "cipherdesk_fs";
+var LIBRARY_HANDLE_STORE = "handles";
+var LIBRARY_HANDLE_KEY = "savedLibrary";
+var ALPHA = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+var libraryFileHandle = null;
+var libraryLinkPrompted = false;
+var libStatusTimer = null;
+
+var state = {
+  quoteIndex: -1,
+  plain: "",
+  author: "",
+  category: "All",
+  cipher: "",
+  map: {},
+  trueMap: {},
+  selected: null,
+  history: [],
+  hintLog: [],
+  elapsed: 0,
+  timerOn: false,
+  timerStart: 0,
+  solved: false,
+  custom: false,
+  checkMode: false,
+  savedId: null,
+  savedDeal: [],
+  snapshotPool: null,
+  snapshotCat: null,
+  snapshotDeal: []
+};
+
+var snapshotLoadToken = 0;
+var snapshotQuotes = null;
+var snapshotLoadPromise = null;
+
+var timerInterval = null;
+
+function shuffle(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+  }
+  return a;
+}
+
+function makeCipherKey() {
+  var plain = ALPHA.split("");
+  var cipher, ok, i;
+  while (true) {
+    cipher = shuffle(plain);
+    ok = true;
+    for (i = 0; i < 26; i++) {
+      if (cipher[i] === plain[i]) { ok = false; break; }
+    }
+    if (ok) break;
+  }
+  var map = {};
+  for (i = 0; i < 26; i++) map[plain[i]] = cipher[i];
+  return map;
+}
+
+function encode(text, key) {
+  var out = "";
+  for (var i = 0; i < text.length; i++) {
+    var ch = text.charAt(i);
+    var u = ch.toUpperCase();
+    if (ALPHA.indexOf(u) >= 0) out += key[u];
+    else out += ch;
+  }
+  return out;
+}
+
+function lettersIn(s) {
+  var set = {};
+  var u, i;
+  for (i = 0; i < s.length; i++) {
+    u = s.charAt(i).toUpperCase();
+    if (ALPHA.indexOf(u) >= 0) set[u] = true;
+  }
+  return Object.keys(set).sort();
+}
+
+function freqMap(cipher) {
+  var f = {}, i, u;
+  for (i = 0; i < cipher.length; i++) {
+    u = cipher.charAt(i).toUpperCase();
+    if (ALPHA.indexOf(u) >= 0) f[u] = (f[u] || 0) + 1;
+  }
+  return f;
+}
+
+function invertTrueMap(plainToCipher) {
+  var inv = {}, i, p;
+  for (i = 0; i < 26; i++) {
+    p = ALPHA.charAt(i);
+    inv[plainToCipher[p]] = p;
+  }
+  return inv;
+}
+
+function loadStorage() {
+  try {
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) { return null; }
+}
+
+function saveStorage() {
+  try {
+    var data = {
+      quoteIndex: state.quoteIndex,
+      plain: state.plain,
+      author: state.author,
+      category: state.category,
+      cipher: state.cipher,
+      map: state.map,
+      trueMap: state.trueMap,
+      elapsed: currentElapsed(),
+      solved: state.solved,
+      custom: state.custom,
+      history: state.history.slice(-80),
+      hintLog: state.hintLog || [],
+      savedId: state.savedId || null,
+      savedDeal: Array.isArray(state.savedDeal) ? state.savedDeal : []
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (e) {}
+}
+
+function loadSavedLibrary() {
+  try {
+    var raw = localStorage.getItem(SAVED_KEY);
+    if (!raw) return [];
+    var arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr : [];
+  } catch (e) { return []; }
+}
+
+function setLibraryStatus(msg, sticky) {
+  var el = document.getElementById("libStatus");
+  if (!el) return;
+  el.textContent = msg || "";
+  if (msg) el.classList.add("active");
+  else el.classList.remove("active");
+  if (libStatusTimer) clearTimeout(libStatusTimer);
+  libStatusTimer = null;
+  if (msg && !sticky) {
+    libStatusTimer = setTimeout(function () {
+      el.textContent = "";
+      el.classList.remove("active");
+    }, 6000);
+  }
+}
+
+var noticeTimer = null;
+function showNotice(msg) {
+  var el = document.getElementById("notice");
+  if (!el) return;
+  el.textContent = msg || "";
+  if (msg) el.classList.add("show");
+  else el.classList.remove("show");
+  if (noticeTimer) clearTimeout(noticeTimer);
+  noticeTimer = null;
+  if (msg) {
+    noticeTimer = setTimeout(function () {
+      el.classList.remove("show");
+      el.textContent = "";
+    }, 7000);
+  }
+}
+var pendingRemovalAction = null;
+function askRemoval(msg, action) {
+  pendingRemovalAction = action;
+  var txt = document.getElementById("removalText");
+  if (txt) txt.textContent = msg || "";
+  var modal = document.getElementById("removalModal");
+  if (modal) modal.classList.add("open");
+}
+function closeRemoval() {
+  pendingRemovalAction = null;
+  var modal = document.getElementById("removalModal");
+  if (modal) modal.classList.remove("open");
+}
+
+function idbOpenLibrary() {
+  return new Promise(function (resolve, reject) {
+    try {
+      var req = indexedDB.open(LIBRARY_HANDLE_DB, 1);
+      req.onupgradeneeded = function () {
+        var db = req.result;
+        if (!db.objectStoreNames.contains(LIBRARY_HANDLE_STORE)) {
+          db.createObjectStore(LIBRARY_HANDLE_STORE);
+        }
+      };
+      req.onsuccess = function () { resolve(req.result); };
+      req.onerror = function () { reject(req.error); };
+    } catch (e) { reject(e); }
+  });
+}
+
+function idbGetLibraryHandle() {
+  return idbOpenLibrary().then(function (db) {
+    return new Promise(function (resolve, reject) {
+      var tx = db.transaction(LIBRARY_HANDLE_STORE, "readonly");
+      var req = tx.objectStore(LIBRARY_HANDLE_STORE).get(LIBRARY_HANDLE_KEY);
+      req.onsuccess = function () { resolve(req.result || null); };
+      req.onerror = function () { reject(req.error); };
+    });
+  });
+}
+
+function idbSetLibraryHandle(handle) {
+  return idbOpenLibrary().then(function (db) {
+    return new Promise(function (resolve, reject) {
+      var tx = db.transaction(LIBRARY_HANDLE_STORE, "readwrite");
+      tx.objectStore(LIBRARY_HANDLE_STORE).put(handle, LIBRARY_HANDLE_KEY);
+      tx.oncomplete = function () { resolve(); };
+      tx.onerror = function () { reject(tx.error); };
+    });
+  });
+}
+
+function ensureLibraryPermission(handle) {
+  if (!handle || !handle.queryPermission) return Promise.resolve(false);
+  var opts = { mode: "readwrite" };
+  return handle.queryPermission(opts).then(function (perm) {
+    if (perm === "granted") return true;
+    if (perm === "prompt" && handle.requestPermission) {
+      return handle.requestPermission(opts).then(function (p2) { return p2 === "granted"; });
+    }
+    return false;
+  }).catch(function () { return false; });
+}
+
+
+function normalizeLibraryEntry(item) {
+  if (!item || typeof item !== "object") return null;
+  var cipher = String(item.cipher || "").replace(/\r\n/g, "\n").trim();
+  if (!cipher) return null;
+  var plain = String(item.plain || "").replace(/\r\n/g, "\n").trim();
+  var title = String(item.title || "").trim() || makeSavedTitle(cipher);
+  var author = String(item.author || "").trim();
+  var id = String(item.id || "").trim();
+  if (!id) id = "s" + Date.now() + "_" + Math.floor(Math.random() * 10000);
+  var createdAt = typeof item.createdAt === "number" ? item.createdAt : Date.now();
+  return { id: id, cipher: cipher, plain: plain, title: title, author: author, createdAt: createdAt };
+}
+
+function mergeLibraryLists(base, incoming) {
+  var lib = (base || []).slice();
+  var i, j, item, found;
+  for (i = 0; i < (incoming || []).length; i++) {
+    item = normalizeLibraryEntry(incoming[i]);
+    if (!item) continue;
+    found = false;
+    for (j = 0; j < lib.length; j++) {
+      if (lib[j].cipher === item.cipher) {
+        if (item.plain) lib[j].plain = item.plain;
+        if (item.author) lib[j].author = item.author;
+        if (item.title) lib[j].title = item.title;
+        found = true;
+        break;
+      }
+    }
+    if (!found) lib.push(item);
+  }
+  return lib;
+}
+
+function pullLibraryFile() {
+  if (!libraryFileHandle) return Promise.resolve(false);
+  return ensureLibraryPermission(libraryFileHandle).then(function (ok) {
+    if (!ok) return false;
+    return libraryFileHandle.getFile().then(function (file) {
+      return file.text().then(function (text) {
+        var data, list, merged;
+        try {
+          data = JSON.parse(String(text || ""));
+        } catch (e) {
+          return false;
+        }
+        if (Array.isArray(data)) list = data;
+        else if (data && Array.isArray(data.puzzles)) list = data.puzzles;
+        else return false;
+        merged = mergeLibraryLists(loadSavedLibrary(), list);
+        try {
+          localStorage.setItem(SAVED_KEY, JSON.stringify(merged));
+        } catch (e2) {}
+        setLibraryStatus("Loaded " + merged.length + " saved puzzle(s) from file.", true);
+        if (state.category === "Saved") {
+          pickSavedPuzzle(state.savedId);
+          renderAll();
+        } else {
+          renderCats();
+        }
+        return true;
+      });
+    });
+  }).catch(function () { return false; });
+}
+
+function syncLibraryFile(arr) {
+  if (!libraryFileHandle) return Promise.resolve(false);
+  var lib = Array.isArray(arr) ? arr : loadSavedLibrary();
+  var payload = JSON.stringify({ puzzles: lib }, null, 2);
+  return ensureLibraryPermission(libraryFileHandle).then(function (ok) {
+    if (!ok) return false;
+    return libraryFileHandle.createWritable().then(function (writable) {
+      return writable.write(payload).then(function () {
+        return writable.close();
+      }).then(function () { return true; });
+    });
+  }).catch(function () { return false; });
+}
+
+function writeSavedLibrary(arr) {
+  try {
+    localStorage.setItem(SAVED_KEY, JSON.stringify(arr));
+  } catch (e) {}
+  syncLibraryFile(arr);
+}
+
+function downloadSavedLibrary(arr) {
+  var lib = Array.isArray(arr) ? arr : loadSavedLibrary();
+  var payload = { puzzles: lib };
+  var json = JSON.stringify(payload, null, 2);
+  try {
+    var blob = new Blob([json], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "saved-puzzles.json";
+    a.rel = "noopener";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  } catch (e) {}
+}
+
+function supportsSaveFilePicker() {
+  return typeof window.showSaveFilePicker === "function";
+}
+
+function linkLibraryFile(arr) {
+  var openPicker = typeof window.showOpenFilePicker === "function";
+  if (!openPicker && !supportsSaveFilePicker()) {
+    downloadSavedLibrary(arr);
+    return Promise.resolve(false);
+  }
+  var pick = openPicker
+    ? window.showOpenFilePicker({
+        multiple: false,
+        types: [{ description: "JSON", accept: { "application/json": [".json"] } }]
+      }).then(function (handles) { return handles && handles[0]; })
+    : window.showSaveFilePicker({
+        suggestedName: "saved-puzzles.json",
+        types: [{ description: "JSON", accept: { "application/json": [".json"] } }]
+      });
+  return pick.then(function (handle) {
+    if (!handle) return false;
+    libraryFileHandle = handle;
+    return idbSetLibraryHandle(handle).then(function () {
+      return pullLibraryFile().then(function (pulled) {
+        if (pulled) return true;
+        // empty/unreadable file: write current library
+        return syncLibraryFile(Array.isArray(arr) ? arr : loadSavedLibrary()).then(function () {
+          setLibraryStatus("Linked — updates ~/Downloads/CipherDesk/saved-puzzles.json", true);
+          return true;
+        });
+      });
+    });
+  }).catch(function () {
+    return false;
+  });
+}
+
+
+function maybeOfferLibraryLink() {
+  if (libraryFileHandle) return;
+  if (!supportsSaveFilePicker()) return;
+  if (libraryLinkPrompted) return;
+  libraryLinkPrompted = true;
+  setLibraryStatus("Link once — choose ~/Downloads/CipherDesk/saved-puzzles.json", true);
+  linkLibraryFile(loadSavedLibrary());
+}
+
+function restoreLibraryHandle() {
+  if (!supportsSaveFilePicker()) {
+    var linkBtn = document.getElementById("exportSavedBtn");
+    var dlBtn = document.getElementById("downloadCopyBtn");
+    if (linkBtn) linkBtn.classList.add("hidden");
+    if (dlBtn) dlBtn.classList.remove("hidden");
+    return Promise.resolve();
+  }
+  return idbGetLibraryHandle().then(function (handle) {
+    if (!handle) return;
+    return ensureLibraryPermission(handle).then(function (ok) {
+      if (ok) {
+        libraryFileHandle = handle;
+        setLibraryStatus("Library file linked.", true);
+        return pullLibraryFile();
+      }
+    });
+  }).catch(function () {});
+}
+
+
+
+
+
+function makeSavedTitle(cipher) {
+  var oneLine = String(cipher || "").replace(/\s+/g, " ").trim();
+  if (!oneLine) return "Saved puzzle";
+  if (oneLine.length > 40) return oneLine.slice(0, 40) + "…";
+  return oneLine;
+}
+
+function upsertSavedPuzzle(cipher, plain, author) {
+  var lib = loadSavedLibrary();
+  var norm = String(cipher || "").replace(/\r\n/g, "\n").trim();
+  var plainNorm = String(plain || "").replace(/\r\n/g, "\n").trim();
+  var authorNorm = String(author || "").trim();
+  var i;
+  for (i = 0; i < lib.length; i++) {
+    if (lib[i].cipher === norm) {
+      if (plainNorm && !lib[i].plain) lib[i].plain = plainNorm;
+      if (authorNorm && !lib[i].author) lib[i].author = authorNorm;
+      writeSavedLibrary(lib);
+      return lib[i];
+    }
+  }
+  var entry = {
+    id: "s" + Date.now() + "_" + Math.floor(Math.random() * 10000),
+    cipher: norm,
+    plain: plainNorm,
+    title: makeSavedTitle(norm),
+    author: authorNorm,
+    createdAt: Date.now()
+  };
+  lib.unshift(entry);
+  writeSavedLibrary(lib);
+  return entry;
+}
+
+function deleteSavedPuzzle(id) {
+  if (!id) return;
+  var lib = loadSavedLibrary().filter(function (e) { return e.id !== id; });
+  writeSavedLibrary(lib);
+}
+
+function findSavedById(id) {
+  var lib = loadSavedLibrary(), i;
+  for (i = 0; i < lib.length; i++) {
+    if (lib[i].id === id) return lib[i];
+  }
+  return null;
+}
+
+function currentElapsed() {
+  if (state.timerOn && state.timerStart) {
+    return state.elapsed + Math.floor((Date.now() - state.timerStart) / 1000);
+  }
+  return state.elapsed;
+}
+
+function formatTime(sec) {
+  var m = Math.floor(sec / 60);
+  var s = sec % 60;
+  return m + ":" + (s < 10 ? "0" : "") + s;
+}
+
+function updateTimerDisplay() {
+  document.getElementById("timer").textContent = formatTime(currentElapsed());
+}
+
+function startTimer() {
+  if (state.solved || state.timerOn) return;
+  state.timerOn = true;
+  state.timerStart = Date.now();
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(updateTimerDisplay, 250);
+}
+
+function stopTimer() {
+  if (!state.timerOn) return;
+  state.elapsed = currentElapsed();
+  state.timerOn = false;
+  state.timerStart = 0;
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  updateTimerDisplay();
+}
+
+// The seven real categories. "All" is a filter AND the holding pool
+// for uncategorized quotes — it is not an eighth subject category.
+var REAL_CATS = ["Wisdom", "Science", "Leadership", "Wit", "History", "Sports", "Comedy"];
+
+// Canonical category for a quote: one of the seven real categories, or
+// "All". Blank, missing, "all" in any case, and unrecognized values all
+// mean uncategorized, so they land in the All pool — never in a real
+// category by accident.
+function canonicalCategory(raw) {
+  var s = String(raw == null ? "" : raw).trim();
+  if (!s) return "All";
+  var lower = s.toLowerCase(), i;
+  if (lower === "all") return "All";
+  for (i = 0; i < REAL_CATS.length; i++) {
+    if (REAL_CATS[i].toLowerCase() === lower) return REAL_CATS[i];
+  }
+  return "All";
+}
+
+// The All-pool rule, in one place so every dealing path agrees:
+// a quote whose category is "All" (uncategorized) is dealt ONLY when
+// the player picks the All filter — never under a single category.
+// The All filter itself draws from every pool, the All pool included.
+// A single-category filter deals only that category's own quotes.
+function quoteDealsUnder(quoteCat, filterCat) {
+  if (filterCat === "All") return true;
+  if (!filterCat || filterCat === "Saved") return false;
+  var qc = canonicalCategory(quoteCat);
+  if (qc === "All") return false;
+  return qc === filterCat;
+}
+
+function filteredQuotes() {
+  var out = [], i;
+  for (i = 0; i < QUOTES.length; i++) {
+    if (quoteDealsUnder(QUOTES[i].c, state.category)) {
+      out.push({ q: QUOTES[i], i: i });
+    }
+  }
+  return out;
+}
+
+function resetPuzzleShell() {
+  stopTimer();
+  state.elapsed = 0;
+  state.timerOn = false;
+  state.solved = false;
+  state.checkMode = false;
+  state.history = [];
+  state.hintLog = [];
+  state.map = {};
+  state.selected = null;
+}
+
+function buildTrueMapFromPlain(cipher, plain) {
+  var trueMap = {};
+  if (!plain) return trueMap;
+  var cLetters = [], pLetters = [], i, ch;
+  var c = cipher.toUpperCase();
+  var p = plain.toUpperCase();
+  for (i = 0; i < c.length; i++) {
+    ch = c.charAt(i);
+    if (ALPHA.indexOf(ch) >= 0) cLetters.push(ch);
+  }
+  for (i = 0; i < p.length; i++) {
+    ch = p.charAt(i);
+    if (ALPHA.indexOf(ch) >= 0) pLetters.push(ch);
+  }
+  if (cLetters.length === pLetters.length) {
+    for (i = 0; i < cLetters.length; i++) {
+      trueMap[cLetters[i]] = pLetters[i];
+    }
+  }
+  return trueMap;
+}
+
+function showEmptySaved() {
+  resetPuzzleShell();
+  state.custom = true;
+  state.quoteIndex = -1;
+  state.savedId = null;
+  state.author = "";
+  state.cipher = "";
+  state.plain = "";
+  state.trueMap = {};
+  updateTimerDisplay();
+  renderCats();
+  renderAll();
+  saveStorage();
+}
+
+function applySavedEntry(entry) {
+  resetPuzzleShell();
+  state.custom = true;
+  state.quoteIndex = -1;
+  state.savedId = entry.id;
+  state.cipher = entry.cipher;
+  state.plain = entry.plain || "";
+  state.author = entry.author || "Custom puzzle";
+  state.trueMap = buildTrueMapFromPlain(state.cipher, state.plain);
+  updateTimerDisplay();
+  renderCats();
+  renderAll();
+  saveStorage();
+}
+
+function pickSavedPuzzle(preferId) {
+  var lib = loadSavedLibrary();
+  if (!lib.length) {
+    showEmptySaved();
+    setLibraryStatus("No saved puzzles loaded — Link library file → ~/Downloads/CipherDesk/saved-puzzles.json", true);
+    return;
+  }
+  var byId = {};
+  var i, id, choice = null, pool, deal, left;
+  for (i = 0; i < lib.length; i++) byId[lib[i].id] = lib[i];
+
+  if (preferId && byId[preferId]) {
+    choice = byId[preferId];
+  } else {
+    if (!Array.isArray(state.savedDeal)) state.savedDeal = [];
+    // Drop ids no longer in library
+    deal = [];
+    for (i = 0; i < state.savedDeal.length; i++) {
+      if (byId[state.savedDeal[i]]) deal.push(state.savedDeal[i]);
+    }
+    state.savedDeal = deal;
+
+    left = [];
+    for (i = 0; i < lib.length; i++) {
+      id = lib[i].id;
+      if (state.savedDeal.indexOf(id) < 0) left.push(id);
+    }
+    // New cycle when all used
+    if (!left.length) {
+      state.savedDeal = [];
+      left = [];
+      for (i = 0; i < lib.length; i++) left.push(lib[i].id);
+    }
+    // Prefer not immediately repeating current if alternatives remain
+    pool = left.slice();
+    if (pool.length > 1 && state.savedId) {
+      var filtered = [];
+      for (i = 0; i < pool.length; i++) {
+        if (pool[i] !== state.savedId) filtered.push(pool[i]);
+      }
+      if (filtered.length) pool = filtered;
+    }
+    id = pool[Math.floor(Math.random() * pool.length)];
+    choice = byId[id];
+  }
+
+  if (!choice) {
+    showEmptySaved();
+    return;
+  }
+  if (state.savedDeal.indexOf(choice.id) < 0) state.savedDeal.push(choice.id);
+  setLibraryStatus(
+    "Saved " + state.savedDeal.length + " of " + lib.length + " this round",
+    true
+  );
+  applySavedEntry(choice);
+}
+
+
+
+function normalizeSnapshotQuotes(data) {
+  var rows = null, list = [], i, item, t, a, c;
+  if (!data) return list;
+  if (Object.prototype.toString.call(data) === "[object Array]") rows = data;
+  else if (data.quotes && Object.prototype.toString.call(data.quotes) === "[object Array]") rows = data.quotes;
+  if (!rows) return list;
+  for (i = 0; i < rows.length; i++) {
+    item = rows[i] || {};
+    t = String(item.t || item.text || item.quote || "").trim();
+    a = String(item.a || item.author || "Unknown").trim() || "Unknown";
+    // Category arrives as "c" in quotes.json; accept the long key too.
+    // canonicalCategory maps blank/missing/unrecognized to "All", so an
+    // uncategorized quote is an All-pool quote from the moment it loads.
+    c = canonicalCategory(item.c != null ? item.c : (item.category != null ? item.category : item.Category));
+    if (t) list.push({ t: t, a: a, c: c });
+  }
+  return list;
+}
+
+function fetchJson(url) {
+  return fetch(url, { method: "GET", mode: "cors", cache: "no-store" }).then(function (res) {
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return res.json();
+  });
+}
+
+// Load the reviewed snapshot once per session: quotes.json beside the
+// page first (the live-site layout), then the copy embedded at build
+// time. Resolves to the quote list, or null when neither is usable —
+// the caller then falls back to the built-in QUOTES.
+function ensureSnapshotLoaded() {
+  if (snapshotLoadPromise) return snapshotLoadPromise;
+  var fromFetch = (typeof fetch === "function")
+    ? fetchJson("quotes.json").then(function (data) {
+        var list = normalizeSnapshotQuotes(data);
+        return list.length ? list : null;
+      }).catch(function () { return null; })
+    : Promise.resolve(null);
+  snapshotLoadPromise = fromFetch.then(function (list) {
+    if (list && list.length) {
+      snapshotQuotes = list;
+      return snapshotQuotes;
+    }
+    var embedded = normalizeSnapshotQuotes(SNAPSHOT);
+    snapshotQuotes = embedded.length ? embedded : null;
+    return snapshotQuotes;
+  }).catch(function () {
+    var embedded = normalizeSnapshotQuotes(SNAPSHOT);
+    snapshotQuotes = embedded.length ? embedded : null;
+    return snapshotQuotes;
+  });
+  return snapshotLoadPromise;
+}
+
+// A shuffled batch of up to 10 snapshot quotes for the selected
+// filter — never backfilled from other categories. Quotes in the
+// "All" pool (uncategorized) enter the batch only when the filter
+// itself is All; the All filter draws from every pool, All included.
+function pickSnapshotBatch(all, category) {
+  var filtered = [], i, q;
+  for (i = 0; i < all.length; i++) {
+    q = all[i];
+    if (quoteDealsUnder(q.c, category)) filtered.push(q);
+  }
+  var shuffled = shuffle(filtered);
+  var out = [], used = {}, key;
+  for (i = 0; i < shuffled.length && out.length < 10; i++) {
+    q = shuffled[i];
+    key = q.t.toLowerCase() + "||" + q.a.toLowerCase();
+    if (used[key]) continue;
+    used[key] = true;
+    out.push({ t: q.t, a: q.a, c: q.c });
+  }
+  return out;
+}
+
+
+function applySnapshotQuote(entry) {
+  resetPuzzleShell();
+  state.custom = false;
+  state.savedId = null;
+  state.quoteIndex = typeof entry._i === "number" ? entry._i : -1;
+  state.plain = entry.t;
+  state.author = entry.a;
+  var key = makeCipherKey();
+  state.cipher = encode(state.plain, key);
+  state.trueMap = invertTrueMap(key);
+  updateTimerDisplay();
+  renderAll();
+  saveStorage();
+  if (state.snapshotPool && state.snapshotCat === state.category && state.snapshotPool.length) {
+    var n = state.snapshotDeal.length;
+    setLibraryStatus("Snapshot " + n + " of " + state.snapshotPool.length + " · " + state.category, true);
+  }
+}
+
+function dealFromSnapshotPool() {
+  if (!state.snapshotPool || !state.snapshotPool.length || state.snapshotCat !== state.category) {
+    return false;
+  }
+  if (!Array.isArray(state.snapshotDeal)) state.snapshotDeal = [];
+  var left = [], i, idx;
+  for (i = 0; i < state.snapshotPool.length; i++) {
+    if (state.snapshotDeal.indexOf(i) < 0) left.push(i);
+  }
+  if (!left.length) return false;
+  // Prefer not immediately repeating current plain text if alternatives remain
+  var pool = left.slice();
+  if (pool.length > 1 && state.plain) {
+    var filtered = [];
+    for (i = 0; i < pool.length; i++) {
+      idx = pool[i];
+      if (state.snapshotPool[idx].t !== state.plain) filtered.push(idx);
+    }
+    if (filtered.length) pool = filtered;
+  }
+  idx = pool[Math.floor(Math.random() * pool.length)];
+  if (state.snapshotDeal.indexOf(idx) < 0) state.snapshotDeal.push(idx);
+  applySnapshotQuote(state.snapshotPool[idx]);
+  return true;
+}
+
+function pickBuiltinFallback() {
+  resetPuzzleShell();
+  state.custom = false;
+  state.savedId = null;
+  var pool = filteredQuotes();
+  if (!pool.length) {
+    state.category = "All";
+    renderCats();
+    pool = filteredQuotes();
+  }
+  var choice = null, i;
+  var others = [];
+  for (i = 0; i < pool.length; i++) {
+    if (pool[i].i !== state.quoteIndex) others.push(pool[i]);
+  }
+  var list = others.length ? others : pool;
+  choice = list[Math.floor(Math.random() * list.length)];
+  state.quoteIndex = choice.i;
+  state.plain = choice.q.t;
+  state.author = choice.q.a;
+  var key = makeCipherKey();
+  state.cipher = encode(state.plain, key);
+  state.trueMap = invertTrueMap(key);
+  updateTimerDisplay();
+  renderAll();
+  saveStorage();
+}
+
+function loadSnapshotPool(category, thenDeal) {
+  var token = ++snapshotLoadToken;
+  setLibraryStatus("Loading 10 from the snapshot…", true);
+  return ensureSnapshotLoaded().then(function (all) {
+    if (token !== snapshotLoadToken || state.category !== category) return;
+    var ten = all ? pickSnapshotBatch(all, category) : [];
+    if (!ten.length) throw new Error("no matches");
+    state.snapshotPool = ten;
+    state.snapshotCat = category;
+    state.snapshotDeal = [];
+    if (thenDeal) {
+      if (!dealFromSnapshotPool()) pickBuiltinFallback();
+    }
+  }).catch(function () {
+    if (token !== snapshotLoadToken || state.category !== category) return;
+    state.snapshotPool = null;
+    state.snapshotCat = null;
+    state.snapshotDeal = [];
+    setLibraryStatus("Web unavailable — using built-in " + category, false);
+    if (thenDeal) pickBuiltinFallback();
+  });
+}
+
+function pickNewPuzzle(preferIndex) {
+  if (state.category === "Saved") {
+    pickSavedPuzzle(typeof preferIndex === "string" ? preferIndex : null);
+    return;
+  }
+
+  // PreferIndex restore path for built-ins (rare)
+  if (typeof preferIndex === "number" && preferIndex >= 0 && preferIndex < QUOTES.length) {
+    var pref = QUOTES[preferIndex];
+    if (quoteDealsUnder(pref.c, state.category)) {
+      resetPuzzleShell();
+      state.custom = false;
+      state.savedId = null;
+      state.quoteIndex = preferIndex;
+      state.plain = pref.t;
+      state.author = pref.a;
+      var keyPref = makeCipherKey();
+      state.cipher = encode(state.plain, keyPref);
+      state.trueMap = invertTrueMap(keyPref);
+      updateTimerDisplay();
+      renderAll();
+      saveStorage();
+      return;
+    }
+  }
+
+  // Use snapshot pool for current category when available
+  if (state.snapshotPool && state.snapshotCat === state.category && state.snapshotPool.length) {
+    if (dealFromSnapshotPool()) return;
+    // Bag emptied — build a fresh batch of 10
+    loadSnapshotPool(state.category, true);
+    return;
+  }
+
+  // No pool yet — load the snapshot (built-ins are the fallback only)
+  loadSnapshotPool(state.category, true);
+}
+
+function loadCustom(cipherText, plainText, author) {
+  resetPuzzleShell();
+  state.custom = true;
+  state.quoteIndex = -1;
+  state.cipher = cipherText.replace(/\r\n/g, "\n").trim();
+  state.plain = (plainText || "").replace(/\r\n/g, "\n").trim();
+  state.trueMap = buildTrueMapFromPlain(state.cipher, state.plain);
+
+  var entry = upsertSavedPuzzle(state.cipher, state.plain, author);
+  state.savedId = entry.id;
+  state.author = entry.author || "Custom puzzle";
+  state.category = "Saved";
+
+  updateTimerDisplay();
+  renderCats();
+  renderAll();
+  saveStorage();
+  maybeOfferLibraryLink();
+}
+
+function pushHistory() {
+  state.history.push(JSON.stringify(state.map));
+  if (state.history.length > 100) state.history.shift();
+}
+
+function setGuess(cipherLetter, plainLetter) {
+  if (state.solved) return;
+  cipherLetter = cipherLetter.toUpperCase();
+  if (ALPHA.indexOf(cipherLetter) < 0) return;
+
+  pushHistory();
+  startTimer();
+
+  var k;
+  if (plainLetter) {
+    plainLetter = plainLetter.toUpperCase();
+    for (k in state.map) {
+      if (state.map.hasOwnProperty(k) && state.map[k] === plainLetter && k !== cipherLetter) {
+        delete state.map[k];
+      }
+    }
+    state.map[cipherLetter] = plainLetter;
+  } else {
+    delete state.map[cipherLetter];
+  }
+  state.checkMode = false;
+  checkSolved();
+  renderAll();
+  saveStorage();
+}
+
+function checkSolved() {
+  var needed = lettersIn(state.cipher);
+  if (!needed.length) return;
+  var hasTrue = Object.keys(state.trueMap).length > 0;
+  var i, c, g;
+
+  if (hasTrue) {
+    for (i = 0; i < needed.length; i++) {
+      c = needed[i];
+      if (state.map[c] !== state.trueMap[c]) return;
+    }
+    var rebuilt = "", target = "", got = "";
+    for (i = 0; i < state.cipher.length; i++) {
+      var ch = state.cipher.charAt(i);
+      var u = ch.toUpperCase();
+      if (ALPHA.indexOf(u) >= 0) rebuilt += state.map[u] || "?";
+      else rebuilt += ch;
+    }
+    for (i = 0; i < state.plain.length; i++) {
+      u = state.plain.charAt(i).toUpperCase();
+      if (ALPHA.indexOf(u) >= 0) target += u;
+    }
+    for (i = 0; i < rebuilt.length; i++) {
+      u = rebuilt.charAt(i).toUpperCase();
+      if (ALPHA.indexOf(u) >= 0) got += u;
+    }
+    if (target && got !== target) return;
+  } else {
+    var vals = [], seen = {};
+    for (i = 0; i < needed.length; i++) {
+      c = needed[i];
+      g = state.map[c];
+      if (!g) return;
+      if (g === c) return;
+      if (seen[g]) return;
+      seen[g] = true;
+      vals.push(g);
+    }
+  }
+
+  state.solved = true;
+  stopTimer();
+}
+
+function undo() {
+  if (!state.history.length || state.solved) return;
+  state.map = JSON.parse(state.history.pop());
+  state.checkMode = false;
+  renderAll();
+  saveStorage();
+}
+
+function hint() {
+  if (state.solved || !state.cipher) return;
+  if (!Object.keys(state.trueMap).length) {
+    showNotice("Hints need a known solution. Use a built-in puzzle, or paste ciphertext with a solution.");
+    return;
+  }
+  var needed = lettersIn(state.cipher);
+  var wrong = [], i, c;
+  for (i = 0; i < needed.length; i++) {
+    c = needed[i];
+    if (state.map[c] !== state.trueMap[c]) wrong.push(c);
+  }
+  if (!wrong.length) return;
+  var freq = freqMap(state.cipher);
+  wrong.sort(function (a, b) { return (freq[b] || 0) - (freq[a] || 0); });
+  c = wrong[0];
+  var plain = state.trueMap[c];
+  var logged = false, hi;
+  if (!state.hintLog) state.hintLog = [];
+  for (hi = 0; hi < state.hintLog.length; hi++) {
+    if (state.hintLog[hi].cipher === c) { logged = true; break; }
+  }
+  if (!logged) state.hintLog.push({ cipher: c, plain: plain });
+  state.selected = c;
+  setGuess(c, plain);
+}
+
+function doCheck() {
+  if (!state.cipher) return;
+  if (!Object.keys(state.trueMap).length) {
+    var needed = lettersIn(state.cipher);
+    var used = {}, issues = 0, i, c, g;
+    for (i = 0; i < needed.length; i++) {
+      c = needed[i];
+      g = state.map[c];
+      if (!g) continue;
+      if (g === c) issues++;
+      if (used[g] && used[g] !== c) issues++;
+      used[g] = c;
+    }
+    showNotice(issues
+      ? ("Found " + issues + " consistency issue(s) (self-maps or duplicate letters).")
+      : "No consistency issues among filled letters. (No solution to verify against.)");
+    return;
+  }
+  state.checkMode = true;
+  renderAll();
+}
+
+function resetGuesses() {
+  if (!state.cipher) return;
+  pushHistory();
+  state.map = {};
+  state.hintLog = [];
+  state.solved = false;
+  state.checkMode = false;
+  renderAll();
+  saveStorage();
+}
+
+function renderCats() {
+  var el = document.getElementById("cats");
+  el.innerHTML = "";
+  CATS.forEach(function (cat) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "cat-btn" + (state.category === cat ? " active" : "");
+    b.textContent = cat === "Saved" ? ("Saved (" + loadSavedLibrary().length + ")") : cat;
+    b.setAttribute("role", "tab");
+    b.setAttribute("aria-selected", state.category === cat ? "true" : "false");
+    b.addEventListener("click", function () {
+      // Every tap deals a new puzzle for that category — including
+      // tapping the category that is already selected.
+      state.category = cat;
+      renderCats();
+      if (cat === "Saved") {
+        if (libraryFileHandle) {
+          pullLibraryFile().then(function () { pickNewPuzzle(); });
+        } else {
+          pickNewPuzzle();
+        }
+        return;
+      }
+      // Each tap on a quote category builds a fresh snapshot batch
+      loadSnapshotPool(cat, true);
+    });
+    el.appendChild(b);
+  });
+}
+
+function renderPuzzle() {
+  var root = document.getElementById("puzzle");
+  root.innerHTML = "";
+  if (!state.cipher) {
+    if (state.category === "Saved") {
+      root.innerHTML = '<div class="empty-saved">No saved puzzles yet.<br>Use <strong>Create</strong> to load a cryptogram — it will be saved here for later.<br>Click <strong>Link library file</strong> and choose that file.</div>';
+    } else {
+      root.innerHTML = '<div class="empty-saved">No puzzle loaded.</div>';
+    }
+    return;
+  }
+  var freq = freqMap(state.cipher);
+  var lines = state.cipher.split("\n");
+  var li, wi, ci;
+
+  for (li = 0; li < lines.length; li++) {
+    if (li > 0) {
+      var br = document.createElement("div");
+      br.style.flexBasis = "100%";
+      br.style.height = "8px";
+      root.appendChild(br);
+    }
+    var line = lines[li];
+    var words = line.split(/(\s+)/);
+    for (wi = 0; wi < words.length; wi++) {
+      var tok = words[wi];
+      if (!tok) continue;
+      if (/^\s+$/.test(tok)) {
+        var sp = document.createElement("div");
+        sp.className = "cell space";
+        root.appendChild(sp);
+        continue;
+      }
+      var word = document.createElement("div");
+      word.className = "word";
+      for (ci = 0; ci < tok.length; ci++) {
+        var ch = tok.charAt(ci);
+        var cell = document.createElement("div");
+        var u = ch.toUpperCase();
+        if (ALPHA.indexOf(u) >= 0) {
+          cell.className = "cell";
+          var g = document.createElement("div");
+          g.className = "guess";
+          g.dataset.cipher = u;
+          var guess = state.map[u] || "";
+          g.textContent = guess;
+          if (guess) g.classList.add("filled");
+          if (state.selected === u) g.classList.add("selected");
+          if (state.checkMode && guess && state.trueMap[u]) {
+            if (guess === state.trueMap[u]) g.classList.add("ok");
+            else g.classList.add("wrong");
+          }
+          if (state.solved && guess) g.classList.add("ok");
+          g.addEventListener("click", (function (letter) {
+            return function () {
+              state.selected = letter;
+              state.checkMode = false;
+              renderAll();
+            };
+          })(u));
+          cell.appendChild(g);
+          var cl = document.createElement("div");
+          cl.className = "cipher-letter";
+          cl.textContent = u;
+          cell.appendChild(cl);
+          var fr = document.createElement("div");
+          fr.className = "freq";
+          fr.textContent = String(freq[u] || 0);
+          cell.appendChild(fr);
+        } else {
+          cell.className = "cell punct";
+          var gp = document.createElement("div");
+          gp.className = "guess";
+          gp.textContent = ch;
+          cell.appendChild(gp);
+          var clp = document.createElement("div");
+          clp.className = "cipher-letter";
+          clp.innerHTML = "&nbsp;";
+          cell.appendChild(clp);
+          var frp = document.createElement("div");
+          frp.className = "freq";
+          frp.innerHTML = "&nbsp;";
+          cell.appendChild(frp);
+        }
+        word.appendChild(cell);
+      }
+      root.appendChild(word);
+    }
+  }
+}
+
+function renderAuthor() {
+  var el = document.getElementById("author");
+  var banner = document.getElementById("solvedBanner");
+  var actions = document.getElementById("savedActions");
+  if (state.solved) {
+    el.textContent = "— " + state.author;
+    el.classList.add("revealed");
+    banner.classList.add("show");
+  } else if (!state.cipher && state.category === "Saved") {
+    el.textContent = "";
+    el.classList.remove("revealed");
+    banner.classList.remove("show");
+  } else {
+    el.textContent = "Author revealed when solved";
+    el.classList.remove("revealed");
+    banner.classList.remove("show");
+  }
+  if (actions) {
+    if (state.category === "Saved" && state.savedId && state.cipher) {
+      actions.classList.remove("hidden");
+    } else {
+      actions.classList.add("hidden");
+    }
+  }
+}
+
+function renderMap() {
+  var el = document.getElementById("map");
+  el.innerHTML = "";
+  var used = lettersIn(state.cipher);
+  used.forEach(function (c) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "map-cell" + (state.map[c] ? "" : " empty") + (state.selected === c ? " selected" : "");
+    b.innerHTML = '<span class="c">' + c + '</span><span class="arrow">→</span><span class="p">' +
+      (state.map[c] || "·") + '</span>';
+    b.addEventListener("click", function () {
+      state.selected = c;
+      renderAll();
+    });
+    el.appendChild(b);
+  });
+}
+
+function renderHintLog() {
+  var el = document.getElementById("hintLog");
+  if (!el) return;
+  var log = state.hintLog || [];
+  if (!log.length) {
+    el.innerHTML = '<span class="meta-empty">None yet — tap Hint to reveal a letter.</span>';
+    return;
+  }
+  var parts = [], i, item;
+  for (i = 0; i < log.length; i++) {
+    item = log[i];
+    parts.push(
+      '<span class="hint-pair"><span class="c">' + item.cipher +
+      '</span><span class="arrow">→</span>' + item.plain + '</span>'
+    );
+  }
+  el.innerHTML = parts.join(", ");
+}
+
+
+function renderKeyboard() {
+  var el = document.getElementById("keyboard");
+  el.innerHTML = "";
+  var usedPlains = {};
+  var k;
+  for (k in state.map) {
+    if (state.map.hasOwnProperty(k)) usedPlains[state.map[k]] = true;
+  }
+  for (var i = 0; i < 26; i++) {
+    var letter = ALPHA.charAt(i);
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "kb-key" + (usedPlains[letter] ? " used" : "");
+    b.textContent = letter;
+    b.addEventListener("click", (function (L) {
+      return function () {
+        if (!state.selected) return;
+        setGuess(state.selected, L);
+      };
+    })(letter));
+    el.appendChild(b);
+  }
+  var clr = document.createElement("button");
+  clr.type = "button";
+  clr.className = "kb-key clear-key";
+  clr.textContent = "Clear";
+  clr.addEventListener("click", function () {
+    if (!state.selected) return;
+    setGuess(state.selected, null);
+  });
+  el.appendChild(clr);
+}
+
+function renderAll() {
+  renderPuzzle();
+  renderAuthor();
+  renderMap();
+  renderHintLog();
+  renderKeyboard();
+}
+
+function restoreOrNew() {
+  var saved = loadStorage();
+  if (saved && saved.cipher) {
+    state.quoteIndex = saved.quoteIndex;
+    state.plain = saved.plain || "";
+    state.author = saved.author || "";
+    state.category = saved.category || "All";
+    state.cipher = saved.cipher;
+    state.map = saved.map || {};
+    state.trueMap = saved.trueMap || {};
+    state.elapsed = saved.elapsed || 0;
+    state.solved = !!saved.solved;
+    state.custom = !!saved.custom;
+    state.savedId = saved.savedId || null;
+    state.savedDeal = Array.isArray(saved.savedDeal) ? saved.savedDeal : [];
+    state.history = saved.history || [];
+    state.hintLog = saved.hintLog || [];
+    if (state.solved) stopTimer();
+    else updateTimerDisplay();
+    renderCats();
+    renderAll();
+    return;
+  }
+  renderCats();
+  pickNewPuzzle();
+}
+
+document.getElementById("printBtn").addEventListener("click", function () {
+  window.print();
+});
+document.getElementById("undoBtn").addEventListener("click", undo);
+document.getElementById("hintBtn").addEventListener("click", hint);
+document.getElementById("checkBtn").addEventListener("click", doCheck);
+document.getElementById("resetBtn").addEventListener("click", resetGuesses);
+document.getElementById("pasteBtn").addEventListener("click", function () {
+  document.getElementById("pasteModal").classList.add("open");
+  document.getElementById("pasteCipher").value = "";
+  document.getElementById("pastePlain").value = "";
+  document.getElementById("pasteAuthor").value = "";
+  setTimeout(function () { document.getElementById("pasteCipher").focus(); }, 50);
+});
+document.getElementById("pasteCancel").addEventListener("click", function () {
+  document.getElementById("pasteModal").classList.remove("open");
+});
+document.getElementById("scrambleSolutionBtn").addEventListener("click", function () {
+  var plain = document.getElementById("pastePlain").value;
+  if (!/[A-Za-z]/.test(plain)) {
+    showNotice("Type a solution with letters first, then Scramble.");
+    document.getElementById("pastePlain").focus();
+    return;
+  }
+  var key = makeCipherKey();
+  var cipher = encode(plain, key);
+  document.getElementById("pasteCipher").value = cipher;
+  document.getElementById("pastePlain").value = plain; // keep solution for Check/Hint
+});
+
+document.getElementById("pasteApply").addEventListener("click", function () {
+  var c = document.getElementById("pasteCipher").value.trim();
+  if (!c || !/[A-Za-z]/.test(c)) {
+    showNotice("Please paste some ciphertext with letters.");
+    return;
+  }
+  var p = document.getElementById("pastePlain").value.trim();
+  var a = document.getElementById("pasteAuthor").value.trim();
+  document.getElementById("pasteModal").classList.remove("open");
+  loadCustom(c, p, a);
+});
+document.getElementById("deleteSavedBtn").addEventListener("click", function () {
+  if (!state.savedId) return;
+  var idToDelete = state.savedId;
+  askRemoval("Remove this puzzle from Saved?", function () {
+    deleteSavedPuzzle(idToDelete);
+    if (state.savedId === idToDelete) state.savedId = null;
+    if (state.category === "Saved") {
+      pickSavedPuzzle();
+    } else {
+      renderAuthor();
+      saveStorage();
+    }
+  });
+});
+document.getElementById("removalCancel").addEventListener("click", closeRemoval);
+document.getElementById("removalOk").addEventListener("click", function () {
+  var action = pendingRemovalAction;
+  closeRemoval();
+  if (action) action();
+});
+document.getElementById("removalModal").addEventListener("click", function (e) {
+  if (e.target.id === "removalModal") closeRemoval();
+});
+document.getElementById("exportSavedBtn").addEventListener("click", function () {
+  linkLibraryFile(loadSavedLibrary());
+});
+document.getElementById("downloadCopyBtn").addEventListener("click", function () {
+  downloadSavedLibrary(loadSavedLibrary());
+});
+document.getElementById("pasteModal").addEventListener("click", function (e) {
+  if (e.target.id === "pasteModal") document.getElementById("pasteModal").classList.remove("open");
+});
+
+document.addEventListener("keydown", function (e) {
+  if (document.getElementById("pasteModal").classList.contains("open")) return;
+  var key = e.key;
+  if (key === "Escape") {
+    state.selected = null;
+    renderAll();
+    return;
+  }
+  if (key === "Backspace" || key === "Delete") {
+    if (state.selected) {
+      e.preventDefault();
+      setGuess(state.selected, null);
+    }
+    return;
+  }
+  if (key.length === 1 && /[a-zA-Z]/.test(key)) {
+    if (state.selected) {
+      e.preventDefault();
+      setGuess(state.selected, key.toUpperCase());
+    }
+    return;
+  }
+  if (key === "ArrowLeft" || key === "ArrowRight") {
+    var letters = lettersIn(state.cipher);
+    if (!letters.length) return;
+    e.preventDefault();
+    var idx = state.selected ? letters.indexOf(state.selected) : -1;
+    if (key === "ArrowRight") idx = (idx + 1) % letters.length;
+    else idx = (idx - 1 + letters.length) % letters.length;
+    state.selected = letters[idx];
+    renderAll();
+  }
+});
+
+restoreLibraryHandle().then(function () {
+  restoreOrNew();
+});
+})();
+</script>
+</body>
+</html>

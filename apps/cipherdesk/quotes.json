@@ -1,0 +1,370 @@
+{
+ "exported": "2026-11-05",
+ "count": 71,
+ "by_category": {
+  "Comedy": 7,
+  "History": 8,
+  "Leadership": 10,
+  "Science": 10,
+  "Sports": 8,
+  "Wisdom": 20,
+  "Wit": 8
+ },
+ "quotes": [
+  {
+   "t": "Age is something that doesn't matter, unless you are a cheese.",
+   "a": "Luis Buñuel",
+   "c": "Comedy"
+  },
+  {
+   "t": "Behind every great man is a woman rolling her eyes.",
+   "a": "Jim Carrey",
+   "c": "Comedy"
+  },
+  {
+   "t": "I am so clever that sometimes I don't understand a single word of what I am saying.",
+   "a": "Oscar Wilde",
+   "c": "Comedy"
+  },
+  {
+   "t": "I can resist everything except temptation.",
+   "a": "Oscar Wilde",
+   "c": "Comedy"
+  },
+  {
+   "t": "I intend to live forever. So far, so good.",
+   "a": "Steven Wright",
+   "c": "Comedy"
+  },
+  {
+   "t": "I never forget a face, but in your case I'll be glad to make an exception.",
+   "a": "Groucho Marx",
+   "c": "Comedy"
+  },
+  {
+   "t": "Outside of a dog, a book is man's best friend. Inside of a dog it's too dark to read.",
+   "a": "Groucho Marx",
+   "c": "Comedy"
+  },
+  {
+   "t": "Four score and seven years ago our fathers brought forth on this continent a new nation.",
+   "a": "Abraham Lincoln",
+   "c": "History"
+  },
+  {
+   "t": "Give me liberty or give me death.",
+   "a": "Patrick Henry",
+   "c": "History"
+  },
+  {
+   "t": "History is written by the victors.",
+   "a": "Attributed to Winston Churchill",
+   "c": "History"
+  },
+  {
+   "t": "I have nothing to offer but blood, toil, tears and sweat.",
+   "a": "Winston Churchill",
+   "c": "History"
+  },
+  {
+   "t": "Never in the field of human conflict was so much owed by so many to so few.",
+   "a": "Winston Churchill",
+   "c": "History"
+  },
+  {
+   "t": "The only thing necessary for the triumph of evil is for good men to do nothing.",
+   "a": "Edmund Burke",
+   "c": "History"
+  },
+  {
+   "t": "Those who cannot remember the past are condemned to repeat it.",
+   "a": "George Santayana",
+   "c": "History"
+  },
+  {
+   "t": "Veni, vidi, vici.",
+   "a": "Julius Caesar",
+   "c": "History"
+  },
+  {
+   "t": "A house divided against itself cannot stand.",
+   "a": "Abraham Lincoln",
+   "c": "Leadership"
+  },
+  {
+   "t": "A leader is a dealer in hope.",
+   "a": "Napoleon Bonaparte",
+   "c": "Leadership"
+  },
+  {
+   "t": "Do what you can, with what you have, where you are.",
+   "a": "Theodore Roosevelt",
+   "c": "Leadership"
+  },
+  {
+   "t": "Fortune favors the bold.",
+   "a": "Virgil",
+   "c": "Leadership"
+  },
+  {
+   "t": "Leadership is the capacity to translate vision into reality.",
+   "a": "Warren Bennis",
+   "c": "Leadership"
+  },
+  {
+   "t": "Management is doing things right; leadership is doing the right things.",
+   "a": "Peter Drucker",
+   "c": "Leadership"
+  },
+  {
+   "t": "One who thinks and reflects develops his foresight and vision.",
+   "a": "Ali ibn Abi Talib (R.A)",
+   "c": "Leadership"
+  },
+  {
+   "t": "Speak softly and carry a big stick.",
+   "a": "Theodore Roosevelt",
+   "c": "Leadership"
+  },
+  {
+   "t": "The best way to predict the future is to create it.",
+   "a": "Peter Drucker",
+   "c": "Leadership"
+  },
+  {
+   "t": "The only thing we have to fear is fear itself.",
+   "a": "Franklin D. Roosevelt",
+   "c": "Leadership"
+  },
+  {
+   "t": "English is necessary as at present original works of science are in English. I believe that in two decades times original works of science will start coming out in our languages. Then we can move over like the Japanese.",
+   "a": "Abdul Kalam",
+   "c": "Science"
+  },
+  {
+   "t": "Eureka!",
+   "a": "Archimedes",
+   "c": "Science"
+  },
+  {
+   "t": "Genius is one percent inspiration and ninety-nine percent perspiration.",
+   "a": "Thomas Edison",
+   "c": "Science"
+  },
+  {
+   "t": "If I have seen further it is by standing on the shoulders of giants.",
+   "a": "Isaac Newton",
+   "c": "Science"
+  },
+  {
+   "t": "Imagination is more important than knowledge.",
+   "a": "Albert Einstein",
+   "c": "Science"
+  },
+  {
+   "t": "Knowledge is power.",
+   "a": "Francis Bacon",
+   "c": "Science"
+  },
+  {
+   "t": "Nature abhors a vacuum.",
+   "a": "Aristotle",
+   "c": "Science"
+  },
+  {
+   "t": "Science is organized knowledge.",
+   "a": "Herbert Spencer",
+   "c": "Science"
+  },
+  {
+   "t": "The important thing is not to stop questioning.",
+   "a": "Albert Einstein",
+   "c": "Science"
+  },
+  {
+   "t": "The whole of science is nothing more than a refinement of everyday thinking.",
+   "a": "Albert Einstein",
+   "c": "Science"
+  },
+  {
+   "t": "Champions keep playing until they get it right.",
+   "a": "Billie Jean King",
+   "c": "Sports"
+  },
+  {
+   "t": "Float like a butterfly, sting like a bee.",
+   "a": "Muhammad Ali",
+   "c": "Sports"
+  },
+  {
+   "t": "Hard work beats talent when talent doesn't work hard.",
+   "a": "Tim Notke",
+   "c": "Sports"
+  },
+  {
+   "t": "It ain't over till it's over.",
+   "a": "Yogi Berra",
+   "c": "Sports"
+  },
+  {
+   "t": "It's not whether you get knocked down, it's whether you get up.",
+   "a": "Vince Lombardi",
+   "c": "Sports"
+  },
+  {
+   "t": "Winning isn't everything, it's the only thing.",
+   "a": "Vince Lombardi",
+   "c": "Sports"
+  },
+  {
+   "t": "You can't put a limit on anything. The more you dream, the farther you get.",
+   "a": "Michael Phelps",
+   "c": "Sports"
+  },
+  {
+   "t": "You miss one hundred percent of the shots you don't take.",
+   "a": "Wayne Gretzky",
+   "c": "Sports"
+  },
+  {
+   "t": "All that glitters is not gold.",
+   "a": "William Shakespeare",
+   "c": "Wisdom"
+  },
+  {
+   "t": "Dream is not that which you see while sleeping it is something that does not let you sleep.",
+   "a": "Abdul Kalam",
+   "c": "Wisdom"
+  },
+  {
+   "t": "I think, therefore I am.",
+   "a": "René Descartes",
+   "c": "Wisdom"
+  },
+  {
+   "t": "In the middle of difficulty lies opportunity.",
+   "a": "Albert Einstein",
+   "c": "Wisdom"
+  },
+  {
+   "t": "Know thyself.",
+   "a": "Inscription at Delphi",
+   "c": "Wisdom"
+  },
+  {
+   "t": "Life is what happens when you are busy making other plans.",
+   "a": "John Lennon",
+   "c": "Wisdom"
+  },
+  {
+   "t": "Money Has Never Made Man Happy, Nor Will It, There Is Nothing In Its Nature To Produce Happiness. The More Of It One Has The More One Wants.",
+   "a": "Benjamin Franklin",
+   "c": "Wisdom"
+  },
+  {
+   "t": "My soul is from elsewhere, I'm sure of that, and I intend to end up there.",
+   "a": "Rumi",
+   "c": "Wisdom"
+  },
+  {
+   "t": "Stay in college, get the knowledge. And stay there until you're through. If they can make penicillin out of moldy bread, they can sure make something out of you. Advice to a young person to continue his education.",
+   "a": "Muhammad Ali",
+   "c": "Wisdom"
+  },
+  {
+   "t": "That which does not kill us makes us stronger.",
+   "a": "Friedrich Nietzsche",
+   "c": "Wisdom"
+  },
+  {
+   "t": "The greatest truth is honesty, and the greatest falsehood is dishonesty.",
+   "a": "Abu Bakr (R.A)",
+   "c": "Wisdom"
+  },
+  {
+   "t": "The journey of a thousand miles begins with one step.",
+   "a": "Lao Tzu",
+   "c": "Wisdom"
+  },
+  {
+   "t": "The truth was a mirror in the hands of God. It fell, and broke into pieces. Everybody took a piece of it, and they looked at it and thought they had the truth.",
+   "a": "Rumi",
+   "c": "Wisdom"
+  },
+  {
+   "t": "The unexamined life is not worth living.",
+   "a": "Socrates",
+   "c": "Wisdom"
+  },
+  {
+   "t": "To be yourself in a world that is constantly trying to make you something else is the greatest accomplishment.",
+   "a": "Ralph Waldo Emerson",
+   "c": "Wisdom"
+  },
+  {
+   "t": "Try as much as you can to mention death. For if you were having hard times in your life, then it would give you more hope and would ease things for you. And if you were having abundant affluence of living in luxury, then it would make it less luxurious.",
+   "a": "Umar ibn Al-Khattāb (R.A)",
+   "c": "Wisdom"
+  },
+  {
+   "t": "We are what we repeatedly do. Excellence, then, is not an act, but a habit.",
+   "a": "Aristotle",
+   "c": "Wisdom"
+  },
+  {
+   "t": "We Continue To Shape Our Personality All Our Life. If We Knew Ourselves Perfectly, We Should Die.",
+   "a": "Albert Camus",
+   "c": "Wisdom"
+  },
+  {
+   "t": "What we think, we become.",
+   "a": "Buddha",
+   "c": "Wisdom"
+  },
+  {
+   "t": "When I Look Into The Future, It'S So Bright It Burns My Eyes.",
+   "a": "Oprah Winfrey",
+   "c": "Wisdom"
+  },
+  {
+   "t": "A witty saying proves nothing.",
+   "a": "Voltaire",
+   "c": "Wit"
+  },
+  {
+   "t": "Be yourself; everyone else is already taken.",
+   "a": "Oscar Wilde",
+   "c": "Wit"
+  },
+  {
+   "t": "Brevity is the soul of wit.",
+   "a": "William Shakespeare",
+   "c": "Wit"
+  },
+  {
+   "t": "Common sense is not so common.",
+   "a": "Voltaire",
+   "c": "Wit"
+  },
+  {
+   "t": "Sarcasm is the lowest form of wit but the highest form of intelligence.",
+   "a": "Oscar Wilde",
+   "c": "Wit"
+  },
+  {
+   "t": "The pen is mightier than the sword.",
+   "a": "Edward Bulwer-Lytton",
+   "c": "Wit"
+  },
+  {
+   "t": "The pure and simple truth is rarely pure and never simple.",
+   "a": "Oscar Wilde",
+   "c": "Wit"
+  },
+  {
+   "t": "Wit is educated insolence.",
+   "a": "Aristotle",
+   "c": "Wit"
+  }
+ ]
+}
