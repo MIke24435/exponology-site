@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,700;6..72,800&display=swap" rel="stylesheet">
 <title>Mah Jongg Hand Matcher</title>
 <style>
   :root{
@@ -75,13 +78,17 @@
     font-size:.82rem;letter-spacing:.06em;text-transform:uppercase;font-weight:700;color:var(--jade);
   }
   .eyebrow::before{content:"";width:28px;height:3px;background:var(--red);border-radius:2px;display:inline-block}
-  .eyebrow .home-link{color:inherit;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1.5px}
-  .eyebrow .home-link:hover,.eyebrow .home-link:focus-visible{color:var(--jade-strong)}
+  .brand-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+  .brand-home{display:block;text-decoration:none;color:inherit;border-radius:8px}
+  .brand-home:hover .brand-logo,.brand-home:focus-visible .brand-logo{color:var(--jade)}
+  .brand-logo{font-family:"Newsreader",Georgia,serif;font-size:1.55rem;font-weight:800;letter-spacing:-.02em;line-height:1;color:var(--ink)}
+  .brand-logo .dot{color:var(--red)}
+  .brand-sub{font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);margin-top:3px}
   h1{
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: "Newsreader", Georgia, "Times New Roman", serif;
     font-weight:700;
-    font-size:clamp(1.9rem, 6vw, 2.9rem);
-    line-height:1.05;
+    font-size:clamp(2rem, 6vw, 3.1rem);
+    line-height:1.02;
     letter-spacing:-.02em;
     margin:10px 0 8px;
   }
@@ -259,7 +266,6 @@
   .results-count{color:var(--ink-soft);font-weight:600}
   .results-side{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
   .help-link{color:var(--jade);font-weight:700;font-size:1rem;text-decoration:underline;text-underline-offset:3px;white-space:nowrap;padding:6px 2px}
-  .eyebrow .help-link{margin-left:auto;font-size:.95rem}
   .sp-star{color:#d9a400;font-size:1.25rem;line-height:1;margin-left:3px}
   /* Help panel */
   #help,#help-use,#help-read{scroll-margin-top:14px}
@@ -394,7 +400,10 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow"><a class="home-link" href="https://exponology.com/">Exponology</a> &bull; 2026 Card &bull; 79 Hands <a class="help-link" href="#help">Help</a></div>
+    <div class="brand-bar">
+      <a class="brand-home" href="https://exponology.com/" aria-label="Exponology — home page"><div class="brand-logo">Exponology<span class="dot">.</span></div><div class="brand-sub">exponology.com</div></a>
+    </div>
+    <div class="eyebrow">2026 Card &bull; 79 Hands</div>
     <h1>Mah Jongg Hand Matcher</h1>
     <p class="lede"><strong>What hand are my tiles closest to?</strong> Tap the tiles on your rack into the page, and it ranks the 2026 card hands by <strong>how few tiles you still need</strong>. Tap a tile on your rack to take it back off, or drag it sideways to move it. Or tap <strong>Random hand</strong> at the top of the Add tiles box to deal yourself a fresh hand to try — 13 tiles, or 14 if you are East.</p>
   </header>
