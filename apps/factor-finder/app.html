@@ -1,0 +1,1248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,700;6..72,800&family=Public+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<title>Prime Factor Finder</title>
+<style>
+  :root{
+    color-scheme: light dark;
+    --bg:#faf8f2;
+    --surface:#fffdf7;
+    --surface-2:#fbf7ec;
+    --ink:#1e2a21;
+    --ink-soft:#4c5a4e;
+    --ink-faint:#71806f;
+    --line:#ded3ba;
+    --line-strong:#c8b98d;
+    --green:#1f6f4a;
+    --green-strong:#175738;
+    --green-soft:#e2efe4;
+    --red:#b23a2e;
+    --red-soft:#faeae6;
+    --gold:#a97b16;
+    --gold-soft:#f6ecd0;
+    --shadow:0 1px 2px rgba(30,42,33,.06), 0 10px 30px rgba(30,42,33,.07);
+    --radius:16px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#131915;
+      --surface:#1b241e;
+      --surface-2:#212b23;
+      --ink:#edf2ec;
+      --ink-soft:#b7c5b6;
+      --ink-faint:#93a48f;
+      --line:#33443a;
+      --line-strong:#4c6152;
+      --green:#5fbf92;
+      --green-strong:#8ad8b8;
+      --green-soft:#22392d;
+      --red:#ff9a8f;
+      --red-soft:#3d2320;
+      --gold:#e3c169;
+      --gold-soft:#38301a;
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.25);
+    }
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Public Sans", ui-sans-system, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size:17px;line-height:1.45;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:20px 22px 48px}
+  /* Brand bar */
+  .brand-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+  .brand-home{display:block;text-decoration:none;color:inherit;border-radius:8px}
+  .brand-home:hover .brand-logo,.brand-home:focus-visible .brand-logo{color:var(--green)}
+  .brand-logo{font-family:"Newsreader",Georgia,serif;font-size:1.55rem;font-weight:800;letter-spacing:-.02em;line-height:1;color:var(--ink)}
+  .brand-logo .dot{color:var(--red)}
+  .brand-sub{font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);margin-top:3px}
+  .eyebrow{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    font-size:.82rem;letter-spacing:.06em;text-transform:uppercase;font-weight:700;color:var(--green);
+  }
+  .eyebrow::before{content:"";width:28px;height:3px;background:var(--red);border-radius:2px;display:inline-block}
+  h1{
+    font-family:"Newsreader", Georgia, "Times New Roman", serif;
+    font-weight:700;font-size:clamp(2rem, 6vw, 3.1rem);
+    line-height:1.02;letter-spacing:-.02em;margin:10px 0 8px;
+  }
+  .lede{color:var(--ink-soft);font-size:1.06rem;max-width:42rem;margin:0}
+  .lede strong{color:var(--ink)}
+  /* Panels */
+  .panel{
+    margin-top:22px;background:var(--surface);
+    border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:18px;
+  }
+  .panel-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .panel h2{font-size:1.12rem;margin:0}
+  .panel h2 .step-num{color:var(--gold);font-weight:800;margin-right:2px}
+  .hint{color:var(--ink-faint);font-size:.93rem;margin:5px 0 0;max-width:44rem}
+  .hint strong{color:var(--ink-soft)}
+  .help-link{color:var(--green);font-weight:700;font-size:1rem;text-decoration:underline;text-underline-offset:3px;white-space:nowrap;padding:6px 2px}
+  /* Mode tabs */
+  .tabs{display:flex;gap:8px;margin-top:24px;background:var(--surface-2);border:1.5px solid var(--line-strong);border-radius:999px;padding:5px}
+  .tab{
+    flex:1 1 0;min-height:52px;padding:10px 12px;border:0;border-radius:999px;
+    background:transparent;color:var(--ink-soft);font-size:1.02rem;font-weight:700;cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .tab[aria-selected="true"]{background:var(--green);color:#fff}
+  @media (prefers-color-scheme: dark){ .tab[aria-selected="true"]{color:#0e1a13} }
+  /* Inputs & buttons */
+  .num-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-top:14px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field label{font-weight:700;font-size:.92rem}
+  .field input{
+    width:170px;max-width:44vw;min-height:54px;padding:10px 14px;
+    font-size:1.25rem;font-weight:700;color:var(--ink);
+    background:var(--surface-2);border:1.5px solid var(--line-strong);border-radius:10px;
+  }
+  .field input:focus{outline:3px solid var(--green-soft);border-color:var(--green)}
+  .field input.small{width:120px;font-size:1.05rem;min-height:50px}
+  .btn{
+    border-radius:999px;min-height:54px;padding:11px 22px;
+    font-size:1.02rem;font-weight:700;cursor:pointer;border:1.5px solid transparent;
+    background:var(--green);color:#fff;-webkit-tap-highlight-color:transparent;
+  }
+  @media (prefers-color-scheme: dark){ .btn{color:#0e1a13} }
+  .btn:active{background:var(--green-strong)}
+  .btn-ghost{background:transparent;color:var(--ink);border-color:var(--line-strong)}
+  .btn-ghost:active{border-color:var(--green);color:var(--green);background:transparent}
+  .btn-small{min-height:46px;padding:8px 16px;font-size:.95rem}
+  .btn[disabled]{opacity:.45;cursor:default}
+  .msg{margin-top:12px;font-size:1rem;min-height:1.4em}
+  .msg.err{color:var(--red);font-weight:600}
+  .msg.good{color:var(--green);font-weight:700}
+  /* Division ladder */
+  .ladder{margin-top:14px;display:grid;gap:6px}
+  .ladder:empty{display:none}
+  .rung{
+    display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
+    background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:9px 14px;
+    font-size:1.12rem;font-weight:600;
+  }
+  .rung .by{color:var(--green);font-weight:800}
+  .rung.prime-rung{border-color:var(--gold);background:var(--gold-soft)}
+  .now-line{margin-top:14px;font-size:1.05rem}
+  .now-line .now-num{font-family:"Newsreader",Georgia,serif;font-size:1.7rem;font-weight:700}
+  .chip-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .pchip{
+    min-width:52px;min-height:52px;padding:8px 10px;
+    font-size:1.15rem;font-weight:800;color:var(--ink);
+    background:var(--surface-2);border:1.5px solid var(--line-strong);border-radius:12px;
+    cursor:pointer;-webkit-tap-highlight-color:transparent;
+  }
+  .pchip:active{border-color:var(--green);color:var(--green)}
+  .pchip.collected{background:var(--green-soft);border-color:var(--green);color:var(--green-strong)}
+  @media (prefers-color-scheme: dark){ .pchip.collected{color:var(--green-strong)} }
+  .pchip.sel{background:var(--green);border-color:var(--green);color:#fff}
+  @media (prefers-color-scheme: dark){ .pchip.sel{color:#0e1a13} }
+  .pchip[disabled]{opacity:.4;cursor:default}
+  .finish-prime{
+    margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+    background:var(--gold-soft);border:1.5px solid var(--gold);border-radius:12px;padding:10px 14px;
+  }
+  .finish-prime p{margin:0;font-weight:600}
+  .custom-prime{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-top:14px}
+  .result-box{
+    margin-top:16px;border:1.5px solid var(--green);background:var(--green-soft);
+    border-radius:12px;padding:14px 16px;
+  }
+  .result-box .big{font-family:"Newsreader",Georgia,serif;font-size:1.45rem;font-weight:700;line-height:1.3}
+  .result-box p{margin:6px 0 0}
+  .check-line{color:var(--green-strong);font-weight:700}
+  @media (prefers-color-scheme: dark){ .check-line{color:var(--green-strong)} }
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  /* Factor tree */
+  .tree-scroll{overflow-x:auto;padding:6px 2px 2px;position:relative}
+  .tree{display:inline-flex;min-width:100%;justify-content:center;position:relative;z-index:1}
+  .tree-lines{position:absolute;top:0;left:0;pointer-events:none;z-index:0;overflow:visible}
+  .tree-lines line{stroke:var(--line-strong);stroke-width:2.5;stroke-linecap:round}
+  .tnode{display:flex;flex-direction:column;align-items:center;padding:0 5px}
+  .tval{
+    min-width:52px;min-height:52px;padding:8px 12px;border-radius:999px;
+    display:inline-flex;align-items:center;justify-content:center;position:relative;z-index:1;
+    font-size:1.15rem;font-weight:800;background:var(--surface-2);
+    border:2px solid var(--line-strong);color:var(--ink);
+  }
+  button.tval{cursor:pointer;-webkit-tap-highlight-color:transparent;font-family:inherit}
+  button.tval:active{border-color:var(--green)}
+  .tval.prime{border-color:var(--green);background:var(--green-soft);color:var(--green-strong)}
+  @media (prefers-color-scheme: dark){ .tval.prime{color:var(--green-strong)} }
+  .tval.picked{border-color:var(--gold);background:var(--gold-soft)}
+  .tkids{display:flex;justify-content:center;margin-top:34px}
+  .tkid{display:flex;flex-direction:column;align-items:center}
+  .split-panel{
+    margin-top:12px;background:var(--surface-2);border:1.5px dashed var(--line-strong);
+    border-radius:12px;padding:12px 14px;
+  }
+  .split-panel p{margin:0 0 10px;font-weight:600}
+  /* Grouping */
+  .group-list{display:grid;gap:10px;margin-top:12px}
+  .group-list:empty{display:none}
+  .factor-box{
+    border:1.5px solid var(--green);background:var(--green-soft);
+    border-radius:12px;padding:12px 16px;
+  }
+  .factor-box .fb-eq{
+    font-family:"Newsreader",Georgia,serif;font-size:1.75rem;font-weight:700;line-height:1.25;
+  }
+  .factor-box p{margin:5px 0 0;font-size:1rem}
+  .factor-box .gname{font-weight:800;color:var(--gold)}
+  .factor-box.final{border-color:var(--gold);background:var(--gold-soft)}
+  /* Blocks */
+  .blocks-board{
+    margin-top:14px;background:var(--surface-2);border:1.5px solid var(--line);
+    border-radius:12px;padding:10px;
+  }
+  .blocks-axis-note{display:flex;flex-wrap:wrap;gap:4px 18px;margin:0 0 8px;font-size:.88rem;color:var(--ink-faint)}
+  .blocks-axis-note strong{color:var(--ink-soft)}
+  .blocks-grid{display:grid;gap:3px;justify-content:center}
+  .blk{aspect-ratio:1/1;border-radius:2px;background:var(--green);opacity:.85;min-height:0}
+  .blk.leftover{background:var(--red);opacity:.95}
+  .axis-corner{min-width:0}
+  .axis-col{display:flex;align-items:flex-end;justify-content:center;font-size:1.2rem;font-weight:800;color:var(--ink-soft);line-height:1.1;padding-bottom:2px;min-width:0;overflow:hidden}
+  .axis-row{display:flex;align-items:center;justify-content:flex-end;font-size:1.2rem;font-weight:800;color:var(--ink-soft);line-height:1;padding-right:4px;min-width:0}
+  .axis-empty{aspect-ratio:1/1;min-height:0}
+  .stepper{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .step-btn{
+    width:52px;height:52px;border-radius:999px;border:1.5px solid var(--line-strong);
+    background:var(--surface-2);color:var(--ink);font-size:1.5rem;font-weight:800;cursor:pointer;
+    -webkit-tap-highlight-color:transparent;line-height:1;
+  }
+  .step-btn:active{border-color:var(--green);color:var(--green)}
+  .step-val{font-size:1.15rem;font-weight:800;min-width:3.2em;text-align:center}
+  .pair-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .pair-chip{
+    padding:7px 13px;border-radius:999px;background:var(--green-soft);color:var(--green-strong);
+    border:1.5px solid var(--green);font-weight:800;font-size:1rem;
+  }
+  @media (prefers-color-scheme: dark){ .pair-chip{color:var(--green-strong)} }
+  .prime-callout{
+    margin-top:14px;border:1.5px solid var(--gold);background:var(--gold-soft);
+    border-radius:12px;padding:14px 16px;
+  }
+  .prime-callout .big{font-family:"Newsreader",Georgia,serif;font-size:1.3rem;font-weight:700;margin:0 0 4px}
+  .prime-callout p{margin:4px 0}
+  .progress-wrap{margin-top:12px}
+  .progress-track{height:12px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line-strong);overflow:hidden}
+  .progress-fill{height:100%;background:var(--gold);width:0%;transition:width .4s ease}
+  @media (prefers-reduced-motion: reduce){ .progress-fill{transition:none} }
+  .collection-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+  .collection-chips .empty-note{color:var(--ink-faint);font-size:.95rem}
+  .coll-chip{
+    min-width:44px;padding:6px 10px;text-align:center;border-radius:10px;
+    background:var(--gold-soft);border:1.5px solid var(--gold);color:var(--gold);
+    font-weight:800;font-size:1.02rem;
+  }
+  @media (prefers-color-scheme: dark){ .coll-chip{color:var(--gold)} }
+  .primorial-fact{
+    margin-top:14px;border:1.5px solid var(--gold);background:var(--gold-soft);
+    border-radius:12px;padding:14px 16px;
+  }
+  .primorial-fact .big{font-family:"Newsreader",Georgia,serif;font-size:1.3rem;font-weight:700;margin:0 0 4px}
+  .primorial-fact p{margin:4px 0}
+  .primorial-fact .primorial-num{
+    font-family:"Newsreader",Georgia,serif;font-weight:700;
+    font-size:1.3rem;line-height:1.35;margin:8px 0;overflow-wrap:anywhere;
+  }
+  /* Fraction mode */
+  .frac-equation{
+    display:flex;align-items:flex-start;gap:10px 18px;flex-wrap:wrap;margin-top:16px;
+    font-family:"Newsreader",Georgia,serif;
+  }
+  .frac-part{display:flex;flex-direction:column;gap:8px;min-width:0}
+  .frac-part.centered{align-items:center}
+  .frac-part.factors{flex:1 1 320px;align-items:stretch}
+  .frac-heading{
+    font-family:"Public Sans", ui-sans-system, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size:.85rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--ink-faint);text-align:center;line-height:1.2;white-space:nowrap;
+  }
+  .frac-equation .frac-eq{margin-top:67px}
+  .frac-reduced{display:flex;flex-direction:column;align-items:center;gap:6px}
+  .frac-reduced .rbox{
+    width:110px;min-height:54px;padding:10px 14px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.55rem;font-weight:700;line-height:1.2;color:var(--green-strong);
+    background:var(--surface-2);border:1.5px solid var(--green);border-radius:10px;
+  }
+  .frac-stack{display:flex;flex-direction:column;align-items:center;gap:6px}
+  .frac-bar{width:110px;height:3px;background:var(--ink);border-radius:2px}
+  .frac-stack input{width:110px;text-align:center}
+  .frac-eq{font-size:1.6rem;font-weight:700}
+  .frac-rows{flex:1 1 320px;min-width:0}
+  .frac-equation .frac-line{padding:8px 0}
+  .frac-line{display:block;padding:12px 0}
+  .frac-line + .frac-line{border-top:3px solid var(--ink)}
+  .frac-line .chip-row{margin-top:0;align-content:flex-start}
+  .fchip{
+    min-width:52px;min-height:52px;padding:8px 10px;
+    font-size:1.15rem;font-weight:800;color:var(--ink);
+    background:var(--surface-2);border:1.5px solid var(--line-strong);border-radius:12px;
+    cursor:pointer;-webkit-tap-highlight-color:transparent;
+  }
+  .fchip.sel{background:var(--gold-soft);border-color:var(--gold);color:var(--gold)}
+  @media (prefers-color-scheme: dark){ .fchip.sel{color:var(--gold)} }
+  .fchip.match{border-color:var(--green);box-shadow:0 0 0 2px var(--green-soft)}
+  .fchip.cancelled{
+    opacity:.38;text-decoration:line-through;text-decoration-thickness:3px;
+    text-decoration-color:var(--red);cursor:default;
+  }
+  .one-note{font-size:1.1rem;font-weight:700;color:var(--ink-soft);padding:10px 2px}
+  /* Help */
+  .help-panel h2{font-size:1.3rem;margin:0}
+  .help-panel h3{font-size:1.08rem;margin:20px 0 6px}
+  .help-panel ul{margin:0;padding-left:20px}
+  .help-panel li{margin:5px 0}
+  #help,#help-factor,#help-fraction{scroll-margin-top:14px}
+  footer{margin-top:26px;color:var(--ink-faint);font-size:.95rem}
+  footer a{color:var(--green);font-weight:700}
+  [hidden]{display:none !important}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="brand-bar">
+    <a class="brand-home" href="https://exponology.com/">
+      <span class="brand-logo">Exponology<span class="dot">.</span></span>
+      <span class="brand-sub" style="display:block">exponology.com</span>
+    </a>
+  </div>
+
+  <p class="eyebrow">Learn by doing · Prime numbers</p>
+  <h1>Prime Factor Finder</h1>
+  <p class="lede">Every whole number bigger than 1 is built from <strong>prime numbers</strong> multiplied together. Here you do the building yourself — divide a number down to its primes, split it into a factor tree, group the primes to find every kind of factor, and line up a fraction’s factors to cancel them away.</p>
+
+  <div class="tabs" role="tablist" aria-label="Choose a mode">
+    <button class="tab" id="tab-factor" role="tab" aria-selected="true" aria-controls="mode-factor">Factor a number</button>
+    <button class="tab" id="tab-fraction" role="tab" aria-selected="false" aria-controls="mode-fraction">Reduce a fraction</button>
+  </div>
+
+  <!-- ================= MODE 1: FACTOR A NUMBER ================= -->
+  <div id="mode-factor">
+    <section class="panel" aria-labelledby="num-head">
+      <div class="panel-head">
+        <h2 id="num-head">Your number</h2>
+      </div>
+      <p class="hint">Type any whole number from <strong>2</strong> to <strong>1,000,000</strong>, then work it over in the four sections below — they all start with this number. Blocks uses it too when it’s 100 or less, and there you can also lay out other numbers of your own.</p>
+      <div class="num-row">
+        <div class="field">
+          <label for="numInput">Number to factor</label>
+          <input id="numInput" type="number" inputmode="numeric" min="2" max="1000000" step="1" value="60">
+        </div>
+        <button class="btn" id="numGo" type="button">Use this number</button>
+      </div>
+      <p class="msg" id="numMsg" aria-live="polite"></p>
+    </section>
+
+    <section class="panel" aria-labelledby="div-head">
+      <div class="panel-head">
+        <h2 id="div-head"><span class="step-num">1.</span> Divide it down to Prime factors</h2>
+        <a class="help-link" href="#help-factor">Help</a>
+      </div>
+      <p class="hint">Divide by a prime, then divide the answer, and keep going. Tap a prime below — if it divides evenly, the step counts. If not, nothing breaks; just try another.</p>
+      <div class="ladder" id="ladder"></div>
+      <div id="divWork">
+        <p class="now-line">Now dividing: <span class="now-num" id="nowNum">60</span></p>
+        <div class="chip-row" id="primeChips" aria-label="Prime divisors"></div>
+        <div class="finish-prime" id="finishPrime" hidden>
+          <p id="finishPrimeText"></p>
+          <button class="btn btn-small" id="finishPrimeBtn" type="button">Add it as the last factor</button>
+        </div>
+        <div class="custom-prime">
+          <div class="field">
+            <label for="customPrime">Try a bigger prime</label>
+            <input class="small" id="customPrime" type="number" inputmode="numeric" min="2" step="1" placeholder="e.g. 101">
+          </div>
+          <button class="btn btn-ghost btn-small" id="customPrimeBtn" type="button">Divide by it</button>
+        </div>
+      </div>
+      <p class="msg" id="divMsg" aria-live="polite"></p>
+      <div class="result-box" id="divResult" hidden>
+        <div class="big" id="divResultBig"></div>
+        <p id="divResultExp"></p>
+        <p class="check-line" id="divResultCheck"></p>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost btn-small" id="divUndo" type="button">Undo last step</button>
+        <button class="btn btn-ghost btn-small" id="divReset" type="button">Start the division over</button>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="tree-head">
+      <div class="panel-head">
+        <h2 id="tree-head"><span class="step-num">2.</span> Build a prime factor tree</h2>
+        <a class="help-link" href="#help-factor">Help</a>
+      </div>
+      <p class="hint">Tap any number that isn’t prime and split it into two factors — a line connects it to the two numbers it splits into, like 60 down to 2 and 30. Keep splitting until every branch ends in a prime — those ending numbers are the prime factors.</p>
+      <div class="tree-scroll"><svg class="tree-lines" id="treeLines" aria-hidden="true" focusable="false"></svg><div class="tree" id="treeRoot"></div></div>
+      <div class="split-panel" id="splitPanel" hidden>
+        <p id="splitText"></p>
+        <div class="chip-row" id="splitOptions" style="margin-top:0"></div>
+      </div>
+      <p class="msg" id="treeMsg" aria-live="polite"></p>
+      <div class="actions">
+        <button class="btn btn-ghost btn-small" id="treeReset" type="button">Start the tree over</button>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="group-head">
+      <div class="panel-head">
+        <h2 id="group-head"><span class="step-num">3.</span> Group the primes, make factors</h2>
+        <a class="help-link" href="#help-factor">Help</a>
+      </div>
+      <p class="hint">Any bunch of the prime factors, multiplied together, makes a factor of the whole number. Tap primes to put them in a group, make the group, and a box shows the factor you made and what it pairs with — like <strong>100 = 25 × 4</strong>. Every group you make gets its own box.</p>
+      <div id="groupWork">
+        <div class="chip-row" id="groupChips" aria-label="Prime factors to group"></div>
+        <p class="now-line" id="groupCurrent" style="margin-top:10px"></p>
+        <div class="actions" style="margin-top:8px">
+          <button class="btn btn-small" id="groupMake" type="button">Make this a group</button>
+          <button class="btn btn-ghost btn-small" id="groupUndo" type="button">Undo last group</button>
+          <button class="btn btn-ghost btn-small" id="groupReset" type="button">Start grouping over</button>
+        </div>
+        <div class="group-list" id="groupList"></div>
+        <p class="msg" id="groupMsg" aria-live="polite"></p>
+      </div>
+      <p class="msg" id="groupEmpty"></p>
+    </section>
+
+    <section class="panel" aria-labelledby="blocks-head">
+      <div class="panel-head">
+        <h2 id="blocks-head"><span class="step-num">4.</span> Blocks — see the factors</h2>
+        <a class="help-link" href="#help-factor">Help</a>
+      </div>
+      <p class="hint">The number as blocks in a row. Change how many blocks go in each row: if every row comes out the same with <strong>nothing left over</strong>, that row size is a factor. Leftovers show in red. The numbers across the <strong>top</strong> count the columns and the numbers down the <strong>left</strong> count the rows, so you can read off the row × column size at a glance. Works for numbers up to <strong id="blocksCapLabel">100</strong>.</p>
+      <div class="num-row">
+        <div class="field">
+          <label for="blocksInput">Blocks number</label>
+          <input id="blocksInput" type="number" inputmode="numeric" min="2" max="100" step="1" value="60">
+        </div>
+        <button class="btn" id="blocksGo" type="button">Show blocks</button>
+      </div>
+      <div class="num-row" style="align-items:center">
+        <span style="font-weight:700">Blocks in each row:</span>
+        <div class="stepper">
+          <button class="step-btn" id="rowMinus" type="button" aria-label="Fewer blocks in each row">−</button>
+          <span class="step-val" id="rowVal">3</span>
+          <button class="step-btn" id="rowPlus" type="button" aria-label="More blocks in each row">+</button>
+        </div>
+        <button class="btn btn-ghost btn-small" id="tryAllBtn" type="button">Try every row size for me</button>
+      </div>
+      <div class="blocks-board">
+        <p class="blocks-axis-note"><span>Across the top: <strong>column numbers</strong></span><span>Down the left: <strong>row numbers</strong></span></p>
+        <div class="blocks-grid" id="blocksGrid" role="img" aria-label="Blocks arranged in rows and columns, with row numbers on the left and column numbers on top"></div>
+      </div>
+      <p class="msg" id="blocksMsg" aria-live="polite"></p>
+      <p style="font-weight:700;margin:14px 0 0">Factor pairs you’ve found</p>
+      <div class="pair-chips" id="pairChips"><span class="empty-note" style="color:var(--ink-faint)">None yet — find a row size that comes out even.</span></div>
+      <div class="prime-callout" id="primeCallout" hidden>
+        <p class="big" id="primeCalloutTitle"></p>
+        <p id="primeCalloutText"></p>
+        <div class="actions" style="margin-top:8px">
+          <button class="btn btn-small" id="collectBtn" type="button">Add it to my prime collection</button>
+        </div>
+      </div>
+      <div class="progress-wrap" id="collectionWrap">
+        <p style="font-weight:700;margin:16px 0 0">My prime collection — <span id="collCount">0 of 25</span> primes up to 100 found</p>
+        <p class="hint" style="margin-top:2px">Every time the blocks prove a number prime, add it here. Find all 25 primes up to 100 and the blocks board grows — you’ll be able to use numbers up to 200.</p>
+        <div class="progress-track"><div class="progress-fill" id="collFill"></div></div>
+        <div class="collection-chips" id="collChips"><span class="empty-note">No primes collected yet.</span></div>
+        <p class="msg good" id="collMsg" aria-live="polite"></p>
+        <div class="primorial-fact" id="primorialFact" hidden>
+          <p class="big">Did you know?</p>
+          <p>Multiply all 25 primes in your collection together and you get one enormous number:</p>
+          <p class="primorial-num">2,305,567,963,945,518,424,753,102,147,331,756,070</p>
+          <p>That number is called the <strong>primorial of 100</strong>, written <strong>100#</strong>. It ends in just one zero — the list has only one 2 and one 5, and 2 × 5 = 10.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= MODE 2: REDUCE A FRACTION ================= -->
+  <div id="mode-fraction" hidden>
+    <section class="panel" aria-labelledby="frac-head">
+      <div class="panel-head">
+        <h2 id="frac-head">Reduce a fraction</h2>
+        <a class="help-link" href="#help-fraction">Help</a>
+      </div>
+      <p class="hint">The whole reduction is <strong>one line</strong>: your fraction = its prime factors = the reduced fraction. The numerator prime factors sit on the top row, the denominator prime factors on the bottom row. Tap a prime factor in the numerator, then tap the <strong>same</strong> prime factor in the denominator — the pair cancels, and the reduced fraction at the end of the line changes right away. Cancel every pair you can, and the fraction is in lowest terms.</p>
+      <div class="frac-equation" aria-label="Your fraction, equals its prime factors, equals the reduced fraction">
+        <div class="frac-part centered">
+          <span class="frac-heading">Initial</span>
+          <div class="frac-stack">
+            <div class="field">
+              <input id="fracNum" type="number" inputmode="numeric" min="1" max="1000000" step="1" value="84" aria-label="Top (numerator)">
+            </div>
+            <div class="frac-bar" aria-hidden="true"></div>
+            <div class="field">
+              <input id="fracDen" type="number" inputmode="numeric" min="1" max="1000000" step="1" value="90" aria-label="Bottom (denominator)">
+            </div>
+          </div>
+        </div>
+        <span class="frac-eq" aria-hidden="true">=</span>
+        <div class="frac-part factors">
+          <span class="frac-heading">Prime Factors</span>
+          <div class="frac-rows">
+            <div class="frac-line">
+              <div class="chip-row" id="numChips"></div>
+            </div>
+            <div class="frac-line">
+              <div class="chip-row" id="denChips"></div>
+            </div>
+          </div>
+        </div>
+        <span class="frac-eq" aria-hidden="true">=</span>
+        <div class="frac-part centered">
+          <span class="frac-heading">Reduced</span>
+          <div class="frac-reduced" aria-label="Reduced fraction">
+            <span class="rbox" id="redNum">84</span>
+            <div class="frac-bar" aria-hidden="true"></div>
+            <span class="rbox" id="redDen">90</span>
+          </div>
+        </div>
+      </div>
+      <div class="actions" style="margin-top:16px">
+        <button class="btn" id="fracGo" type="button">Line up the prime factors</button>
+      </div>
+      <p class="msg" id="fracMsg" aria-live="polite"></p>
+      <p class="msg" id="cancelMsg" aria-live="polite"></p>
+      <div class="actions">
+        <button class="btn btn-ghost btn-small" id="cancelAllBtn" type="button">Cancel all matching pairs</button>
+        <button class="btn btn-ghost btn-small" id="fracReset" type="button">Put all the prime factors back</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= HELP ================= -->
+  <section class="panel help-panel" id="help" aria-label="Help">
+    <h2>Help</h2>
+    <h3 id="help-factor">How to factor a number</h3>
+    <ul>
+      <li><strong>Primes</strong> are the building blocks: a prime number (2, 3, 5, 7, 11…) can only be divided evenly by 1 and itself. Every whole number above 1 that isn’t prime itself is primes multiplied together — 60 = 2 × 2 × 3 × 5.</li>
+      <li><strong>Divide it down to prime factors:</strong> pick a prime that divides your number evenly and divide. Repeat with the answer until what’s left is prime itself — that’s the last factor. The answer is written two ways: repeated factors (2 × 2 × 3 × 5) and exponent form (2<sup>2</sup> × 3 × 5). The app multiplies the factors back to check they equal your number.</li>
+      <li><strong>Factor tree:</strong> split the number into any two factors, then split those, until every ending number is prime. Different splits still land on the same primes — try splitting 60 as 6 × 10 or as 5 × 12 and compare.</li>
+      <li><strong>Grouping:</strong> multiply any group of the prime factors and you get a factor of the number. Grouping [2 × 3] and [2 × 5] from 60’s primes gives 6 × 10 = 60, so 6 and 10 are factors. Every factor of a number can be built this way.</li>
+      <li><strong>Blocks:</strong> if the blocks fill equal rows with none left over, the row size and the number of rows are a factor pair. If <em>no</em> row size works — only one row of all of them, or all rows of one — the number is <strong>prime</strong>. That’s the blocks’ way of teaching what prime means. Collect each prime you prove in your prime collection; find all 25 primes up to 100 and the blocks board extends to numbers up to 200.</li>
+      <li>Numbers run from 2 to 1,000,000. The number 1 has no prime factors — it isn’t prime and isn’t built from primes.</li>
+    </ul>
+    <h3 id="help-fraction">How to reduce a fraction</h3>
+    <ul>
+      <li>The whole reduction is one line: your fraction = its prime factors = the reduced fraction. The top and bottom numbers are written as products of primes, lined up one above the other: 84 = 2 × 2 × 3 × 7 over 90 = 2 × 3 × 3 × 5.</li>
+      <li>A prime that appears on <strong>both</strong> top and bottom can be cancelled — tap one on top, then its match on the bottom. Cancelling is just dividing the top and bottom by the same number, which never changes the fraction’s value.</li>
+      <li>The reduced fraction at the end of the line changes each time a pair cancels. When no prime factor appears on both sides any more, the fraction is in <strong>lowest terms</strong>: 84/90 becomes 14/15.</li>
+      <li>The cancelled factors multiplied together give the <strong>greatest common factor</strong> of the two numbers — here 2 × 3 = 6, and indeed 84 ÷ 6 = 14 and 90 ÷ 6 = 15.</li>
+      <li>If everything cancels on one side, that side becomes 1. If both sides cancel completely, the fraction equals 1.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <p>Prime Factor Finder is one of the learning apps at <a href="https://exponology.com/">Exponology</a> — exponology.com. Every step here is done by you: divide, split, group, cancel, arrange.</p>
+  </footer>
+</div>
+
+<script>
+"use strict";
+/* ---------- helpers ---------- */
+function isPrime(n){
+  if(n < 2) return false;
+  if(n % 2 === 0) return n === 2;
+  for(var d = 3; d * d <= n; d += 2){ if(n % d === 0) return false; }
+  return true;
+}
+function primeFactorize(n){
+  var out = [], d = 2, m = n;
+  while(d * d <= m){
+    while(m % d === 0){ out.push(d); m = m / d; }
+    d = (d === 2) ? 3 : d + 2;
+  }
+  if(m > 1) out.push(m);
+  return out;
+}
+function product(arr){ var p = 1; for(var i = 0; i < arr.length; i++) p *= arr[i]; return p; }
+function fmt(n){ return n.toLocaleString("en-US"); }
+function multStr(arr){ return arr.length ? arr.join(" × ") : "1"; }
+function expHTML(factors){
+  var counts = {}, order = [];
+  factors.forEach(function(p){ if(!(p in counts)){ counts[p] = 0; order.push(p); } counts[p]++; });
+  return order.map(function(p){
+    return counts[p] > 1 ? p + "<sup>" + counts[p] + "</sup>" : String(p);
+  }).join(" × ");
+}
+function el(id){ return document.getElementById(id); }
+function setMsg(node, text, kind){
+  node.textContent = text || "";
+  node.className = "msg" + (kind ? " " + kind : "");
+}
+var PRIMES_97 = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97];
+var PRIMES_TO_100 = PRIMES_97.slice();
+
+/* ---------- mode tabs ---------- */
+var tabFactor = el("tab-factor"), tabFraction = el("tab-fraction");
+function showMode(which){
+  var f = which === "factor";
+  tabFactor.setAttribute("aria-selected", f ? "true" : "false");
+  tabFraction.setAttribute("aria-selected", f ? "false" : "true");
+  el("mode-factor").hidden = !f;
+  el("mode-fraction").hidden = f;
+}
+tabFactor.addEventListener("click", function(){ showMode("factor"); });
+tabFraction.addEventListener("click", function(){ showMode("fraction"); });
+
+/* ---------- factor mode: shared number ---------- */
+var N = 60;
+
+el("numGo").addEventListener("click", setNumber);
+el("numInput").addEventListener("keydown", function(e){ if(e.key === "Enter") setNumber(); });
+function setNumber(){
+  var v = parseInt(el("numInput").value, 10);
+  var msg = el("numMsg");
+  if(isNaN(v) || v < 2){ setMsg(msg, "Type a whole number from 2 to 1,000,000. (1 has no prime factors.)", "err"); return; }
+  if(v > 1000000){ setMsg(msg, "That’s over the 1,000,000 limit — factoring stays instant at or under it.", "err"); return; }
+  N = v;
+  el("numInput").value = v;
+  setMsg(msg, isPrime(v)
+    ? fmt(v) + " is prime — the sections below will show you what that means."
+    : "Working on " + fmt(v) + ". Divide it down, split it into a tree, group its primes, or lay it out in blocks.", "good");
+  resetDivision(); resetTree(); resetGrouping();
+  if(v <= blocksCap){ el("blocksInput").value = v; setBlocksNumber(v, true); }
+}
+
+/* ---------- 1. division ---------- */
+var divCurrent, divSteps, divFactors, divDone;
+function resetDivision(){
+  divCurrent = N; divSteps = []; divFactors = []; divDone = false;
+  renderDivision();
+  setMsg(el("divMsg"), "");
+}
+function renderDivision(){
+  var ladder = el("ladder");
+  ladder.innerHTML = "";
+  divSteps.forEach(function(s){
+    var rung = document.createElement("div");
+    rung.className = "rung" + (s.primeFinish ? " prime-rung" : "");
+    if(s.primeFinish){
+      rung.innerHTML = "<span><strong>" + fmt(s.from) + "</strong> is prime — it’s the last factor.</span>";
+    } else {
+      rung.innerHTML = "<span><strong>" + fmt(s.from) + "</strong> ÷ <span class='by'>" + fmt(s.by) + "</span> = <strong>" + fmt(s.to) + "</strong></span>";
+    }
+    ladder.appendChild(rung);
+  });
+  el("nowNum").textContent = fmt(divCurrent);
+  el("divWork").hidden = divDone;
+  el("divResult").hidden = !divDone;
+  el("divUndo").disabled = divSteps.length === 0;
+  /* prime divisor chips */
+  var chips = el("primeChips");
+  chips.innerHTML = "";
+  PRIMES_97.forEach(function(p){
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "pchip"; b.textContent = p;
+    b.setAttribute("aria-label", "Divide by " + p);
+    b.addEventListener("click", function(){ tryDivide(p); });
+    chips.appendChild(b);
+  });
+  /* finish-with-prime offer */
+  var fp = el("finishPrime");
+  if(!divDone && divCurrent > 97 && isPrime(divCurrent)){
+    fp.hidden = false;
+    el("finishPrimeText").innerHTML = "<strong>" + fmt(divCurrent) + "</strong> is itself prime — no smaller prime divides it.";
+  } else { fp.hidden = true; }
+  if(divDone){
+    el("divResultBig").textContent = fmt(N) + " = " + multStr(divFactors);
+    el("divResultExp").innerHTML = "Exponent form: " + fmt(N) + " = " + expHTML(divFactors);
+    el("divResultCheck").textContent = "✓ Check: " + multStr(divFactors) + " = " + fmt(product(divFactors)) + " — the factors multiply back to your number.";
+  }
+}
+function tryDivide(p){
+  if(divDone) return;
+  var msg = el("divMsg");
+  if(!isPrime(p)){ setMsg(msg, p + " isn’t a prime number — divisors here have to be prime.", "err"); return; }
+  if(divCurrent % p !== 0){
+    setMsg(msg, fmt(p) + " doesn’t divide " + fmt(divCurrent) + " evenly — " + fmt(divCurrent) + " ÷ " + fmt(p) + " leaves a remainder. Try another prime.", "err");
+    return;
+  }
+  var from = divCurrent, to = divCurrent / p;
+  divSteps.push({from: from, by: p, to: to});
+  divFactors.push(p);
+  divCurrent = to;
+  setMsg(msg, fmt(from) + " ÷ " + fmt(p) + " = " + fmt(to) + ". " + (to === 1 ? "Nothing left — you’re done!" : isPrime(to) && to <= 97 ? "And " + fmt(to) + " is prime — divide by " + fmt(to) + " itself to finish." : "Keep going."), "good");
+  if(to === 1){ divDone = true; }
+  renderDivision();
+  if(divDone) resetGrouping();
+}
+el("finishPrimeBtn").addEventListener("click", function(){
+  if(divDone || !isPrime(divCurrent)) return;
+  divSteps.push({from: divCurrent, by: divCurrent, to: 1, primeFinish: true});
+  divFactors.push(divCurrent);
+  divCurrent = 1; divDone = true;
+  setMsg(el("divMsg"), "Done — every factor is prime.", "good");
+  renderDivision();
+  resetGrouping();
+});
+el("customPrimeBtn").addEventListener("click", function(){
+  var v = parseInt(el("customPrime").value, 10);
+  if(isNaN(v) || v < 2){ setMsg(el("divMsg"), "Type a prime number to divide by.", "err"); return; }
+  tryDivide(v);
+});
+el("divUndo").addEventListener("click", function(){
+  if(!divSteps.length) return;
+  var s = divSteps.pop();
+  divFactors.pop();
+  divCurrent = s.from; divDone = false;
+  setMsg(el("divMsg"), "Took back the last step. Now dividing " + fmt(divCurrent) + ".", "");
+  renderDivision();
+});
+el("divReset").addEventListener("click", function(){ resetDivision(); setMsg(el("divMsg"), "Started over with " + fmt(N) + ".", ""); });
+
+/* ---------- 2. factor tree ---------- */
+var treeRootNode, nodeSeq, pickedNode;
+function makeNode(v){ return {id: ++nodeSeq, v: v, kids: null}; }
+function resetTree(){
+  nodeSeq = 0; pickedNode = null;
+  treeRootNode = makeNode(N);
+  renderTree();
+  setMsg(el("treeMsg"), "");
+  el("splitPanel").hidden = true;
+}
+function factorPairs(v){
+  var pairs = [];
+  for(var a = 2; a * a <= v; a++){ if(v % a === 0) pairs.push([a, v / a]); }
+  return pairs;
+}
+function renderTree(){
+  el("treeRoot").innerHTML = treeHTML(treeRootNode);
+  /* wire buttons */
+  var btns = el("treeRoot").querySelectorAll("button.tval");
+  Array.prototype.forEach.call(btns, function(b){
+    b.addEventListener("click", function(){ pickTreeNode(parseInt(b.getAttribute("data-id"), 10)); });
+  });
+  checkTreeDone();
+  /* draw the connecting branches once the new layout is on screen */
+  if(window.requestAnimationFrame){ requestAnimationFrame(drawTreeLines); }
+  else { drawTreeLines(); }
+}
+/* Position of an element's box inside the tree scroll area, in the
+   scroll area's own (content) coordinates. */
+function treeRelPos(elm, ancestor){
+  var x = 0, y = 0, cur = elm;
+  while(cur && cur !== ancestor){
+    x += cur.offsetLeft; y += cur.offsetTop;
+    cur = cur.offsetParent;
+  }
+  return {x: x, y: y, w: elm.offsetWidth, h: elm.offsetHeight};
+}
+/* Draw a straight branch line from the bottom of every split number
+   down to the top of each of its two children — 60 to 2 and 30, and
+   so on down the tree — so the tree reads as one connected diagram. */
+function drawTreeLines(){
+  var svg = el("treeLines"), host = el("treeRoot");
+  if(!svg || !host || !treeRootNode) return;
+  var scroll = host.parentElement;
+  var w = scroll.scrollWidth, h = scroll.scrollHeight;
+  svg.setAttribute("width", w); svg.setAttribute("height", h);
+  svg.setAttribute("viewBox", "0 0 " + w + " " + h);
+  /* map node id -> its number bubble */
+  var bubbles = {};
+  Array.prototype.forEach.call(host.querySelectorAll(".tnode"), function(tn){
+    var bubble = tn.querySelector(":scope > .tval");
+    if(bubble) bubbles[tn.getAttribute("data-tnode")] = bubble;
+  });
+  var out = "";
+  (function walk(node){
+    if(!node.kids) return;
+    var from = bubbles[node.id];
+    if(from){
+      var fp = treeRelPos(from, scroll);
+      var x1 = fp.x + fp.w / 2, y1 = fp.y + fp.h;
+      node.kids.forEach(function(kid){
+        var to = bubbles[kid.id];
+        if(!to) return;
+        var tp = treeRelPos(to, scroll);
+        out += "<line x1='" + x1 + "' y1='" + y1 + "' x2='" + (tp.x + tp.w / 2) + "' y2='" + tp.y + "' />";
+      });
+    }
+    walk(node.kids[0]); walk(node.kids[1]);
+  })(treeRootNode);
+  svg.innerHTML = out;
+}
+var treeResizeTimer = null;
+window.addEventListener("resize", function(){
+  if(treeResizeTimer) clearTimeout(treeResizeTimer);
+  treeResizeTimer = setTimeout(drawTreeLines, 150);
+});
+function treeHTML(node){
+  var cls = "tval", leaf = !node.kids;
+  if(leaf && isPrime(node.v)) cls += " prime";
+  if(pickedNode && pickedNode.id === node.id) cls += " picked";
+  var top;
+  if(leaf && !isPrime(node.v) && node.v > 1){
+    top = "<button type='button' class='" + cls + "' data-id='" + node.id + "' aria-label='Split " + node.v + "'>" + fmt(node.v) + "</button>";
+  } else {
+    top = "<span class='" + cls + "'>" + fmt(node.v) + "</span>";
+  }
+  var html = "<div class='tnode' data-tnode='" + node.id + "'>" + top;
+  if(node.kids){
+    html += "<div class='tkids'>" +
+      "<div class='tkid'>" + treeHTML(node.kids[0]) + "</div>" +
+      "<div class='tkid'>" + treeHTML(node.kids[1]) + "</div>" +
+    "</div>";
+  }
+  return html + "</div>";
+}
+function findNode(node, id){
+  if(node.id === id) return node;
+  if(node.kids){ return findNode(node.kids[0], id) || findNode(node.kids[1], id); }
+  return null;
+}
+function pickTreeNode(id){
+  var node = findNode(treeRootNode, id);
+  if(!node || node.kids) return;
+  pickedNode = node;
+  var pairs = factorPairs(node.v);
+  var panel = el("splitPanel");
+  panel.hidden = false;
+  el("splitText").textContent = "Split " + fmt(node.v) + " into:";
+  var opts = el("splitOptions");
+  opts.innerHTML = "";
+  pairs.forEach(function(pr){
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "pchip"; b.textContent = pr[0] + " × " + pr[1];
+    b.addEventListener("click", function(){
+      node.kids = [makeNode(pr[0]), makeNode(pr[1])];
+      pickedNode = null;
+      panel.hidden = true;
+      setMsg(el("treeMsg"), fmt(node.v) + " split into " + pr[0] + " × " + pr[1] + ". Keep splitting the numbers that aren’t prime.", "good");
+      renderTree();
+    });
+    opts.appendChild(b);
+  });
+  renderTree();
+}
+function collectLeaves(node, out){
+  if(!node.kids){ out.push(node.v); return out; }
+  collectLeaves(node.kids[0], out); collectLeaves(node.kids[1], out);
+  return out;
+}
+function checkTreeDone(){
+  var leaves = collectLeaves(treeRootNode, []);
+  if(leaves.length > 1 && leaves.every(isPrime)){
+    var sorted = leaves.slice().sort(function(a,b){ return a - b; });
+    setMsg(el("treeMsg"), "✓ Tree finished! The primes at the ends: " + multStr(sorted) + " — and " + multStr(sorted) + " = " + fmt(product(sorted)) + ". Same primes the division found.", "good");
+  }
+}
+el("treeReset").addEventListener("click", function(){ resetTree(); setMsg(el("treeMsg"), "Fresh tree — just " + fmt(N) + ". Tap it to split.", ""); });
+
+/* ---------- 3. grouping ---------- */
+var grpFactors, grpGroups, grpCurrentSel;
+function resetGrouping(){
+  grpFactors = primeFactorize(N);
+  grpGroups = []; grpCurrentSel = [];
+  renderGrouping();
+  setMsg(el("groupMsg"), "");
+}
+function grpUsedCount(){
+  var used = grpCurrentSel.length;
+  grpGroups.forEach(function(g){ used += g.length; });
+  return used;
+}
+function renderGrouping(){
+  var single = grpFactors.length < 2;
+  el("groupWork").hidden = single;
+  el("groupEmpty").textContent = single
+    ? (isPrime(N) ? fmt(N) + " is prime — it has only one prime factor, so there’s nothing to group. Its only factors are 1 and " + fmt(N) + "." : "")
+    : "";
+  if(single) return;
+  var chips = el("groupChips");
+  chips.innerHTML = "";
+  var usedIdx = {};
+  grpGroups.forEach(function(g){ g.forEach(function(i){ usedIdx[i] = true; }); });
+  grpFactors.forEach(function(p, i){
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "pchip" + (usedIdx[i] ? " collected" : "") + (grpCurrentSel.indexOf(i) >= 0 ? " sel" : "");
+    b.textContent = p;
+    b.disabled = !!usedIdx[i];
+    b.setAttribute("aria-label", "Prime factor " + p + (usedIdx[i] ? ", already in a group" : ""));
+    b.addEventListener("click", function(){
+      var k = grpCurrentSel.indexOf(i);
+      if(k >= 0) grpCurrentSel.splice(k, 1); else grpCurrentSel.push(i);
+      renderGrouping();
+    });
+    chips.appendChild(b);
+  });
+  var cur = el("groupCurrent");
+  if(grpCurrentSel.length){
+    var vals = grpCurrentSel.map(function(i){ return grpFactors[i]; });
+    cur.innerHTML = "Building a group: <strong>" + multStr(vals) + "</strong> = <strong>" + fmt(product(vals)) + "</strong>";
+  } else {
+    cur.textContent = grpUsedCount() === grpFactors.length ? "Every prime is in a group." : "Tap primes above to build the next group.";
+  }
+  el("groupMake").disabled = grpCurrentSel.length === 0;
+  el("groupUndo").disabled = grpGroups.length === 0;
+  var list = el("groupList");
+  list.innerHTML = "";
+  grpGroups.forEach(function(g, gi){
+    var vals = g.map(function(i){ return grpFactors[i]; });
+    var prod = product(vals);
+    var other = N / prod;
+    var box = document.createElement("div");
+    box.className = "factor-box";
+    box.innerHTML = "<div class='fb-eq'>" + fmt(N) + " = " + fmt(prod) + " × " + fmt(other) + "</div>" +
+      "<p><span class='gname'>Group " + (gi + 1) + "</span>: " + multStr(vals) + " = <strong>" + fmt(prod) + "</strong> — so <strong>" + fmt(prod) + "</strong> and <strong>" + fmt(other) + "</strong> are both factors of " + fmt(N) + ".</p>";
+    list.appendChild(box);
+  });
+  if(grpGroups.length && grpUsedCount() === grpFactors.length){
+    var allProds = grpGroups.map(function(g){ return product(g.map(function(i){ return grpFactors[i]; })); });
+    var fin = document.createElement("div");
+    fin.className = "factor-box final";
+    fin.innerHTML = "<div class='fb-eq'>" + fmt(N) + " = " + allProds.map(fmt).join(" × ") + "</div>" +
+      "<p>Every prime is in a group, and the group factors multiply back to " + fmt(N) + ".</p>";
+    list.appendChild(fin);
+  }
+  if(grpGroups.length && grpUsedCount() === grpFactors.length){
+    var all = grpGroups.map(function(g){ return product(g.map(function(i){ return grpFactors[i]; })); });
+    setMsg(el("groupMsg"), "✓ All primes grouped: " + multStr(all) + " = " + fmt(product(all)) + " — your groups multiply back to " + fmt(N) + ".", "good");
+  }
+}
+el("groupMake").addEventListener("click", function(){
+  if(!grpCurrentSel.length) return;
+  grpGroups.push(grpCurrentSel.slice().sort(function(a,b){ return a - b; }));
+  grpCurrentSel = [];
+  renderGrouping();
+});
+el("groupUndo").addEventListener("click", function(){ grpGroups.pop(); renderGrouping(); });
+el("groupReset").addEventListener("click", function(){ grpGroups = []; grpCurrentSel = []; renderGrouping(); setMsg(el("groupMsg"), "", ""); });
+
+/* ---------- 4. blocks + prime collection ---------- */
+var blocksCap = 100;
+var blocksN = 12, rowSize = 3;
+var triedRows = {}, foundPairs = {}, primeProven = false, triedCount = 0;
+
+el("blocksGo").addEventListener("click", function(){
+  var v = parseInt(el("blocksInput").value, 10);
+  if(isNaN(v) || v < 2){ setMsg(el("blocksMsg"), "Type a whole number from 2 to " + blocksCap + ".", "err"); return; }
+  if(v > blocksCap){
+    setMsg(el("blocksMsg"), blocksCap === 100
+      ? "Blocks only go up to 100 for now — find all 25 primes up to 100 and the board extends to 200."
+      : "Blocks go up to " + blocksCap + ".", "err");
+    return;
+  }
+  setBlocksNumber(v, false);
+});
+function setBlocksNumber(v, quiet){
+  blocksN = v;
+  el("blocksInput").value = v;
+  triedRows = {}; foundPairs = {}; primeProven = false; triedCount = 0;
+  if(rowSize > v) rowSize = Math.max(1, v);
+  if(rowSize < 1) rowSize = 1;
+  renderBlocks();
+  if(!quiet) setMsg(el("blocksMsg"), "Here are " + fmt(v) + " blocks. Change the row size and look for a fit with nothing left over.", "");
+}
+function renderBlocks(){
+  el("rowVal").textContent = rowSize;
+  var grid = el("blocksGrid");
+  var rem = blocksN % rowSize;
+  var rows = Math.ceil(blocksN / rowSize);
+  /* Size each block from BOTH the row and column counts, so the whole
+     board fits on screen: capped at 28px a block, and shrunk further
+     when there are many rows (tall boards) or many columns (wide ones).
+     Before, blocks stretched to fill the board width, so a few columns
+     meant giant blocks and a board thousands of pixels tall. */
+  var gutterPx = 36;
+  var gapPx = (rowSize > 40 || rows > 40) ? 1 : (rowSize > 20 || rows > 20) ? 2 : 3;
+  grid.style.gap = gapPx + "px";
+  var boardEl = grid.parentElement;
+  var availW = boardEl && boardEl.clientWidth ? boardEl.clientWidth - 20 : 640;
+  if(availW < 200) availW = 200;
+  var maxW = Math.min(availW, 560);
+  var maxH = 380;
+  var cellW = (maxW - gutterPx - rowSize * gapPx) / rowSize;
+  var cellH = (maxH - 24 - rows * gapPx) / rows;
+  var cell = Math.floor(Math.min(cellW, cellH));
+  if(cell > 28) cell = 28;
+  if(cell < 2) cell = 2;
+  grid.style.gridTemplateColumns = gutterPx + "px repeat(" + rowSize + ", " + cell + "px)";
+  grid.setAttribute("aria-label", blocksN + " blocks in " + rows + (rows === 1 ? " row" : " rows") + " of up to " + rowSize + " — column numbers across the top, row numbers down the left");
+  var labelSize = "1.2rem";
+  var html = "";
+  html += "<div class='axis-corner' aria-hidden='true'></div>";
+  for(var c = 1; c <= rowSize; c++){
+    html += "<div class='axis-col' style='font-size:" + labelSize + "' aria-hidden='true'>" + c + "</div>";
+  }
+  for(var r = 0; r < rows; r++){
+    html += "<div class='axis-row' style='font-size:" + labelSize + "' aria-hidden='true'>" + (r + 1) + "</div>";
+    for(var cc = 0; cc < rowSize; cc++){
+      var idx = r * rowSize + cc;
+      if(idx < blocksN){
+        var left = rem > 0 && idx >= blocksN - rem;
+        html += "<div class='blk" + (left ? " leftover" : "") + "'></div>";
+      } else {
+        html += "<div class='axis-empty' aria-hidden='true'></div>";
+      }
+    }
+  }
+  grid.innerHTML = html;
+  /* outcome message */
+  var msg = el("blocksMsg");
+  if(rowSize === 1){
+    setMsg(msg, blocksN + " rows of 1 — that always works, but it only tells you 1 is a factor. Try a bigger row size.", "");
+  } else if(rowSize === blocksN){
+    setMsg(msg, "One row of " + blocksN + " — that always works too. The interesting fits are in between.", "");
+  } else if(rem === 0){
+    var rows = blocksN / rowSize;
+    foundPairs[Math.min(rowSize, rows) + " × " + Math.max(rowSize, rows)] = true;
+    setMsg(msg, "✓ " + rows + " rows of " + rowSize + " = " + blocksN + ", nothing left over. So " + rowSize + " and " + rows + " are both factors of " + blocksN + ".", "good");
+  } else {
+    if(!triedRows[rowSize]){ triedRows[rowSize] = true; triedCount++; }
+    setMsg(msg, Math.floor(blocksN / rowSize) + " full rows of " + rowSize + ", with " + rem + " left over (in red). " + rowSize + " is not a factor of " + blocksN + " — try another size.", "err");
+  }
+  maybeShowPrimeCallout();
+  renderPairs();
+  updateCalloutVisibility();
+}
+function renderPairs(){
+  var keys = Object.keys(foundPairs);
+  var box = el("pairChips");
+  if(!keys.length){
+    box.innerHTML = "<span style='color:var(--ink-faint)'>None yet — find a row size that comes out even.</span>";
+    return;
+  }
+  box.innerHTML = "";
+  keys.sort(function(a,b){
+    var x = a.split(" × ").map(Number), y = b.split(" × ").map(Number);
+    return x[0] - y[0];
+  }).forEach(function(k){
+    var s = document.createElement("span");
+    s.className = "pair-chip"; s.textContent = k;
+    box.appendChild(s);
+  });
+}
+function maybeShowPrimeCallout(){
+  if(!isPrime(blocksN) || primeProven) return;
+  /* The only real tests are the row sizes strictly between 1 and the number
+     itself. 2 has none at all and 3 has just one, so a flat "two failed sizes"
+     proof could never be reached for them — scale the proof to the tests that
+     actually exist: none to try for 2, the single size 2 for 3, two failures
+     for every bigger prime. */
+  var midCount = Math.max(blocksN - 2, 0);
+  var needed = Math.min(2, midCount);
+  if(triedCount < needed) return;
+  primeProven = true;
+  if(midCount === 0){
+    showPrimeCallout("There isn’t a single row size in between to try — " + blocksN + " is too small to split into equal rows any other way, so there’s nothing left to test.");
+  } else if(triedCount === 1){
+    showPrimeCallout("You tried the only row size in between — " + Object.keys(triedRows)[0] + " — and it left blocks over. There are no other sizes to test.");
+  } else {
+    showPrimeCallout("You’ve tried " + triedCount + " different row sizes on " + blocksN + ", and every one leaves blocks over.");
+  }
+}
+function showPrimeCallout(lead){
+  el("primeCalloutTitle").textContent = blocksN + " is prime";
+  el("primeCalloutText").textContent = lead + " The only ways to arrange " + blocksN + " blocks evenly are one row of " + blocksN + ", or " + blocksN + " rows of one — its only factors are 1 and " + blocksN + ". That’s exactly what a prime number is.";
+  updateCalloutVisibility();
+}
+function updateCalloutVisibility(){
+  var show = primeProven && isPrime(blocksN);
+  el("primeCallout").hidden = !show;
+  if(show){
+    var already = collected.has(blocksN);
+    el("collectBtn").disabled = already;
+    el("collectBtn").textContent = already ? blocksN + " is already in your collection" : "Add " + blocksN + " to my prime collection";
+  }
+}
+el("tryAllBtn").addEventListener("click", function(){
+  var divisors = [];
+  for(var k = 2; k < blocksN; k++){ if(blocksN % k === 0) divisors.push(k); }
+  if(!divisors.length){
+    primeProven = true;
+    showPrimeCallout(blocksN === 2
+      ? "There isn’t a single row size in between to try on 2 — it’s too small to split into equal rows any other way."
+      : blocksN === 3
+      ? "The only row size in between is 2, and 3 in rows of 2 leaves a block over — there’s nothing else to try."
+      : "Every row size from 2 to " + (blocksN - 1) + " was tried on " + blocksN + ", and none of them came out even.");
+    setMsg(el("blocksMsg"), "Tried them all — no row size works for " + blocksN + ".", "");
+  } else {
+    divisors.forEach(function(k){
+      var r = blocksN / k;
+      foundPairs[Math.min(k, r) + " × " + Math.max(k, r)] = true;
+    });
+    renderPairs();
+    setMsg(el("blocksMsg"), "Tried them all: " + blocksN + " = " + divisors.map(function(k){ return k + " × " + (blocksN / k); }).join(",  ") + ". So " + blocksN + " is not prime — it has factors besides 1 and itself.", "good");
+  }
+  updateCalloutVisibility();
+});
+el("rowMinus").addEventListener("click", function(){ if(rowSize > 1){ rowSize--; renderBlocks(); } });
+el("rowPlus").addEventListener("click", function(){ if(rowSize < blocksN){ rowSize++; renderBlocks(); } });
+var blocksResizeTimer = null;
+window.addEventListener("resize", function(){
+  if(blocksResizeTimer) clearTimeout(blocksResizeTimer);
+  blocksResizeTimer = setTimeout(function(){ renderBlocks(); }, 150);
+});
+
+/* prime collection */
+var collected = new Set();
+el("collectBtn").addEventListener("click", function(){
+  if(!isPrime(blocksN) || collected.has(blocksN)) return;
+  collected.add(blocksN);
+  renderCollection();
+  updateCalloutVisibility();
+  if(collected.size === PRIMES_TO_100.length){
+    blocksCap = 200;
+    el("blocksInput").max = 200;
+    el("blocksCapLabel").textContent = "200";
+    setMsg(el("collMsg"), "🎉 You found all 25 primes up to 100! The blocks board is extended — you can now lay out numbers up to 200.", "good");
+  } else {
+    setMsg(el("collMsg"), blocksN + " added. " + (PRIMES_TO_100.length - collected.size) + " primes up to 100 still to find.", "good");
+  }
+});
+function renderCollection(){
+  el("collCount").textContent = collected.size + " of " + PRIMES_TO_100.length;
+  el("primorialFact").hidden = collected.size < PRIMES_TO_100.length;
+  el("collFill").style.width = (collected.size / PRIMES_TO_100.length * 100) + "%";
+  var box = el("collChips");
+  box.innerHTML = "";
+  if(!collected.size){
+    box.innerHTML = "<span class='empty-note'>No primes collected yet.</span>";
+    return;
+  }
+  Array.from(collected).sort(function(a,b){ return a - b; }).forEach(function(p){
+    var s = document.createElement("span");
+    s.className = "coll-chip"; s.textContent = p;
+    box.appendChild(s);
+  });
+}
+
+/* ---------- fraction mode ---------- */
+var frNum = 84, frDen = 90;
+var numFac = [], denFac = [];   /* {v, cancelled} */
+var selNum = -1, selDen = -1;
+
+el("fracGo").addEventListener("click", setupFraction);
+function readFracInput(node, label){
+  var v = parseInt(node.value, 10);
+  if(isNaN(v) || v < 1 || v > 1000000) return null;
+  return v;
+}
+function setupFraction(){
+  var n = readFracInput(el("fracNum")), d = readFracInput(el("fracDen"));
+  var msg = el("fracMsg");
+  if(n === null || d === null){ setMsg(msg, "Both numbers must be whole numbers from 1 to 1,000,000.", "err"); return; }
+  frNum = n; frDen = d;
+  numFac = primeFactorize(n).map(function(v){ return {v: v, cancelled: false}; });
+  denFac = primeFactorize(d).map(function(v){ return {v: v, cancelled: false}; });
+  selNum = -1; selDen = -1;
+  setMsg(msg, "Prime factors lined up. Tap a prime factor in the numerator, then tap the same prime factor in the denominator to cancel the pair.", "good");
+  renderFraction();
+}
+function renderFraction(){
+  renderFracChips(el("numChips"), numFac, "num");
+  renderFracChips(el("denChips"), denFac, "den");
+  var rn = product(numFac.filter(function(f){ return !f.cancelled; }).map(function(f){ return f.v; }));
+  var rd = product(denFac.filter(function(f){ return !f.cancelled; }).map(function(f){ return f.v; }));
+  el("redNum").textContent = fmt(rn);
+  el("redDen").textContent = fmt(rd);
+  var cancelledVals = numFac.filter(function(f){ return f.cancelled; }).map(function(f){ return f.v; });
+  var msg = el("cancelMsg");
+  /* is it fully reduced? gcd of what's left */
+  var g = gcd(rn, rd);
+  if(cancelledVals.length && g === 1){
+    var gcf = product(cancelledVals);
+    setMsg(msg, "✓ Lowest terms! You cancelled " + multStr(cancelledVals) + " = " + fmt(gcf) + " — the greatest common factor. Check: " + fmt(frNum) + " ÷ " + fmt(gcf) + " = " + fmt(frNum / gcf) + " and " + fmt(frDen) + " ÷ " + fmt(gcf) + " = " + fmt(frDen / gcf) + ".", "good");
+  } else if(cancelledVals.length){
+    setMsg(msg, "Cancelled so far: " + multStr(cancelledVals) + " = " + fmt(product(cancelledVals)) + ". There are still matching prime factors to cancel.", "");
+  } else if(g === 1){
+    setMsg(msg, frNum + " and " + frDen + " share no prime factors — this fraction is already in lowest terms.", "good");
+  } else {
+    setMsg(msg, "Matching prime factors are waiting — tap one in the numerator, then its match in the denominator.", "");
+  }
+}
+function gcd(a, b){ while(b){ var t = a % b; a = b; b = t; } return a; }
+function renderFracChips(box, facs, side){
+  box.innerHTML = "";
+  if(!facs.length){
+    box.innerHTML = "<span class='one-note'>1 — nothing to cancel</span>";
+    return;
+  }
+  facs.forEach(function(f, i){
+    var b = document.createElement("button");
+    b.type = "button";
+    var sel = side === "num" ? selNum === i : selDen === i;
+    var otherSel = side === "num" ? selDen : selNum;
+    var otherFacs = side === "num" ? denFac : numFac;
+    var isMatch = otherSel >= 0 && !otherFacs[otherSel].cancelled && otherFacs[otherSel].v === f.v;
+    b.className = "fchip" + (f.cancelled ? " cancelled" : "") + (sel ? " sel" : "") + (isMatch ? " match" : "");
+    b.textContent = f.v;
+    b.disabled = f.cancelled;
+    b.setAttribute("aria-label", (side === "num" ? "Numerator" : "Denominator") + " prime factor " + f.v + (f.cancelled ? ", cancelled" : ""));
+    b.addEventListener("click", function(){ tapFracChip(side, i); });
+    box.appendChild(b);
+  });
+}
+function tapFracChip(side, i){
+  var msg = el("fracMsg");
+  var mine = side === "num" ? numFac : denFac;
+  var other = side === "num" ? denFac : numFac;
+  var mySel = side === "num" ? selNum : selDen;
+  var otherSel = side === "num" ? selDen : selNum;
+  if(otherSel >= 0 && !other[otherSel].cancelled && other[otherSel].v === mine[i].v){
+    other[otherSel].cancelled = true;
+    mine[i].cancelled = true;
+    selNum = -1; selDen = -1;
+    setMsg(msg, "Cancelled a pair of " + mine[i].v + "s — one from the numerator, one from the denominator.", "good");
+  } else if(otherSel >= 0){
+    setMsg(msg, "Those don’t match — a " + mine[i].v + " can only cancel with a " + mine[i].v + " on the other side. Tap the " + other[otherSel].v + "’s match instead, or tap it again to unpick it.", "err");
+    return;
+  } else if(mySel === i){
+    if(side === "num") selNum = -1; else selDen = -1;
+    setMsg(msg, "", "");
+  } else {
+    if(side === "num") selNum = i; else selDen = i;
+    var hasMatch = other.some(function(f){ return !f.cancelled && f.v === mine[i].v; });
+    setMsg(msg, hasMatch
+      ? "You picked a " + mine[i].v + " — now tap the matching " + mine[i].v + " on the other side."
+      : "There’s no " + mine[i].v + " on the other side to cancel with. Pick a prime factor that appears on both sides.", hasMatch ? "" : "err");
+  }
+  renderFraction();
+}
+el("cancelAllBtn").addEventListener("click", function(){
+  var changed = false;
+  numFac.forEach(function(f){
+    if(f.cancelled) return;
+    var j = denFac.findIndex(function(g){ return !g.cancelled && g.v === f.v; });
+    if(j >= 0){ f.cancelled = true; denFac[j].cancelled = true; changed = true; }
+  });
+  selNum = -1; selDen = -1;
+  setMsg(el("fracMsg"), changed ? "All matching pairs cancelled." : "No matching pairs left to cancel.", changed ? "good" : "");
+  renderFraction();
+});
+el("fracReset").addEventListener("click", function(){
+  numFac.forEach(function(f){ f.cancelled = false; });
+  denFac.forEach(function(f){ f.cancelled = false; });
+  selNum = -1; selDen = -1;
+  setMsg(el("fracMsg"), "All prime factors are back. Tap pairs to cancel them.", "");
+  renderFraction();
+});
+
+/* ---------- init ---------- */
+resetDivision();
+resetTree();
+resetGrouping();
+setBlocksNumber(60, true);
+renderCollection();
+setupFraction();
+setMsg(el("fracMsg"), "", "");
+</script>
+</body>
+</html>
