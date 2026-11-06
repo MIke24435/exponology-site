@@ -458,7 +458,6 @@ h1 {
 .help-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 @media (min-width: 640px) {
   .help-steps { grid-template-columns: 1fr 1fr; }
-  .help-steps li:last-child { grid-column: 1 / -1; }
 }
 .help-steps li {
   display: flex; gap: 10px; align-items: flex-start;
@@ -658,10 +657,9 @@ h1 {
 <body>
 <div class="topbar">
   <a class="wordmark" href="https://exponology.com/">Exponology<span class="dot">.</span><small>exponology.com</small></a>
-  <a class="help-link" href="#help">Help</a>
 </div>
 <div class="header">
-  <div class="eyebrow">71 quotes &bull; 9 categories</div>
+  <div class="eyebrow" id="eyebrowCounts">71 quotes &bull; 9 categories</div>
   <h1>CipherDesk</h1>
   <p class="subtitle lede">Newspaper cryptograms · desk edition</p>
 </div>
@@ -723,7 +721,8 @@ h1 {
       <li><span class="step-num">2</span><span><strong>Fill in the blanks.</strong> Tap a cipher letter, then tap a letter on the keyboard — or type it. Your guess fills in everywhere that letter appears.</span></li>
       <li><span class="step-num">3</span><span><strong>Hint, Check, Undo, Reset.</strong> Hint reveals one letter — the most frequent one you haven&rsquo;t got right yet. Check marks wrong guesses in red. Undo takes back the last guess; Reset clears them all.</span></li>
       <li><span class="step-num">4</span><span><strong>Create &amp; Scramble.</strong> Use Create to load a cryptogram of your own, or type a solution and Scramble turns it into a cipher. Created puzzles live in the Saved tab.</span></li>
-      <li><span class="step-num">5</span><span><strong>Timer and print.</strong> The timer starts with your first guess and stops when you solve. The printer button prints just the puzzle, ready to solve on paper.</span></li>
+      <li><span class="step-num">5</span><span><strong>Link library file.</strong> This connects your Saved puzzles to a file on your device, so they live outside this browser too. Tap the button and pick <strong>saved-puzzles.json</strong> — the app points you to ~/Downloads/CipherDesk/saved-puzzles.json. CipherDesk loads the puzzles in that file into Saved, then keeps the file updated in place whenever your Saved puzzles change, and reconnects to the same file on your next visit (your browser may ask you to allow it again). The file it expects is plain JSON: a &ldquo;puzzles&rdquo; list, each entry holding the ciphertext and, when known, its solution and author. If you pick a new, empty file, your current Saved puzzles are written into it. On a browser that can&rsquo;t link a file, <strong>Download copy</strong> is offered instead — it saves a one-time copy of saved-puzzles.json with the same contents.</span></li>
+      <li><span class="step-num">6</span><span><strong>Timer and print.</strong> The timer starts with your first guess and stops when you solve. The printer button prints just the puzzle, ready to solve on paper.</span></li>
     </ol>
   </div>
 
@@ -1620,6 +1619,13 @@ function fetchJson(url) {
   });
 }
 
+function updateQuoteCount(n) {
+  var el = document.getElementById("eyebrowCounts");
+  if (!el) return;
+  var count = (typeof n === "number" && n > 0) ? n : QUOTES.length;
+  el.textContent = count + " quotes \u2022 9 categories";
+}
+
 // Load the reviewed snapshot once per session: quotes.json beside the
 // page first (the live-site layout), then the copy embedded at build
 // time. Resolves to the quote list, or null when neither is usable —
@@ -1635,14 +1641,17 @@ function ensureSnapshotLoaded() {
   snapshotLoadPromise = fromFetch.then(function (list) {
     if (list && list.length) {
       snapshotQuotes = list;
+      updateQuoteCount(snapshotQuotes.length);
       return snapshotQuotes;
     }
     var embedded = normalizeSnapshotQuotes(SNAPSHOT);
     snapshotQuotes = embedded.length ? embedded : null;
+    updateQuoteCount(snapshotQuotes ? snapshotQuotes.length : QUOTES.length);
     return snapshotQuotes;
   }).catch(function () {
     var embedded = normalizeSnapshotQuotes(SNAPSHOT);
     snapshotQuotes = embedded.length ? embedded : null;
+    updateQuoteCount(snapshotQuotes ? snapshotQuotes.length : QUOTES.length);
     return snapshotQuotes;
   });
   return snapshotLoadPromise;
@@ -2330,6 +2339,7 @@ document.addEventListener("keydown", function (e) {
 });
 
 restoreLibraryHandle().then(function () {
+  ensureSnapshotLoaded();
   restoreOrNew();
 });
 })();
