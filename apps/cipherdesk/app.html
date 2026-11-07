@@ -17,7 +17,6 @@
 <style>
 :root {
   color-scheme: dark;
-  --page-max: 1080px;
   --bg: #10160f;
   --bg2: #232b21;
   --paper: #1a211a;
@@ -51,10 +50,15 @@ body {
   font-family: "Public Sans", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background: var(--bg);
   color: var(--ink);
-  padding: calc(12px + var(--safe-t)) calc(22px + var(--safe-r)) calc(12px + var(--safe-b)) calc(22px + var(--safe-l));
+  padding: 0;
   line-height: 1.45;
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior: none;
+}
+.wrap {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 20px 22px 48px;
 }
 button, select, input, textarea {
   font-family: inherit;
@@ -89,28 +93,35 @@ h1 {
   margin: 10px 0 8px;
   color: var(--ink);
 }
-.topbar {
+/* Standard brand bar (Exponology standard §3.1): stacked wordmark
+   "Exponology." with red dot and "EXPONOLOGY.COM" underneath, linking
+   home, turning green on hover. Dark-theme tokens kept (§1.3). */
+.brand-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  max-width: var(--page-max);
-  margin: 0 auto;
+  gap: 12px;
   padding: 8px 0 6px;
   border-bottom: 1px solid var(--border);
+  margin-bottom: 18px;
 }
-.wordmark {
+.brand-home {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 8px;
+}
+.brand-home:hover .brand-logo, .brand-home:focus-visible .brand-logo { color: var(--accent); }
+.brand-logo {
   font-family: "Newsreader", Georgia, serif;
   font-size: 30px;
   font-weight: 700;
   letter-spacing: -0.01em;
-  color: var(--ink);
-  text-decoration: none;
   line-height: 1;
+  color: var(--ink);
 }
-.wordmark .dot { color: #e88a7d; }
-.wordmark:hover, .wordmark:focus-visible { color: var(--accent); }
-.wordmark small {
+.brand-logo .dot { color: #e88a7d; }
+.brand-sub {
   display: block;
   font-family: "Public Sans", sans-serif;
   font-size: 12.5px;
@@ -122,8 +133,7 @@ h1 {
 }
 .subtitle, .lede { font-size: 1.06rem; color: var(--muted); margin: 0; max-width: 38rem; }
 .header {
-  margin: 0 auto 10px;
-  max-width: var(--page-max);
+  margin: 0 0 10px;
 }
 .controls-row {
   display: flex;
@@ -131,8 +141,7 @@ h1 {
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
-  max-width: var(--page-max);
-  margin: 0 auto 12px;
+  margin: 0 0 12px;
 }
 .stat {
   font-variant-numeric: tabular-nums;
@@ -176,8 +185,7 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  max-width: var(--page-max);
-  margin: 0 auto 12px;
+  margin: 0 0 12px;
   align-items: center;
 }
 .toolbar-spacer {
@@ -189,8 +197,7 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  max-width: var(--page-max);
-  margin: 0 auto 14px;
+  margin: 0 0 14px;
 }
 .cat-btn {
   font-size: 0.82rem;
@@ -241,8 +248,7 @@ h1 {
 }
 .saved-actions .mini-btn:hover { color: var(--ink); border-color: var(--accent); }
 .main {
-  max-width: var(--page-max);
-  margin: 0 auto;
+  margin: 0;
   display: grid;
   gap: 14px;
   grid-template-columns: minmax(0, 1fr);
@@ -258,9 +264,9 @@ h1 {
 @media (min-width: 760px) {
   .map-grid { grid-template-columns: repeat(4, 1fr); }
 }
-/* The wider side margins live at page level (body padding + the
-   --page-max column above), not inside the puzzle panel — so the
-   panel's own side padding stays modest and the puzzle keeps its width. */
+/* The wider side margins live at page level (the .wrap above), not
+   inside the puzzle panel — so the panel's own side padding stays
+   modest and the puzzle keeps its width. */
 .panel {
   background: var(--paper);
   border: 1px solid var(--border);
@@ -430,8 +436,7 @@ h1 {
 .help-link:active { color: var(--wrong); }
 #help, #help-use, #help-read { scroll-margin-top: 18px; }
 .hint {
-  max-width: var(--page-max);
-  margin: 0 auto 12px;
+  margin: 0 0 12px;
   font-size: 0.92rem;
   color: var(--muted);
 }
@@ -441,7 +446,7 @@ h1 {
   justify-content: space-between;
   gap: 10px;
 }
-.help-panel { max-width: var(--page-max); margin: 28px auto 0; padding: 20px 18px 8px; }
+.help-panel { margin: 28px 0 0; padding: 20px 18px 8px; }
 .help-panel > h2 {
   font-family: "Newsreader", Georgia, "Times New Roman", serif;
   font-size: 1.7rem;
@@ -489,9 +494,8 @@ h1 {
 }
 .read-item strong { color: var(--ink); display: block; margin-bottom: 2px; }
 .keyboard {
-  max-width: var(--page-max);
   width: 100%;
-  margin: 14px auto 0;
+  margin: 14px 0 0;
   display: grid;
   grid-template-columns: repeat(9, minmax(0, 1fr));
   gap: 6px;
@@ -525,10 +529,6 @@ h1 {
    fit inside the viewport with nothing cut off and no sideways
    scroll. Desktop and landscape widths are untouched. */
 @media (max-width: 480px) {
-  body {
-    padding-left: calc(22px + var(--safe-l));
-    padding-right: calc(22px + var(--safe-r));
-  }
   .keyboard {
     gap: 4px;
     padding: 6px;
@@ -546,8 +546,7 @@ h1 {
   }
 }
 .notice {
-  max-width: var(--page-max);
-  margin: 0 auto 12px;
+  margin: 0 0 12px;
   padding: 12px 14px;
   background: var(--bg2);
   border: 1px solid var(--line-strong);
@@ -619,12 +618,14 @@ h1 {
 .lib-status {
   font-size: 0.85rem;
   color: var(--muted);
-  max-width: var(--page-max);
-  margin: -4px auto 10px;
+  margin: -4px 0 10px;
   min-height: 1.2em;
   padding: 0 4px;
 }
 .lib-status.active { color: var(--accent, #b45309); }
+/* Standard app footer (§3.4): one line saying what the app is. */
+footer { margin-top: 26px; color: var(--muted); font-size: 0.95rem; }
+footer a { color: var(--accent); font-weight: 700; }
 .print-only { display: none; }
 @media print {
   body {
@@ -634,7 +635,7 @@ h1 {
   }
   .controls-row, .toolbar, .cats, .keyboard, .side, .modal-backdrop,
   .icon-btn, .tool-btn, .freq, .solved-banner, .no-print,
-  .help-panel, .hint, .notice, .topbar .help-link { display: none !important; }
+  .help-panel, .hint, .notice, footer { display: none !important; }
   .main { display: block; }
   .panel {
     box-shadow: none;
@@ -655,9 +656,13 @@ h1 {
 </style>
 </head>
 <body>
-<div class="topbar">
-  <a class="wordmark" href="https://exponology.com/">Exponology<span class="dot">.</span><small>exponology.com</small></a>
-</div>
+<div class="wrap">
+<header class="brand-bar">
+  <a class="brand-home" href="https://exponology.com/">
+    <span class="brand-logo">Exponology<span class="dot">.</span></span>
+    <span class="brand-sub">EXPONOLOGY.COM</span>
+  </a>
+</header>
 <div class="header">
   <div class="eyebrow" id="eyebrowCounts">71 quotes &bull; 9 categories</div>
   <h1>CipherDesk</h1>
@@ -710,6 +715,37 @@ h1 {
   </aside>
 </div>
 
+<div class="modal-backdrop" id="removalModal" role="dialog" aria-modal="true" aria-labelledby="removalTitle">
+  <div class="modal">
+    <h2 id="removalTitle">Are you sure?</h2>
+    <p class="hint-text" id="removalText"></p>
+    <div class="modal-actions">
+      <button type="button" class="tool-btn" id="removalCancel">Cancel</button>
+      <button type="button" class="tool-btn primary" id="removalOk">Remove</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="pasteModal" role="dialog" aria-modal="true" aria-labelledby="pasteTitle">
+  <div class="modal">
+    <h2 id="pasteTitle">Create a cryptogram</h2>
+    <p class="hint-text">Paste ciphertext from a newspaper or book, or type the solution and click <strong>Scramble solution</strong> to make the ciphertext. Optionally keep the solution so Check can mark wrong letters.</p>
+    <label for="pasteCipher">Ciphertext</label>
+    <textarea id="pasteCipher" placeholder="XYZ ABC DEF…" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"></textarea>
+    <label for="pastePlain">Known solution (optional)</label>
+    <textarea id="pastePlain" placeholder="THE QUICK BROWN…" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"></textarea>
+    <div class="modal-actions" style="margin: 0 0 10px; justify-content: flex-start;">
+      <button type="button" class="tool-btn" id="scrambleSolutionBtn" title="Encode the solution into ciphertext">Scramble solution</button>
+    </div>
+    <label for="pasteAuthor">Author (optional)</label>
+    <input type="text" id="pasteAuthor" placeholder="Attribution shown when solved" autocomplete="off" autocorrect="off" spellcheck="false">
+    <div class="modal-actions">
+      <button type="button" class="tool-btn" id="pasteCancel">Cancel</button>
+      <button type="button" class="tool-btn primary" id="pasteApply">Load puzzle</button>
+    </div>
+  </div>
+</div>
+
 <section class="panel help-panel" id="help" aria-label="Help">
   <h2>Help</h2>
   <p class="help-intro">Two short guides — how to use CipherDesk, and how to read the board.</p>
@@ -746,37 +782,10 @@ h1 {
   </div>
 </section>
 
-<div class="modal-backdrop" id="removalModal" role="dialog" aria-modal="true" aria-labelledby="removalTitle">
-  <div class="modal">
-    <h2 id="removalTitle">Are you sure?</h2>
-    <p class="hint-text" id="removalText"></p>
-    <div class="modal-actions">
-      <button type="button" class="tool-btn" id="removalCancel">Cancel</button>
-      <button type="button" class="tool-btn primary" id="removalOk">Remove</button>
-    </div>
-  </div>
+<footer>
+  <p>CipherDesk is one of the learning apps at <a href="https://exponology.com/">Exponology</a> — exponology.com.</p>
+</footer>
 </div>
-
-<div class="modal-backdrop" id="pasteModal" role="dialog" aria-modal="true" aria-labelledby="pasteTitle">
-  <div class="modal">
-    <h2 id="pasteTitle">Create a cryptogram</h2>
-    <p class="hint-text">Paste ciphertext from a newspaper or book, or type the solution and click <strong>Scramble solution</strong> to make the ciphertext. Optionally keep the solution so Check can mark wrong letters.</p>
-    <label for="pasteCipher">Ciphertext</label>
-    <textarea id="pasteCipher" placeholder="XYZ ABC DEF…" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"></textarea>
-    <label for="pastePlain">Known solution (optional)</label>
-    <textarea id="pastePlain" placeholder="THE QUICK BROWN…" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"></textarea>
-    <div class="modal-actions" style="margin: 0 0 10px; justify-content: flex-start;">
-      <button type="button" class="tool-btn" id="scrambleSolutionBtn" title="Encode the solution into ciphertext">Scramble solution</button>
-    </div>
-    <label for="pasteAuthor">Author (optional)</label>
-    <input type="text" id="pasteAuthor" placeholder="Attribution shown when solved" autocomplete="off" autocorrect="off" spellcheck="false">
-    <div class="modal-actions">
-      <button type="button" class="tool-btn" id="pasteCancel">Cancel</button>
-      <button type="button" class="tool-btn primary" id="pasteApply">Load puzzle</button>
-    </div>
-  </div>
-</div>
-
 <script>
 (function () {
 "use strict";
