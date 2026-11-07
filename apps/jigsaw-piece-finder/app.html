@@ -233,10 +233,10 @@
       .piece-card .pimg img{display:block;width:100%;height:auto;border-radius:8px;}
       .piece-head{
         font-family:"Newsreader",Georgia,serif;font-weight:700;
-        font-size:clamp(27px,4vw,34px);line-height:1.15;margin:0 0 10px;
+        font-size:clamp(32px,5vw,42px);line-height:1.15;margin:12px 0 10px;
       }
-      .piece-head .rc{font-size:.66em;font-weight:600;color:var(--ink-soft);white-space:nowrap;}
-      .piece-head .turn{font-size:.66em;font-weight:700;color:var(--gold);white-space:nowrap;}
+      .piece-head .rc{font-size:.74em;font-weight:600;color:var(--ink-soft);white-space:nowrap;}
+      .piece-head .turn{font-weight:700;color:var(--gold);}
       .piece-card .pimg .cap{font-size:13.5px;font-weight:700;color:var(--ink-soft);margin-top:6px;line-height:1.35;}
       .piece-card .minimap{position:relative;line-height:0;max-width:300px;}
       .piece-card .minimap img{display:block;width:100%;height:auto;border-radius:6px;pointer-events:none;}
@@ -1536,36 +1536,37 @@
 
           var card=document.createElement("div"); card.className="piece-card";
 
-          /* LEFT: the piece number, the piece photo, then its suggested fits */
+          /* LEFT: the piece photo, then — below it, in larger type —
+             the piece number in compact code form, then its suggested fits */
           var left=document.createElement("div");
-          // The piece number, big, with where it sat on the sheet as
-          // (R<row>, C<column>) and the orientation turn the app matched
-          // it at next to it — e.g. "Piece 13 (R3, C3) 180°".
-          var head=document.createElement("p"); head.className="piece-head";
-          head.appendChild(document.createTextNode("Piece "+r.n+" "));
-          var rcSpan=document.createElement("span"); rcSpan.className="rc";
-          rcSpan.textContent="(R"+((p.row||0)+1)+", C"+((p.col||0)+1)+")";
-          head.appendChild(rcSpan);
-          if(hasFit){
-            head.appendChild(document.createTextNode(" "));
-            var turnSpan=document.createElement("span"); turnSpan.className="turn";
-            turnSpan.textContent=(fitRot*90)+"\u00B0";
-            head.appendChild(turnSpan);
-          }
-          left.appendChild(head);
           var pwrap=document.createElement("div"); pwrap.className="pimg";
           var im=document.createElement("img"); im.src=p.cropURL;
           im.alt="Piece "+r.n+(fitRot?(", turned "+(fitRot*90)+" degrees, the way it fits"):" as photographed on the sheet");
           if(fitRot){
             rotatedURL(p,fitRot,function(u){ im.src=u; });
           }
-          var cap=document.createElement("div"); cap.className="cap";
-          cap.textContent="Sheet "+(p.sheetNo||1)+
-            (hasFit&&fitRot?(" \u00B7 Photo turned "+(fitRot*90)+"\u00B0 \u2014 the way it fits"):
-             hasFit?" \u00B7 Fits as photographed \u2014 no turn needed":
-             " \u00B7 As photographed on the sheet");
-          pwrap.appendChild(im); pwrap.appendChild(cap);
+          pwrap.appendChild(im);
           left.appendChild(pwrap);
+          // Below the photo, large: the piece number with its sheet,
+          // row and column on the sheet and the orientation turn the
+          // app matched it at, in degrees, all in compact code form —
+          // e.g. "Piece 13 (S1, R3, C3, 180°)". No wordy caption.
+          var head=document.createElement("p"); head.className="piece-head";
+          head.appendChild(document.createTextNode("Piece "+r.n+" "));
+          var rcSpan=document.createElement("span"); rcSpan.className="rc";
+          rcSpan.textContent="(S"+(p.sheetNo||1)+", R"+((p.row||0)+1)+", C"+((p.col||0)+1)+(hasFit?", ":"");
+          head.appendChild(rcSpan);
+          if(hasFit){
+            var turnSpan=document.createElement("span"); turnSpan.className="turn";
+            turnSpan.textContent=(fitRot*90)+"\u00B0";
+            head.appendChild(turnSpan);
+            var closeSpan=document.createElement("span"); closeSpan.className="rc";
+            closeSpan.textContent=")";
+            head.appendChild(closeSpan);
+          } else {
+            rcSpan.textContent+=")";
+          }
+          left.appendChild(head);
 
           var fh=document.createElement("h4"); fh.className="fits-head";
           fh.textContent="Suggested fits";
