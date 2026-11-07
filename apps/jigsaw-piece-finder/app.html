@@ -275,6 +275,42 @@
       .help-block li{margin:5px 0;}
       footer{margin-top:44px;padding-top:14px;border-top:1px solid var(--line);color:var(--ink-soft);font-size:14px;}
       footer a{color:var(--green);}
+
+      /* Other candidate fits on a map: small gray circles */
+      .pin.alt{
+        background:#d6d3c9;color:#63615a;min-width:21px;height:21px;font-size:11.5px;z-index:2;
+      }
+      .sw.alt{background:#d6d3c9;}
+
+      /* Retake / human-look note on a piece's own card, beside its state word */
+      .look-note{
+        border:1px solid var(--gold);background:var(--gold-soft);border-radius:8px;
+        padding:8px 10px;font-size:15px;margin:10px 0 0;color:var(--ink);
+      }
+
+      /* Step 3 cards: suggested fits left of the map, placed button under the map */
+      .piece-card .mapcol .minimap{max-width:520px;}
+      .piece-card .fits-head{
+        font-family:"Newsreader",Georgia,serif;font-size:19px;font-weight:600;margin:14px 0 4px;
+      }
+      @media (max-width:700px){ .piece-card{grid-template-columns:1fr;} }
+
+      /* Print: only the puzzle map sheet prints */
+      #printArea{display:none;}
+      @media print{
+        @page{size:Letter;margin:0.5in;}
+        .wrap{display:none !important;}
+        #printArea{display:block !important;color:#000;background:#fff;padding:0;}
+        #printArea h1{font-family:Georgia,serif;font-size:24px;margin:0 0 4px;color:#000;}
+        #printArea p{font-size:13px;color:#333;margin:6px 0 0;}
+        #printArea .print-stage{position:relative;line-height:0;margin:0 auto;}
+        #printArea .print-stage img{display:block;width:100%;height:auto;}
+        #printArea .print-stage svg{position:absolute;inset:0;width:100%;height:100%;}
+        #printArea .cell-label{
+          position:absolute;transform:translate(-50%,-50%);font-weight:700;color:#000;
+          text-shadow:0 1px 2px #fff,0 0 5px #fff;line-height:1;white-space:nowrap;
+        }
+      }
     </style>
   </head>
   <body>
@@ -286,7 +322,7 @@
       </div>
 
       <h1>Jigsaw Piece Finder</h1>
-      <p class="lede">Photograph the finished puzzle and lay a grid over it. Then photograph a sheet of loose pieces and drag the grid lines until every piece sits in its own box — the app cuts each piece out of its box, reads its outline where the outline is clear, and matches every piece against every box on the map, trying it four ways round. Sheet after sheet adds up, and every piece you place is remembered on the board in step 4.</p>
+      <p class="lede">Photograph the finished puzzle and lay a grid over it. Then photograph a sheet of loose pieces and drag the grid lines until every piece sits in its own box — the grid lines you drag are what define each piece, and the app cuts each piece out of its box and matches it against every box on the map, trying it four ways round. Sheet after sheet adds up, and every piece you place is remembered on the board in step 4.</p>
       <span class="stagepill">Stage 3 of the build — sheets add up, and placed pieces are remembered. Check every answer before placing a piece</span>
 
       <!-- ============ STEP 1: THE MAP ============ -->
@@ -345,8 +381,10 @@
 
           <div class="btn-row">
             <button type="button" class="btn" id="mapConfirm">The grid sits right on the picture</button>
+            <button type="button" class="btn secondary" id="printMap">Print Puzzle Map</button>
           </div>
           <p class="confirm-note" id="mapConfirmNote">Not confirmed yet — nudge the corners until every grid line follows the picture, then tap the green button.</p>
+          <p class="confirm-note" id="printNote">Print Puzzle Map prints just the map photo with its grid and box names, scaled to fit one 8.5 &times; 11 sheet in whichever orientation suits the map — landscape if it is wider than tall, portrait if it is taller. A paper copy to work from at the table.</p>
         </div>
       </section>
 
@@ -357,14 +395,14 @@
           <h2>Photograph a sheet of pieces</h2>
           <a class="help-link" href="#help-sheet">Help</a>
         </div>
-        <p class="sec-intro">Lay loose pieces face-up on a plain dark sheet or tray, roughly in rows. Then <strong>drag the grid lines on the photo</strong> — side to side, up and down — until every piece sits inside its own box. Pieces that have slid a little are fine: you line the grid up to the pieces, not the other way round. The app cuts each piece out of its box and, where the piece&rsquo;s outline stands out clearly against the dark background, reads the piece&rsquo;s shape from that outline. The counts below set how many boxes the grid has, and name the rows. This first sheet holds 20 pieces — 5 across by 4 down. When a sheet is checked, save its pieces and photograph the next one — the app keeps every sheet&rsquo;s pieces together, and step 3 matches them all at once.</p>
+        <p class="sec-intro">Lay loose pieces face-up on a plain dark sheet or tray, roughly in rows. Then <strong>drag the grid lines on the photo</strong> — side to side, up and down — until every piece sits inside its own box. Pieces that have slid a little are fine: you line the grid up to the pieces, not the other way round. The grid lines are what define each piece — the app cuts each piece straight out of its box. The counts below set how many boxes the grid has, and name the rows. This first sheet holds 20 pieces — 5 across by 4 down. When a sheet is checked, save its pieces and photograph the next one — the app keeps every sheet&rsquo;s pieces together, and step 3 matches them all at once.</p>
 
         <div class="guide">
           <h3>For a good sheet photo</h3>
           <ul>
             <li>Even light — no glare or bright spots on the pieces.</li>
             <li>No shadow falling across the sheet.</li>
-            <li>Every piece flat and face-up, and <strong>not touching</strong> its neighbours — pieces that touch are harder to outline, and their shapes may not read.</li>
+            <li>Every piece flat and face-up, and <strong>not touching</strong> its neighbours — each piece inside its own grid box.</li>
             <li>Drag each grid line until it runs between two rows or columns of pieces, so every piece sits inside one box. A piece that has slid out of line is fine — move the lines to fit it.</li>
             <li>The whole sheet in the frame, photographed straight from above.</li>
           </ul>
@@ -412,7 +450,7 @@
         <div class="card" id="cutCard" hidden>
           <h3 style="font-family:'Newsreader',Georgia,serif;font-size:22px;margin:0 0 4px;font-weight:600;">The pieces, cut out</h3>
           <p style="color:var(--ink-soft);margin:0 0 6px;" id="cutSummary"></p>
-          <p style="color:var(--ink-soft);margin:0 0 14px;">Each piece is cut out of its grid box, in reading order — across, then down. Where a piece&rsquo;s outline was clear, the cut follows the outline and the shape below is read from it. Check that each cut-out holds one whole piece. If a piece was missed or cut badly, drag the grid lines so it sits in its own box — or spread the pieces out so none touch — retake the photo, and cut again.</p>
+          <p style="color:var(--ink-soft);margin:0 0 14px;">Each piece is cut straight out of its grid box, in reading order — across, then down — and every cut-out is the same size, so the pieces line up in even rows. Check that each cut-out holds one whole piece. If a piece was missed or cut badly, drag the grid lines so it sits in its own box, retake the photo, and cut again.</p>
           <div class="cut-grid" id="cutGrid"></div>
           <div class="btn-row">
             <button type="button" class="btn" id="sheetConfirm">These pieces look right</button>
@@ -430,7 +468,7 @@
           <h2>Match the pieces</h2>
           <a class="help-link" href="#help-match">Help</a>
         </div>
-        <p class="sec-intro">The app compares every cut-out piece against every box on the map — by colour and by the pattern of the picture — trying each piece at 0&deg;, 90&deg;, 180&deg; and 270&deg; and keeping the best fit. Each card also reads the piece&rsquo;s shape from its outline — tab out, blank in, or flat edge on each of its four sides — as a second way to tell pieces apart. Each piece gets a <strong>Fit score out of 10</strong>, always shown with its word:</p>
+        <p class="sec-intro">The app compares every cut-out piece against every box on the map — by colour and by the pattern of the picture — trying each piece at 0&deg;, 90&deg;, 180&deg; and 270&deg; and keeping the best fit. Each card shows the piece turned the way it fits — the rotation that produced its best fit. Each piece gets a <strong>Fit score out of 10</strong>, always shown with its word:</p>
 
         <div class="states" style="margin:0 0 18px;">
           <div class="state-box"><span class="word locked">LOCKED</span><p>Fit 8 to 10. The app is sure. Place the piece.</p></div>
@@ -462,8 +500,9 @@
             <div class="pinlegend">
               <span><span class="sw locked"></span>LOCKED</span>
               <span><span class="sw soft"></span>SOFT</span>
-              <span><span class="sw conflict"></span>CONFLICT — pinned at its next-best box</span>
-              <span>Pin numbers are the piece numbers on the cards below. UNPLACED pieces get no pin.</span>
+              <span><span class="sw conflict"></span>CONFLICT — pinned at the box it wanted</span>
+              <span><span class="sw alt"></span>Other possible fit (gray circle)</span>
+              <span>Pin numbers are the piece numbers on the cards below. Every piece with a suggested fit is pinned, CONFLICT pieces included. UNPLACED pieces get no pin.</span>
             </div>
           </div>
 
@@ -479,7 +518,7 @@
           <h2>Where things stand</h2>
           <a class="help-link" href="#help-board">Help</a>
         </div>
-        <p class="sec-intro">Each step shows its own result before the next begins, so a wrong grid or a bad outline can never hide behind a confident-looking answer.</p>
+        <p class="sec-intro">Each step shows its own result before the next begins, so a wrong grid or a bad cut can never hide behind a confident-looking answer.</p>
 
         <div class="recap" style="margin-bottom:18px;">
           <div class="item"><div class="k">The map</div><div class="v" id="recapMap">—</div></div>
@@ -501,7 +540,7 @@
             <button type="button" class="btn secondary" id="loadProgressBtn">Load Progress File</button>
             <input type="file" id="loadProgress" accept=".json,application/json" hidden />
           </div>
-          <p class="confirm-note" id="progressNote">A progress file holds the whole sitting: the map photo and its grid, and every piece cut so far — each with its match, its shape, and whether it is placed. Save at the end of a sitting, then load the file at the next one to pick up exactly where you left off. On a desktop browser you choose the file once and later saves update that same file; on iPhone the save downloads the file, and loading means choosing it again.</p>
+          <p class="confirm-note" id="progressNote">A progress file holds the whole sitting: the map photo and its grid, and every piece cut so far — each with its match and whether it is placed. Save at the end of a sitting, then load the file at the next one to pick up exactly where you left off. On a desktop browser you choose the file once and later saves update that same file; on iPhone the save downloads the file, and loading means choosing it again.</p>
         </div>
 
         <div class="card">
@@ -528,12 +567,12 @@
         <div class="help-block" id="help-sheet">
           <h3>Photographing a sheet of pieces</h3>
           <ol>
-            <li>Lay the pieces face-up on a plain dark sheet or tray, roughly in rows and columns. They do not need to line up exactly — you drag the grid lines on the photo until every piece sits inside its own box, and the app cuts each piece out of its box.</li>
-            <li>Keep pieces apart where you can: two pieces that touch are harder to outline, so their shapes may not read. A piece that has slid a little out of line is fine — move the grid lines to fit it.</li>
-            <li>Use even light with no glare, and keep shadows — including your own — off the sheet. Dark pieces on the dark tray are the hardest to outline; steady, even light helps most.</li>
+            <li>Lay the pieces face-up on a plain dark sheet or tray, roughly in rows and columns. They do not need to line up exactly — you drag the grid lines on the photo until every piece sits inside its own box, and the app cuts each piece straight out of its box. The grid lines are what define each piece; there is no outline reading.</li>
+            <li>Keep pieces apart where you can, one piece to a box. A piece that has slid a little out of line is fine — move the grid lines to fit it.</li>
+            <li>Use even light with no glare, and keep shadows — including your own — off the sheet. Dark pieces on a dark tray are the hardest to tell apart; steady, even light helps most.</li>
             <li>Hold the phone straight above the sheet and fill the frame with it; include the whole sheet, edge to edge.</li>
             <li>Set the pieces-across and pieces-down counts to match how many pieces you laid out, drag the grid lines until each piece sits in its own box — drag a line by its middle, side to side or up and down — then tap <strong>Cut out the pieces in the grid</strong>.</li>
-            <li>Check the cut-outs: one whole piece each. A caption saying &ldquo;no clear outline&rdquo; means the app could not separate that piece from the background, so the whole grid box was used as its cut — if several captions say that, spread the pieces out, check the grid lines sit between the pieces, and retake the photo.</li>
+            <li>Check the cut-outs: one whole piece each, all the same size. If a cut-out holds only part of a piece, the grid lines are off — drag them so the whole piece sits inside its box, and cut again.</li>
             <li>A puzzle takes many sheets, and this step repeats for each one. After checking a sheet&rsquo;s cut-outs, tap <strong>Save these pieces &amp; photograph another sheet</strong> — those pieces stay in the pool, step 2 frees up for the next photo, and step 3 matches every piece from every sheet together.</li>
           </ol>
         </div>
@@ -546,7 +585,8 @@
             <li>If two pieces both fit one box best, the higher score keeps the box and the other is marked <strong>CONFLICT</strong>, with its next-best box shown. A box is never given to two pieces without saying so.</li>
             <li>Plain or dark pieces look like many boxes at once. Their cards list the top three candidate boxes with scores, so a person can judge between them.</li>
             <li>Changing the map grid or re-cutting the sheet clears the matching — run it again afterwards.</li>
-            <li>Each card also reads the piece&rsquo;s shape from its outline — which sides carry a tab out, a blank in, or a flat edge, with a small drawing of the four sides. It is read as the piece lies in the sheet photo, and it is a second way to tell look-alike pieces apart.</li>
+            <li>The piece photo on each card is turned the way the piece will sit in the puzzle — the rotation that gave its best fit — so what you see is the piece as it goes in, not as it lay on the sheet.</li>
+            <li>On each card the suggested fits sit to the left of the small map, the piece&rsquo;s other possible fits appear on that map as gray circles with the piece number in gray inside, and <strong>Mark as placed</strong> sits under the map. CONFLICT pieces are pinned on the map too, at the box they wanted — their next-best box shows as a gray circle.</li>
             <li>When you physically put a piece in, tap <strong>Mark as placed</strong> on its card. It is remembered on the board in step 4, in its box, and stays there while you add more sheets.</li>
           </ol>
         </div>
@@ -554,9 +594,9 @@
         <div class="help-block" id="help-board">
           <h3>The board and the progress file</h3>
           <ol>
-            <li>Tap <strong>Mark as placed</strong> on a piece&rsquo;s card in step 3 once the piece is physically in the puzzle. The piece appears on the board in step 4, in its box, turned the way it fits best, with its Fit score and shape in the list under the board.</li>
+            <li>Tap <strong>Mark as placed</strong> on a piece&rsquo;s card in step 3 once the piece is physically in the puzzle. The piece appears on the board in step 4, in its box, turned the way it fits best, with its Fit score in the list under the board.</li>
             <li>The board is the app&rsquo;s memory of what is placed, box by box. Adding more sheets does not disturb it. Changing the map grid does — the boxes move, so the board clears; a progress file saved beforehand brings the placements back with the grid they belong to.</li>
-            <li><strong>Save Progress File</strong> writes the whole sitting to one file on your computer: the map photo and grid, and every piece cut so far — each with a small picture, its match and Fit score, its shape, and whether it is placed. Keep the file with the puzzle. On a desktop browser the first save lets you choose where the file lives, and later saves update that same file; on iPhone the save downloads the file instead.</li>
+            <li><strong>Save Progress File</strong> writes the whole sitting to one file on your computer: the map photo and grid, and every piece cut so far — each with a small picture, its match and Fit score, and whether it is placed. Keep the file with the puzzle. On a desktop browser the first save lets you choose where the file lives, and later saves update that same file; on iPhone the save downloads the file instead.</li>
             <li><strong>Load Progress File</strong> at your next sitting puts everything back — the map and its grid, every piece with its match, and the board exactly as it was — then photograph the next sheet of pieces and carry on.</li>
           </ol>
         </div>
@@ -567,6 +607,8 @@
       </footer>
 
     </div>
+
+    <div id="printArea" aria-hidden="true"></div>
 
     <script>
     (function(){
@@ -765,6 +807,60 @@
         drawMap();
       });
 
+      /* Print Puzzle Map: build a print-only sheet (map photo + grid +
+         box names) and open the print dialog. The @media print CSS hides
+         the app and shows only that sheet. */
+      function buildPrintArea(){
+        var pa=$("printArea"); if(!pa) return;
+        var c=map.corners, cols=map.cols, rows=map.rows, i, j, u, v, pts, p, html="";
+        for(i=0;i<=cols;i++){
+          u=i/cols; pts=[];
+          for(j=0;j<=16;j++){ v=j/16; p=bilinear(c,u,v); pts.push(p.x.toFixed(2)+","+p.y.toFixed(2)); }
+          html+='<polyline points="'+pts.join(" ")+'" fill="none" stroke="'+(i===0||i===cols?'#b98a1c':'rgba(0,0,0,.5)')+'" vector-effect="non-scaling-stroke" style="stroke-width:'+(i===0||i===cols?2.4:1.2)+'px"/>';
+        }
+        for(j=0;j<=rows;j++){
+          v=j/rows; pts=[];
+          for(i=0;i<=16;i++){ u=i/16; p=bilinear(c,u,v); pts.push(p.x.toFixed(2)+","+p.y.toFixed(2)); }
+          html+='<polyline points="'+pts.join(" ")+'" fill="none" stroke="'+(j===0||j===rows?'#b98a1c':'rgba(0,0,0,.5)')+'" vector-effect="non-scaling-stroke" style="stroke-width:'+(j===0||j===rows?2.4:1.2)+'px"/>';
+        }
+        var lh="", fs=clamp(Math.min(1000/cols,760/rows)*0.3,10,20);
+        for(j=0;j<rows;j++) for(i=0;i<cols;i++){
+          p=bilinear(c,(i+0.5)/cols,(j+0.5)/rows);
+          lh+='<span class="cell-label" style="left:'+p.x+'%;top:'+p.y+'%;font-size:'+fs+'px">'+colLetter(i)+(j+1)+'</span>';
+        }
+        // Pick the orientation that fits the map's shape, and scale the
+        // map (with its grid) to fit one US Letter sheet in it. Wider
+        // than tall prints landscape (10in of printable width, 7.5in of
+        // height); taller than wide prints portrait (7.5in wide, 10in
+        // tall). In both, the stage leaves room for the heading and the
+        // line below, and the grid overlay scales with the photo because
+        // it covers the stage.
+        var iw=mapImg.naturalWidth||4, ih=mapImg.naturalHeight||3;
+        var landscape=iw>ih;
+        var maxW=landscape?10:7.5, maxH=landscape?6.6:9.1;
+        var wIn=maxW, hIn=wIn*ih/iw;
+        if(hIn>maxH){ hIn=maxH; wIn=hIn*iw/ih; }
+        pa.innerHTML='<h1>Puzzle Map</h1><div class="print-stage"><img src="'+mapImg.src+'" alt=""/>'+
+          '<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">'+html+'</svg>'+
+          '<div style="position:absolute;inset:0;">'+lh+'</div></div>'+
+          '<p>Grid: '+cols+' across \u00D7 '+rows+' down = '+(cols*rows)+' boxes, A1 (top left) to '+colLetter(cols-1)+rows+' (bottom right). '+(landscape?"Landscape":"Portrait")+' \u2014 fits one 8.5 \u00D7 11 sheet. Printed from the Jigsaw Piece Finder.</p>';
+        var st=pa.querySelector(".print-stage");
+        if(st) st.style.width=wIn.toFixed(2)+"in";
+        // Tell the printer the chosen orientation. The static @page rule
+        // in the stylesheet is the portrait default; this injected rule
+        // comes later in the cascade and wins.
+        var ps=document.getElementById("printPageStyle");
+        if(!ps){ ps=document.createElement("style"); ps.id="printPageStyle"; document.head.appendChild(ps); }
+        ps.textContent="@page{size:Letter "+(landscape?"landscape":"portrait")+";margin:0.5in;}";
+      }
+      $("printMap").addEventListener("click",function(){
+        buildPrintArea();
+        var n=$("printNote");
+        n.textContent="Opening the print dialog \u2014 the printout is just the map with its grid, scaled to fit one 8.5 \u00D7 11 sheet in the orientation that suits the map. If no dialog opens, use your browser\u2019s Print command: the page is set up to print the map sheet on its own.";
+        n.classList.add("done");
+        try{ window.print(); }catch(e){}
+      });
+
       $("mapFile").addEventListener("change",function(){
         var f=this.files && this.files[0]; if(!f) return;
         var rd=new FileReader();
@@ -809,14 +905,6 @@
           html+='<line class="gl gl-h" x1="0" y1="'+y+'" x2="100" y2="'+y+'" stroke="rgba(255,255,255,.8)" vector-effect="non-scaling-stroke" style="stroke-width:'+(i===0||i===rows?2.2:1.5)+'px"/>';
           html+='<line class="gl-hit h" data-axis="h" data-idx="'+i+'" x1="0" y1="'+y+'" x2="100" y2="'+y+'" stroke="rgba(0,0,0,0)" vector-effect="non-scaling-stroke" style="stroke-width:20px"/>';
         }
-        // Detected outlines, once cut
-        if(sheet.cut){
-          for(i=0;i<sheet.pieces.length;i++){
-            var bp=sheet.pieces[i].bboxPct;
-            if(!bp) continue;
-            html+='<rect x="'+bp.x.toFixed(2)+'" y="'+bp.y.toFixed(2)+'" width="'+bp.w.toFixed(2)+'" height="'+bp.h.toFixed(2)+'" fill="none" stroke="rgba(255,190,60,.95)" vector-effect="non-scaling-stroke" style="stroke-width:2px"/>';
-          }
-        }
         sheetSvg.innerHTML=html;
         bindSheetLineDrag();
         var lh="";
@@ -824,9 +912,9 @@
         if(sheet.cut){
           var fs2=clamp(Math.min(rect.width/cols,rect.height/rows)*0.34,10,20);
           for(i=0;i<sheet.pieces.length;i++){
-            var pc=sheet.pieces[i], bc=pc.bboxPct;
-            if(!bc) continue;
-            lh+='<span class="cell-label" style="left:'+(bc.x+bc.w/2)+'%;top:'+Math.max(2,bc.y-1.5)+'%;font-size:'+fs2+'px">'+pc.n+'</span>';
+            var pc=sheet.pieces[i];
+            var cx2=(L.v[pc.col]+L.v[pc.col+1])/2, cy2=L.h[pc.row]+(L.h[pc.row+1]-L.h[pc.row])*0.14;
+            lh+='<span class="cell-label" style="left:'+cx2+'%;top:'+cy2+'%;font-size:'+fs2+'px">'+pc.n+'</span>';
           }
         } else {
           var fs=clamp(Math.min(rect.width/cols,rect.height/rows)*0.3,9,18);
@@ -926,10 +1014,11 @@
       });
 
       /* ---- Shape reading ----
-         From a piece's outline mask, read each of its four sides: does the
-         middle of the side stick out past the corners' line (a tab), dip in
-         (a blank), or run straight along it (a flat edge)? Measured as the
-         piece lies in the sheet photo. */
+         From the piece's pixels inside its grid box, read each of its four
+         sides: does the middle of the side stick out past the corners' line
+         (a tab), dip in (a blank), or run straight along it (a flat edge)?
+         Measured as the piece lies in the sheet photo; cards turn the
+         reading to the way the piece will sit in the puzzle. */
       function shapeOf(mask,W,b){
         function med(a){ if(!a.length) return 0; var s=a.slice().sort(function(p,q){return p-q;}); return s[Math.floor(s.length/2)]; }
         function judge(vals,size){
@@ -974,32 +1063,35 @@
         var right=judge(vals,b.w);
         return { top:top, right:right, bottom:bottom, left:left };
       }
-      function shapeWord(v){ return v==="tab"?"tab out":v==="blank"?"blank in":v==="flat"?"flat edge":"not clear"; }
-      function shapeText(s){
-        if(!s) return "";
-        return "top "+shapeWord(s.top)+" \u00B7 right "+shapeWord(s.right)+" \u00B7 bottom "+shapeWord(s.bottom)+" \u00B7 left "+shapeWord(s.left);
+      // A piece photo turned to the rotation that produced its best fit.
+      // The turned copy is made once, on a canvas, and cached on the piece.
+      function rotatedURL(piece,rot,done){
+        if(!rot||!piece.cropURL){ done(piece.cropURL); return; }
+        piece._rc=piece._rc||{};
+        if(piece._rc[rot]){ done(piece._rc[rot]); return; }
+        var im=new Image();
+        im.onload=function(){
+          var cv=document.createElement("canvas");
+          if(rot%2===1){ cv.width=im.height; cv.height=im.width; } else { cv.width=im.width; cv.height=im.height; }
+          var cx=cv.getContext("2d");
+          cx.translate(cv.width/2,cv.height/2);
+          cx.rotate(rot*Math.PI/2);
+          cx.drawImage(im,-im.width/2,-im.height/2);
+          var u; try{ u=cv.toDataURL("image/jpeg",0.85); }catch(e){ u=piece.cropURL; }
+          piece._rc[rot]=u;
+          done(u);
+        };
+        im.onerror=function(){ done(piece.cropURL); };
+        im.src=piece.cropURL;
       }
-      function shapeSVG(s){
-        function seg(side,xm1,ym1,xm2,ym2,x2,y2){
-          if(side==="tab") return "L"+xm1+","+ym1+" A6,6 0 0 1 "+xm2+","+ym2+" L"+x2+","+y2;
-          if(side==="blank") return "L"+xm1+","+ym1+" A6,6 0 0 0 "+xm2+","+ym2+" L"+x2+","+y2;
-          return "L"+x2+","+y2;
-        }
-        var d="M12,12"+seg(s.top,18,12,30,12,36,12)+seg(s.right,36,18,36,30,36,36)+seg(s.bottom,30,36,18,36,12,36)+seg(s.left,12,30,12,18,12,12)+"Z";
-        return '<svg width="46" height="46" viewBox="0 0 48 48" aria-hidden="true" style="flex:none;"><path d="'+d+'" fill="var(--panel-soft)" stroke="var(--ink-soft)" stroke-width="2" stroke-linejoin="round"/></svg>';
-      }
-
-      /* ---- Outline detection ----
-         Within each grid box the user aligned: estimate the tray colour from
-         the box's border ring, mark pixels that differ from it, group them
-         into blobs, and take the piece's blob (largest blob; small blobs
-         joined if the largest is implausible). The outline sharpens the cut
-         and gives the piece's shape. If nothing plausible is found, the
-         piece is its whole grid box and the app says so. */
+      /* ---- Cutting the sheet ----
+         There is no outline or edge detection: the grid lines the user
+         dragged into place define the pieces. Each piece is its whole grid
+         box, so every cut-out is the same size. Inside the box, a simple
+         light/dark split against the tray colour gives the piece's shape
+         reading and keeps the tray out of its colour samples. */
       function detectPieces(src){
         var W=src.w, H=src.h, d=src.data, cols=sheet.cols, rows=sheet.rows;
-        // The cells come from the grid lines the user dragged into place —
-        // each piece is whatever sits inside its box.
         var L=sheetLines(), xs=[], ys=[], li;
         for(li=0;li<=cols;li++) xs.push(Math.round(L.v[li]/100*W));
         for(li=0;li<=rows;li++) ys.push(Math.round(L.h[li]/100*H));
@@ -1013,7 +1105,7 @@
             var x0=xs[c], x1=xs[c+1];
             var y0=ys[r], y1=ys[r+1];
             var cw=x1-x0, ch=y1-y0, cellArea=cw*ch;
-            // border-ring background (median per channel, sampled every 2px)
+            // Tray colour from the box's border ring (median per channel)
             var ring=[], t=Math.max(5,Math.round(Math.min(cw,ch)*0.07)), xx, yy;
             for(xx=x0;xx<x1;xx+=2){ for(yy=y0;yy<y0+t;yy++) ring.push((yy*W+xx)*4); for(yy=y1-t;yy<y1;yy++) ring.push((yy*W+xx)*4); }
             for(yy=y0;yy<y1;yy+=2){ for(xx=x0;xx<x0+t;xx++) ring.push((yy*W+xx)*4); for(xx=x1-t;xx<x1;xx++) ring.push((yy*W+xx)*4); }
@@ -1021,77 +1113,34 @@
             for(var k=0;k<ring.length;k++){ rs.push(d[ring[k]]); gs.push(d[ring[k]+1]); bs.push(d[ring[k]+2]); }
             function med(a){ a.sort(function(p,q){return p-q;}); return a[Math.floor(a.length/2)]; }
             var bg=[med(rs),med(gs),med(bs)];
-            // mask of pixels unlike the tray
-            var mask=new Uint8Array(cw*ch);
+            // Pixels unlike the tray: used only for the shape reading and
+            // for sampling the piece's own colours — never to locate or
+            // cut the piece, which is always its whole grid box.
+            var mask=new Uint8Array(cw*ch), mCount=0;
+            var mnx=cw, mxx=-1, mny=ch, mxy=-1;
             for(yy=0;yy<ch;yy++){
               var rowOff=(y0+yy)*W+x0;
               for(xx=0;xx<cw;xx++){
                 var idx=(rowOff+xx)*4;
                 var dr=d[idx]-bg[0], dg=d[idx+1]-bg[1], db=d[idx+2]-bg[2];
-                if(dr*dr+dg*dg+db*db>38*38) mask[yy*cw+xx]=1;
+                if(dr*dr+dg*dg+db*db>38*38){
+                  mask[yy*cw+xx]=1; mCount++;
+                  if(xx<mnx)mnx=xx; if(xx>mxx)mxx=xx; if(yy<mny)mny=yy; if(yy>mxy)mxy=yy;
+                }
               }
             }
-            // connected blobs (4-way), iterative flood fill
-            var seen=new Uint8Array(cw*ch), blobs=[];
-            for(var s0=0;s0<cw*ch;s0++){
-              if(!mask[s0]||seen[s0]) continue;
-              var stack=[s0]; seen[s0]=1; var pts=[];
-              while(stack.length){
-                var p0=stack.pop(); pts.push(p0);
-                var px=p0%cw, py=(p0-px)/cw;
-                if(px>0 && mask[p0-1] && !seen[p0-1]){ seen[p0-1]=1; stack.push(p0-1); }
-                if(px<cw-1 && mask[p0+1] && !seen[p0+1]){ seen[p0+1]=1; stack.push(p0+1); }
-                if(py>0 && mask[p0-cw] && !seen[p0-cw]){ seen[p0-cw]=1; stack.push(p0-cw); }
-                if(py<ch-1 && mask[p0+cw] && !seen[p0+cw]){ seen[p0+cw]=1; stack.push(p0+cw); }
-              }
-              blobs.push(pts);
+            var shape=null;
+            if(mCount>=cellArea*0.035 && mCount<=cellArea*0.88 && mxx>=mnx && mxy>=mny){
+              shape=shapeOf(mask,cw,{x:mnx,y:mny,w:mxx-mnx+1,h:mxy-mny+1});
             }
-            blobs.sort(function(a,b2){ return b2.length-a.length; });
-            var useMask=null, found=false;
-            function bboxOf(ptsArr){
-              var mnx=1e9,mxx=-1, mny=1e9,mxy=-1;
-              for(var q=0;q<ptsArr.length;q++){ var p1=ptsArr[q], px2=p1%cw, py2=(p1-px2)/cw;
-                if(px2<mnx)mnx=px2; if(px2>mxx)mxx=px2; if(py2<mny)mny=py2; if(py2>mxy)mxy=py2; }
-              return {x:mnx,y:mny,w:mxx-mnx+1,h:mxy-mny+1};
-            }
-            if(blobs.length && blobs[0].length>=cellArea*0.035 && blobs[0].length<=cellArea*0.80){
-              useMask=new Uint8Array(cw*ch);
-              for(var q1=0;q1<blobs[0].length;q1++) useMask[blobs[0][q1]]=1;
-              found=true;
-            } else {
-              var union=[], uArea=0;
-              for(var q2=0;q2<blobs.length;q2++){
-                if(blobs[q2].length>=cellArea*0.012){ union=union.concat(blobs[q2]); uArea+=blobs[q2].length; }
-              }
-              if(union.length && uArea>=cellArea*0.035 && uArea<=cellArea*0.85){
-                useMask=new Uint8Array(cw*ch);
-                for(var q3=0;q3<union.length;q3++) useMask[union[q3]]=1;
-                found=true;
-              }
-            }
-            var bbox, pieceMask;
-            if(found){
-              bbox=bboxOf((function(){ var arr=[]; for(var q4=0;q4<cw*ch;q4++) if(useMask[q4]) arr.push(q4); return arr; })());
-              pieceMask=useMask;
-            } else {
-              // No clear outline: the piece is its grid box, lightly inset.
-              var mx=Math.round(cw*0.04), my=Math.round(ch*0.04);
-              bbox={x:mx,y:my,w:cw-2*mx,h:ch-2*my};
-              pieceMask=new Uint8Array(cw*ch);
-              for(var fy=bbox.y;fy<bbox.y+bbox.h;fy++) for(var fx=bbox.x;fx<bbox.x+bbox.w;fx++) pieceMask[fy*cw+fx]=1;
-            }
-            // pad the box a little, clamped to the photo
-            var padX=Math.round(cw*0.03), padY=Math.round(ch*0.03);
-            var bx=clamp(x0+bbox.x-padX,0,W-1), by=clamp(y0+bbox.y-padY,0,H-1);
-            var bw=clamp(bbox.w+2*padX,4,W-bx), bh=clamp(bbox.h+2*padY,4,H-by);
             pieces.push({
               n:r*cols+c+1, row:r, col:c,
               label:"Row "+(r+1)+" \u00B7 "+(c+1)+" across",
-              found:found,
-              shape:(found?shapeOf(pieceMask,cw,bbox):null),
-              cellX0:x0, cellY0:y0, cellW:cw, cellH:ch, mask:pieceMask,
-              bboxPx:{x:bx,y:by,w:bw,h:bh},
-              bboxPct:{x:bx/W*100,y:by/H*100,w:bw/W*100,h:bh/H*100}
+              found:true,
+              shape:shape,
+              cellX0:x0, cellY0:y0, cellW:cw, cellH:ch, mask:mask,
+              bboxPx:{x:x0,y:y0,w:cw,h:ch},
+              bboxPct:{x:x0/W*100,y:y0/H*100,w:cw/W*100,h:ch/H*100}
             });
           }
         }
@@ -1133,9 +1182,7 @@
         var grid=$("cutGrid");
         grid.style.gridTemplateColumns="repeat("+sheet.cols+",1fr)";
         grid.innerHTML="";
-        var foundN=0;
         sheet.pieces.forEach(function(pc){
-          if(pc.found) foundN++;
           var cell=document.createElement("div");
           cell.className="cut-cell";
           var im=document.createElement("img");
@@ -1144,15 +1191,10 @@
           var cap=document.createElement("div");
           cap.className="cap";
           cap.appendChild(document.createTextNode("Piece "+pc.n+" \u00B7 "+pc.label));
-          cap.appendChild(document.createElement("br"));
-          var sp=document.createElement("span");
-          sp.className=pc.found?"found":"nofind";
-          sp.textContent=pc.found?"Outline found":"No clear outline \u2014 grid box used";
-          cap.appendChild(sp);
           cell.appendChild(im); cell.appendChild(cap);
           grid.appendChild(cell);
         });
-        $("cutSummary").textContent="Found a clear outline for "+foundN+" of "+sheet.pieces.length+" pieces."+(foundN<sheet.pieces.length?" The rest were cut straight from their grid box, as marked below.":"")+" That makes "+pool.length+" pieces cut in all"+(sheetsDone?" over "+(sheetsDone+1)+" sheets":"")+".";
+        $("cutSummary").textContent="Cut "+sheet.pieces.length+" pieces straight from the grid \u2014 every piece the same size. That makes "+pool.length+" pieces cut in all"+(sheetsDone?" over "+(sheetsDone+1)+" sheets":"")+ ".";
         $("cutCard").hidden=false;
       }
 
@@ -1173,14 +1215,12 @@
         for(bi=0;bi<sheet.pieces.length;bi++){ sheet.pieces[bi].sheetNo=currentSheetNo; sheet.pieces[bi].n=baseN+bi+1; }
         pool=pool.filter(function(p){ return p.sheetNo!==currentSheetNo; }).concat(sheet.pieces);
         sheetPending=false;
-        // Features still come from the outline box, where one was found.
         for(var i=0;i<sheet.pieces.length;i++){
           sheet.pieces[i].feat=pieceFeatures(src,sheet.pieces[i]);
         }
         // Cut-outs are uniform: every piece is cropped from its whole grid
-        // box — never clipped by a too-tight outline — and drawn onto a
-        // canvas the same size as every other piece's, so the cut grid
-        // lines up in even rows of same-sized cells.
+        // box and drawn onto a canvas the same size as every other piece's,
+        // so the cut grid lines up in even rows of same-sized cells.
         var uw=0, uh=0, ui;
         for(ui=0;ui<sheet.pieces.length;ui++){ uw=Math.max(uw,sheet.pieces[ui].cellW); uh=Math.max(uh,sheet.pieces[ui].cellH); }
         for(var ci2=0;ci2<sheet.pieces.length;ci2++){
@@ -1339,7 +1379,15 @@
             loser.state="CONFLICT";
             loser.conflictWith={ n:winner.n, id:cellId, fit:winner.best.fit, state:winner.state };
             loser.fallback=loser.ranked[1]||null;
-            loser.pinCand=(loser.fallback && loser.fallback.fit>=5)?loser.fallback:null;
+            // A CONFLICT piece is still plotted on the map, at its
+            // suggested location — its next-best box, or (if there is no
+            // next-best) the box it wanted. Every piece with a suggested
+            // fit gets a pin; none is silently left off the map.
+            loser.pinCand=loser.fallback||loser.best;
+            // Plotted on the maps at its BEST box — the box it wanted —
+            // even though that box is taken. (Mark as placed still uses
+            // pinCand, the next-best box, which is the box to try.)
+            loser.mapCand=loser.best;
           }
         }
         match.results=results;
@@ -1368,42 +1416,10 @@
           box("CONFLICT","CONFLICT","lost their best box")+
           box("UNPLACED","UNPLACED","Fit below 5 · no match")+
           '<div class="count-box"><div class="num" id="placedNum">'+c.placed+'</div><div class="word" style="color:var(--green);">PLACED</div><p>of '+total+' pieces put in by hand</p></div>';
-        // Built with DOM nodes and text nodes, never string interpolation:
-        // a piece label can come from a loaded progress file, whose text
-        // must be shown as text, never run as markup.
-        var att=$("matchAttention");
-        att.innerHTML="";
-        var needs=[];
-        for(var i=0;i<match.results.length;i++){
-          var r=match.results[i], p=r.piece;
-          if(!p.found) needs.push({ n:r.n, text:" ("+p.label+") had no clear outline — its cut is its whole grid box, so treat its match with extra care." });
-          if(r.state==="SOFT") needs.push({ n:r.n, text:" ("+p.label+") is SOFT for box "+r.best.id+" — worth a human look before placing." });
-          if(r.state==="CONFLICT") needs.push({ n:r.n, text:" ("+p.label+") also wanted box "+r.best.id+", which piece "+r.conflictWith.n+" keeps. "+(r.fallback?("Its next-best box is "+r.fallback.id+"."):"It has no next-best box worth showing.")+" A human should settle it." });
-          if(r.state==="UNPLACED") needs.push({ n:r.n, text:" ("+p.label+") is UNPLACED — retake the sheet photo in better light, or place it by hand." });
-        }
-        if(needs.length){
-          var hp=document.createElement("p");
-          hp.style.cssText="margin:14px 0 0;";
-          var hs=document.createElement("strong");
-          hs.textContent="Needs a retake or a human look:";
-          hp.appendChild(hs);
-          att.appendChild(hp);
-          var ul=document.createElement("ul"); ul.className="attention";
-          needs.forEach(function(it){
-            var li=document.createElement("li");
-            var st=document.createElement("strong");
-            st.textContent="Piece "+it.n;
-            li.appendChild(st);
-            li.appendChild(document.createTextNode(it.text));
-            ul.appendChild(li);
-          });
-          att.appendChild(ul);
-        } else {
-          var np2=document.createElement("p");
-          np2.style.cssText="margin:14px 0 0;";
-          np2.textContent="Nothing needs a second look — every piece came out LOCKED.";
-          att.appendChild(np2);
-        }
+        // There is no separate retake / human-look section: each
+        // piece's own card carries that note beside its LOCKED / SOFT /
+        // CONFLICT / UNPLACED word (see renderCards).
+        $("matchAttention").innerHTML="";
         $("recapMatch").textContent=total+" pieces: "+c.LOCKED+" LOCKED \u00B7 "+c.SOFT+" SOFT \u00B7 "+c.CONFLICT+" CONFLICT \u00B7 "+c.UNPLACED+" UNPLACED \u00B7 "+c.placed+" placed";
       }
 
@@ -1419,14 +1435,47 @@
       }
 
       function renderPins(){
-        var html="";
+        // Where each piece is plotted: CONFLICT pieces at their BEST box
+        // (the box they wanted, even though it is taken), everyone else at
+        // their suggested box. Every piece with a suggested fit is plotted.
+        function plotOf(r){ return r.state==="CONFLICT" ? (r.mapCand||r.best) : r.pinCand; }
+        var html="", pins="";
+        // Count pins per box first: when two pieces plot to the same box
+        // (a CONFLICT piece and the piece that keeps the box), their pins
+        // are nudged apart so both stay visible.
+        var perCell={}, order=[];
         for(var i=0;i<match.results.length;i++){
-          var r=match.results[i];
-          if(!r.pinCand) continue;
-          var ctr=cellCenterPct(r.pinCand.ci,r.pinCand.rj);
-          html+='<span class="pin '+stateClass(r.state)+'" style="left:'+ctr.x+'%;top:'+ctr.y+'%">'+(r.placed?"\u2713":r.n)+'</span>';
+          var r0=match.results[i];
+          if(!r0.pinCand || r0.state==="UNPLACED") continue;
+          var pc0=plotOf(r0);
+          if(!perCell[pc0.id]){ perCell[pc0.id]=0; order.push(pc0.id); }
+          perCell[pc0.id]++;
         }
-        $("annotPins").innerHTML=html;
+        var seen={};
+        for(var k=0;k<match.results.length;k++){
+          var r=match.results[k];
+          if(!r.pinCand || r.state==="UNPLACED") continue;
+          var pc=plotOf(r);
+          // Other possible fits first (gray circles with gray numbers),
+          // so the best-fit pins draw on top of them.
+          var top=r.ranked.slice(0,3);
+          for(var t=0;t<top.length;t++){
+            var cand=top[t];
+            if(cand.id===pc.id) continue;
+            if(cand.fit<5 && !(r.fallback && cand.id===r.fallback.id)) continue;
+            var ac=cellCenterPct(cand.ci,cand.rj);
+            html+='<span class="pin alt" title="Piece '+r.n+' could also fit '+cand.id+'" style="left:'+ac.x+'%;top:'+ac.y+'%">'+r.n+'</span>';
+          }
+          var ctr=cellCenterPct(pc.ci,pc.rj);
+          var idx=seen[pc.id]||0; seen[pc.id]=idx+1;
+          var nIn=perCell[pc.id]||1;
+          if(nIn>1){
+            var off=(idx-(nIn-1)/2)*3.2;
+            ctr={ x:ctr.x+off, y:ctr.y+off*0.8 };
+          }
+          pins+='<span class="pin '+stateClass(r.state)+'" style="left:'+ctr.x+'%;top:'+ctr.y+'%">'+(r.placed?"\u2713":r.n)+'</span>';
+        }
+        $("annotPins").innerHTML=html+pins;
       }
 
       function fitText(cand){
@@ -1457,64 +1506,68 @@
           if(match.filter!=="all" && match.filter!=="placed" && r.state!==match.filter) return;
           shown++;
           var p=r.piece;
+          // A piece has a suggested fit unless it is UNPLACED. CONFLICT
+          // pieces count: their suggested location is the pin candidate
+          // (their next-best box). The piece is shown turned the way it
+          // fits at that location — the rotation that produced the fit.
+          var hasFit=!!(r.pinCand && r.state!=="UNPLACED");
+          // The piece photo is actually turned to the rotation that
+          // produced its best fit, so it appears the way it fits.
+          var fitRot=hasFit?r.best.rot:0;
+          // Where this piece is plotted on the maps: CONFLICT pieces at
+          // their best box (the one they wanted), everyone else at their
+          // suggested box.
+          var plotCand=(r.state==="CONFLICT")?(r.mapCand||r.best):r.pinCand;
+
           var card=document.createElement("div"); card.className="piece-card";
 
-          var left=document.createElement("div"); left.className="pimg";
+          /* LEFT: the piece photo, then its suggested fits */
+          var left=document.createElement("div");
+          var pwrap=document.createElement("div"); pwrap.className="pimg";
           var im=document.createElement("img"); im.src=p.cropURL;
-          im.alt="Piece "+r.n+" as photographed on the sheet";
+          im.alt="Piece "+r.n+(fitRot?(", turned "+(fitRot*90)+" degrees, the way it fits"):" as photographed on the sheet");
+          if(fitRot){
+            rotatedURL(p,fitRot,function(u){ im.src=u; });
+          }
           var cap=document.createElement("div"); cap.className="cap";
-          cap.textContent="Piece "+r.n+" \u00B7 Sheet "+(p.sheetNo||1)+" \u00B7 "+p.label;
-          left.appendChild(im); left.appendChild(cap);
-          card.appendChild(left);
+          cap.textContent="Piece "+r.n+" \u00B7 Sheet "+(p.sheetNo||1)+" \u00B7 "+p.label+
+            (hasFit&&fitRot?(" \u00B7 Photo turned "+(fitRot*90)+"\u00B0 \u2014 the way it fits"):"");
+          pwrap.appendChild(im); pwrap.appendChild(cap);
+          left.appendChild(pwrap);
 
-          var right=document.createElement("div");
-          // verdict + state
+          var fh=document.createElement("h4"); fh.className="fits-head";
+          fh.textContent="Suggested fits";
+          left.appendChild(fh);
           var verdict=document.createElement("p"); verdict.className="verdict";
           if(r.state==="UNPLACED"){
             verdict.innerHTML='No box found for this piece';
           } else if(r.state==="CONFLICT"){
-            verdict.innerHTML='Best box <span class="cellid">'+r.best.id+'</span> is taken'+(r.fallback?' — try <span class="cellid">'+r.fallback.id+'</span>':'');
+            verdict.innerHTML='Best box <span class="cellid">'+r.best.id+'</span> is taken'+(r.fallback?' \u2014 try <span class="cellid">'+r.fallback.id+'</span>':'');
           } else {
             verdict.innerHTML='Goes in <span class="cellid">'+r.best.id+'</span>';
           }
-          right.appendChild(verdict);
+          left.appendChild(verdict);
           var fit=document.createElement("p"); fit.className="fitline";
           if(r.state==="CONFLICT"){
             fit.innerHTML='<span class="st word conflict">CONFLICT</span> \u00B7 '+fitText(r.best)+' for '+r.best.id+', but piece '+r.conflictWith.n+' scored higher and keeps that box ('+fitText(r.conflictWith)+').';
           } else {
             fit.innerHTML='<span class="st word '+stateClass(r.state)+'">'+r.state+'</span> \u00B7 '+fitText(r.best)+' \u2014 '+statePhrase(r.state)+'.';
           }
-          right.appendChild(fit);
-          // shape, read from the outline: tabs out, blanks in, flat edges
-          if(p.shape){
-            var sh=document.createElement("div");
-            sh.style.cssText="display:flex;gap:10px;align-items:center;margin-top:10px;";
-            sh.innerHTML=shapeSVG(p.shape)+'<p class="piece-note" style="margin:0;">Shape, as it lies in the sheet photo: '+shapeText(p.shape)+'.</p>';
-            right.appendChild(sh);
+          left.appendChild(fit);
+          // Retake / human-look note, on this piece's own card beside its
+          // state word — there is no separate list for these any more.
+          var lookText=null, lookLead=null;
+          if(r.state==="UNPLACED"){ lookLead="Retake:"; lookText="no box scored well enough. A clearer sheet photo, in better light, may find this piece a box \u2014 otherwise place it by hand."; }
+          else if(r.state==="CONFLICT"){ lookLead="Human look:"; lookText="two pieces want the same box. Settle it by eye before placing either one."; }
+          else if(r.state==="SOFT"){ lookLead="Human look:"; lookText="probably right, but check it by eye before placing."; }
+          if(lookText){
+            var hn=document.createElement("p"); hn.className="look-note";
+            var hb=document.createElement("strong"); hb.textContent=lookLead+" ";
+            hn.appendChild(hb);
+            hn.appendChild(document.createTextNode(lookText));
+            left.appendChild(hn);
           }
-          // mini map with pin
-          var mm=document.createElement("div"); mm.className="minimap";
-          var mimg=document.createElement("img"); mimg.src=mapImg.src;
-          mimg.alt="The puzzle map"+(r.pinCand?(" with box "+r.pinCand.id+" marked"):"");
-          mm.appendChild(mimg);
-          if(r.pinCand){
-            var bx=cellBoxPct(r.pinCand.ci,r.pinCand.rj);
-            var boxEl=document.createElement("div"); boxEl.className="cellbox";
-            boxEl.style.cssText="left:"+bx.x+"%;top:"+bx.y+"%;width:"+bx.w+"%;height:"+bx.h+"%;";
-            mm.appendChild(boxEl);
-            var ctr=cellCenterPct(r.pinCand.ci,r.pinCand.rj);
-            var pin=document.createElement("span"); pin.className="pin "+stateClass(r.state);
-            pin.style.cssText="left:"+ctr.x+"%;top:"+ctr.y+"%;";
-            pin.textContent=r.placed?"\u2713":r.n;
-            mm.appendChild(pin);
-          }
-          right.appendChild(mm);
-          if(!r.pinCand){
-            var np=document.createElement("p"); np.className="piece-note";
-            np.textContent= r.state==="CONFLICT" ? "No pin: its next-best box scored too low to point at — judge from the candidates below." : "No pin: no box scored well enough to point at.";
-            right.appendChild(np);
-          }
-          // candidates
+          // Candidate boxes, best first
           var list=document.createElement("ul"); list.className="cand-list";
           var top=r.ranked.slice(0,3);
           top.forEach(function(cand,idx){
@@ -1522,28 +1575,62 @@
             var note="";
             if(idx===0 && r.state!=="CONFLICT") note="Best fit";
             if(idx===0 && r.state==="CONFLICT") note="Wanted this box, but piece "+r.conflictWith.n+" keeps it";
-            if(r.state==="CONFLICT" && r.fallback && cand.id===r.fallback.id && idx>0) note="Next best — the box to try";
-            if(r.piece.feat.plain) note=(note?note+" \u00B7 ":"")+"one of several similar boxes";
+            if(r.state==="CONFLICT" && r.fallback && cand.id===r.fallback.id && idx>0) note="Next best \u2014 the box to try";
+            if(r.piece.feat && r.piece.feat.plain) note=(note?note+" \u00B7 ":"")+"one of several similar boxes";
             li.innerHTML='<span class="cid">'+cand.id+'</span><span class="cfit">'+fitText(cand)+'</span>'+(note?'<span class="cnote">'+note+'</span>':"");
             list.appendChild(li);
           });
-          right.appendChild(list);
-          if(r.best.rot>0){
-            var rn=document.createElement("p"); rn.className="piece-note";
-            rn.textContent="Best fit found with the piece turned "+(r.best.rot*90)+"\u00B0 from how it lies in the sheet photo.";
-            right.appendChild(rn);
-          }
-          if(p.feat.plain){
+          left.appendChild(list);
+          if(p.feat && p.feat.plain){
             var pn=document.createElement("p"); pn.className="piece-note";
-            pn.textContent="This piece is mostly one plain colour, so several boxes look alike — judge between the candidates rather than trusting the top one.";
-            right.appendChild(pn);
+            pn.textContent="Human look: this piece is mostly one plain colour, so several boxes look alike \u2014 judge between the candidates rather than trusting the top one.";
+            left.appendChild(pn);
           }
-          if(!p.found){
-            var on=document.createElement("p"); on.className="piece-note";
-            on.textContent="No clear outline was found for this piece; its cut-out is its whole grid box, so this match is shakier than most.";
-            right.appendChild(on);
+          card.appendChild(left);
+
+          /* RIGHT: the map, with Mark as Placed under it */
+          var right=document.createElement("div"); right.className="mapcol";
+          var mm=document.createElement("div"); mm.className="minimap";
+          var mimg=document.createElement("img"); mimg.src=mapImg.src;
+          mimg.alt="The puzzle map"+(hasFit?(" with box "+plotCand.id+" marked"):"");
+          mm.appendChild(mimg);
+          if(hasFit){
+            // Other possible fits as gray circles (gray number inside),
+            // under the best-fit pin. A CONFLICT piece's next-best box is
+            // always one of them — it is the box to try.
+            top.forEach(function(cand){
+              if(cand.id===plotCand.id) return;
+              if(cand.fit<5 && !(r.fallback && cand.id===r.fallback.id)) return;
+              var ac=cellCenterPct(cand.ci,cand.rj);
+              var alt=document.createElement("span"); alt.className="pin alt";
+              alt.style.cssText="left:"+ac.x+"%;top:"+ac.y+"%;";
+              alt.textContent=r.n;
+              alt.title="Piece "+r.n+" could also fit "+cand.id;
+              mm.appendChild(alt);
+            });
+            var bx=cellBoxPct(plotCand.ci,plotCand.rj);
+            var boxEl=document.createElement("div"); boxEl.className="cellbox";
+            boxEl.style.cssText="left:"+bx.x+"%;top:"+bx.y+"%;width:"+bx.w+"%;height:"+bx.h+"%;";
+            mm.appendChild(boxEl);
+            var ctr=cellCenterPct(plotCand.ci,plotCand.rj);
+            var pin=document.createElement("span"); pin.className="pin "+stateClass(r.state);
+            pin.style.cssText="left:"+ctr.x+"%;top:"+ctr.y+"%;";
+            pin.textContent=r.placed?"\u2713":r.n;
+            mm.appendChild(pin);
           }
-          // Placed action
+          right.appendChild(mm);
+          if(hasFit){
+            var lg=document.createElement("p"); lg.className="piece-note";
+            lg.textContent= r.state==="CONFLICT" ?
+              "The red pin is the box this piece wanted, which another piece keeps. The gray circle is its next-best box \u2014 the one to try." :
+              "The numbered pin is the suggested box. Gray circles are this piece\u2019s other possible fits.";
+            right.appendChild(lg);
+          } else {
+            var np=document.createElement("p"); np.className="piece-note";
+            np.textContent="No pin: no box scored well enough to point at.";
+            right.appendChild(np);
+          }
+          // Placed action — under the map
           var row=document.createElement("div"); row.className="btn-row";
           var pb=document.createElement("button"); pb.type="button";
           pb.className="btn"+(r.placed?" confirmed":"");
@@ -1577,7 +1664,7 @@
         if(!shown){
           var none=document.createElement("p");
           none.className="confirm-note";
-          none.textContent= match.filter==="placed" ? "No pieces marked as placed yet — place a LOCKED piece, then tap Mark as placed on its card." : "No pieces in this group.";
+          none.textContent= match.filter==="placed" ? "No pieces marked as placed yet \u2014 place a LOCKED piece, then tap Mark as placed on its card." : "No pieces in this group.";
           wrap.appendChild(none);
         }
       }
@@ -1680,7 +1767,7 @@
             var strong=document.createElement("strong");
             strong.textContent="Box "+id;
             li.appendChild(strong);
-            li.appendChild(document.createTextNode(" — "+e.label+(e.fit!=null?(" \u00B7 Fit "+e.fit+"/10 "+e.state):"")+(e.shape?(" \u00B7 shape: "+shapeText(e.shape)):"")));
+            li.appendChild(document.createTextNode(" — "+e.label+(e.fit!=null?(" \u00B7 Fit "+e.fit+"/10 "+e.state):"")));
             ul.appendChild(li);
           });
           listEl.appendChild(ul);
@@ -1872,7 +1959,9 @@
                   placed:!!pd.match.placed,
                   conflictWith:cwClean,
                   fallback:cleanCand(pd.match.fallback),
-                  pinCand:cleanCand(pd.match.pinCand)||best });
+                  pinCand:cleanCand(pd.match.pinCand)||best,
+                  // CONFLICT pieces plot at their best box on the maps.
+                  mapCand:(st==="CONFLICT"?best:null) });
               }
             }
           });
