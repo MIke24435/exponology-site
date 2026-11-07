@@ -370,6 +370,14 @@
       .piece-card .mapcol .btn-row{justify-content:flex-end;}
       @media (max-width:700px){ .piece-card{grid-template-columns:1fr;} }
 
+      /* Fingerprint matching settings (Step 3) */
+      .fp-settings{border:1px solid var(--line);border-radius:10px;background:var(--panel-soft);padding:14px 16px;margin:0 0 16px;}
+      .fp-toggle{display:inline-flex;align-items:center;gap:10px;font-weight:700;font-size:16.5px;cursor:pointer;min-height:36px;color:var(--ink);}
+      .fp-toggle input{width:22px;height:22px;margin:0;flex:none;cursor:pointer;accent-color:var(--green);}
+      .fp-desc{color:var(--ink-soft);font-size:15px;margin:6px 0 0;}
+      .fp-hash{font-size:13.5px;color:var(--ink-soft);margin:4px 0 0;}
+      .fp-hash code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--ink);}
+
       /* Print: only the puzzle map sheet prints */
       #printArea{display:none;}
       @media print{
@@ -554,6 +562,11 @@
         <p class="sec-intro">The app compares every cut-out piece against every box on the map — by colour and by the pattern of the picture — trying each piece at 0&deg;, 90&deg;, 180&deg; and 270&deg; and keeping the best fit. Each card shows the piece turned the way it fits — the rotation that produced its best fit. Each piece gets a <strong>Fit score out of 10</strong>, always shown with its word.</p>
 
         <div class="card">
+          <div class="fp-settings">
+            <label class="fp-toggle"><input type="checkbox" id="fpToggle" /> <span>Use fingerprint matching</span></label>
+            <p class="fp-desc">Each box on the map is boiled down to a short fingerprint code — its colours and its light-and-dark pattern on an 8&times;8 sub-grid — with the average brightness taken out first, so a brighter or darker photo gives the same code, and all four turns tried, so a piece turned 90&deg;, 180&deg; or 270&deg; still matches. The map&rsquo;s fingerprints are worked out once and kept in a table; each piece is fingerprinted the same way and looked up in the table to find the few closest boxes, and only those few get the full colour-and-pattern check. A piece photographed twice has the same fingerprint both times, so its card says when it looks like a piece already in the pool. The setting stays as you leave it, and is saved in your progress file. Off, matching works exactly as it always has.</p>
+            <p class="confirm-note" id="fpStatus">Fingerprint matching is off — pieces are matched by colour and pattern only, exactly as before.</p>
+          </div>
           <div class="btn-row" style="margin-top:0;">
             <button type="button" class="btn" id="matchRun">Match the pieces</button>
           </div>
@@ -672,6 +685,7 @@
             <li>Above the cards, one dropdown filter picks which pieces the cards show: open it and tick any mix of LOCKED, SOFT, CONFLICT, UNPLACED and Placed — or All pieces to see everything again.</li>
             <li>When you physically put a piece in, tick the <strong>Placed</strong> checkbox above the gold info box on its card. It is remembered on the board in step 4, in its box, and stays there while you add more sheets.</li>
             <li>Before placing a piece, check its card: SOFT means probably right — have a quick look first — and CONFLICT means another piece wants the same box, so settle it by eye before placing either one. Plain and dark pieces are the hardest to tell apart, because several boxes look alike.</li>
+            <li><strong>Fingerprint matching</strong> (the toggle at the top of step 3) is optional. On, every box on the map is first boiled down to a short fingerprint code — its colours and light-and-dark pattern on an 8&times;8 sub-grid, with the average brightness taken out so a brighter photo gives the same code, and all four turns covered so a turned piece still matches. The codes are kept in a table built once for the map and reused for every sheet — a new sheet only fingerprints its own pieces and looks them up. The lookup narrows each piece to the few closest boxes, and the full colour-and-pattern check then runs on just those few, so the Fit scores and the LOCKED / SOFT / CONFLICT / UNPLACED words work exactly as before. Each card shows the piece&rsquo;s fingerprint code; if the same piece is photographed twice, the two share a code and the card says so. Off, matching works exactly as it always has. The setting stays as you leave it, and is saved in your progress file.</li>
           </ol>
         </div>
 
@@ -779,6 +793,96 @@
         return 1-(s/108)/255;
       }
 
+      /* ================= FINGERPRINTS (hash codes) =================
+         A fingerprint boils a box (or a piece) down to a short code plus
+         a compact numeric vector, from an 8x8 sub-grid of the picture:
+         the mean colour of each of the 64 sub-cells. The average
+         brightness over the whole box is subtracted first and what is
+         left is scaled by the picture's own contrast, so the same
+         picture photographed brighter or darker gives (nearly) the
+         same fingerprint. All four rotations of the vector are stored,
+         so a piece turned 90/180/270 degrees still matches; the hash
+         code shown in the app is the smallest of the four rotations'
+         codes, which makes it rotation-independent — the same piece
+         photographed twice, at any turn, gets the same code.
+         The map's fingerprints live in a table built ONCE (see
+         ensureFpTable in the matching section): one entry per box,
+         grouped into sub-grids of up to 3x3 boxes. The table is reused
+         for every sheet — only new pieces are fingerprinted and looked
+         up — and it is thrown away only when the map itself changes. */
+      var fpEnabled=false, fpTable=null, fpTableVersion=-1, mapVersion=0;
+
+      function rotVec8(v,rot){ // rotate an 8x8x3 vector by rot*90 degrees clockwise
+        if(rot===0) return v;
+        var out=new Float32Array(192), x, y, nx, ny;
+        for(y=0;y<8;y++) for(x=0;x<8;x++){
+          if(rot===1){ nx=7-y; ny=x; } else if(rot===2){ nx=7-x; ny=7-y; } else { nx=y; ny=7-x; }
+          var s=(y*8+x)*3, t=(ny*8+nx)*3;
+          out[t]=v[s]; out[t+1]=v[s+1]; out[t+2]=v[s+2];
+        }
+        return out;
+      }
+      function bitsToHex(bits){
+        var h="";
+        for(var i=0;i+3<bits.length;i+=4) h+=(bits[i]*8+bits[i+1]*4+bits[i+2]*2+bits[i+3]).toString(16);
+        return h;
+      }
+      // Hash code for one normalised 8x8x3 vector: 64 light/dark bits
+      // (each sub-cell brighter or darker than the box average — the
+      // average was subtracted when the vector was made, so the test
+      // is simply "above zero") plus 2 colour bits per sub-cell naming
+      // its strongest channel (or "none" for a grey sub-cell).
+      function fpHashFromVec(v){
+        var lbits=[], cbits=[], i, r, g, b, mx, mn, code;
+        for(i=0;i<64;i++){
+          r=v[i*3]; g=v[i*3+1]; b=v[i*3+2];
+          lbits.push((r+g+b)/3>0?1:0);
+          mx=Math.max(r,g,b); mn=Math.min(r,g,b);
+          code=(mx-mn<0.15)?3:(mx===r?0:(mx===g?1:2));
+          cbits.push((code>>1)&1, code&1);
+        }
+        return bitsToHex(lbits)+bitsToHex(cbits);
+      }
+      // Fingerprint from a 48x48x3 sample array (the same sampling the
+      // pattern grid uses, so map boxes and pieces are treated alike).
+      function makeFingerprint(samples){
+        var B=8, blk=6, means=new Float32Array(192), bx, by, dx, dy;
+        for(by=0;by<B;by++) for(bx=0;bx<B;bx++){
+          var sr=0, sg=0, sb=0;
+          for(dy=0;dy<blk;dy++) for(dx=0;dx<blk;dx++){
+            var idx=((by*blk+dy)*48+(bx*blk+dx))*3;
+            sr+=samples[idx]; sg+=samples[idx+1]; sb+=samples[idx+2];
+          }
+          var o=(by*B+bx)*3, n=blk*blk;
+          means[o]=sr/n; means[o+1]=sg/n; means[o+2]=sb/n;
+        }
+        var mean=0, i;
+        for(i=0;i<64;i++) mean+=(means[i*3]+means[i*3+1]+means[i*3+2])/3;
+        mean/=64;
+        var varr=0;
+        for(i=0;i<64;i++){ var L=(means[i*3]+means[i*3+1]+means[i*3+2])/3; varr+=(L-mean)*(L-mean); }
+        var scale=Math.max(Math.sqrt(varr/64),8);
+        var v=new Float32Array(192);
+        for(i=0;i<192;i++) v[i]=(means[i]-mean)/scale; // average brightness taken out here
+        var rots=[v,rotVec8(v,1),rotVec8(v,2),rotVec8(v,3)];
+        var hash=null;
+        for(i=0;i<4;i++){ var hh=fpHashFromVec(rots[i]); if(hash===null||hh<hash) hash=hh; }
+        return { v:v, rots:rots, hash:hash, short:hash.slice(0,12) };
+      }
+      // Closeness of two fingerprints: the smallest mean absolute
+      // difference between the piece's vector and any rotation of the
+      // other — 0 for identical pictures, around 1 for unrelated ones.
+      function fpDist(a,b){
+        var best=1e9;
+        for(var r=0;r<4;r++){
+          var bv=b.rots[r], s=0;
+          for(var i=0;i<192;i++) s+=Math.abs(a.v[i]-bv[i]);
+          var d=s/192;
+          if(d<best) best=d;
+        }
+        return best;
+      }
+
       /* ================= MAP ================= */
       var map = {
         corners: [ {x:0,y:0}, {x:100,y:0}, {x:100,y:100}, {x:0,y:100} ], // TL TR BR BL, in % — the photo's outer corners
@@ -830,6 +934,8 @@
 
       function mapChanged(){
         board={}; // the boxes moved — placements belong to the old grid
+        mapVersion++; fpTable=null; fpTableVersion=-1; // the fingerprint table belongs to the old map — it is rebuilt once, on next use
+        if(typeof updateFpStatus==="function") updateFpStatus();
         if(map.confirmed){
           map.confirmed=false;
           $("mapConfirm").textContent="The grid sits right on the picture";
@@ -1278,7 +1384,7 @@
           var varr=0; for(i2=0;i2<grayVals.length;i2++) varr+=(grayVals[i2]-mean)*(grayVals[i2]-mean);
           plain=Math.sqrt(varr/grayVals.length)<26;
         }
-        return { hist:histOf(histSamples), grids:grids, plain:plain };
+        return { hist:histOf(histSamples), grids:grids, plain:plain, fp:makeFingerprint(samples) };
       }
 
       // Renders the current sheet's cut-outs. Used right after a cut, and
@@ -1457,10 +1563,110 @@
       window.addEventListener("resize",drawSheet);
 
       /* ================= MATCHING ================= */
-      var match={ results:[], ran:false, filters:[] };
+      var match={ results:[], ran:false, filters:[], fpOn:false, fpK:0 };
+
+      /* ---- The map's fingerprint table ----
+         Built once for the map as it stands (ensureFpTable), then
+         reused for every sheet and every match run: matching a new
+         sheet fingerprints only the new pieces and looks them up.
+         mapChanged() throws the table away, so it is rebuilt — once —
+         only when the map grid or photo changes. Each entry is a map
+         cell with its fingerprint; cells are also grouped into
+         sub-grids of up to 3x3 boxes, each sub-grid carrying an
+         aggregate fingerprint (the mean of its boxes' vectors). */
+      function ensureFpTable(src){
+        if(fpTable && fpTableVersion===mapVersion) return fpTable;
+        var cells=buildMapCells(src,true);
+        var subgrids=[], sg=3, br, bc, r, c, k;
+        for(br=0;br<map.rows;br+=sg){
+          for(bc=0;bc<map.cols;bc+=sg){
+            var idxs=[];
+            for(r=br;r<Math.min(map.rows,br+sg);r++) for(c=bc;c<Math.min(map.cols,bc+sg);c++) idxs.push(r*map.cols+c);
+            var mean=new Float32Array(192);
+            for(k=0;k<idxs.length;k++){ var cv=cells[idxs[k]].fp.v; for(var i2=0;i2<192;i2++) mean[i2]+=cv[i2]; }
+            for(var i3=0;i3<192;i3++) mean[i3]/=idxs.length;
+            subgrids.push({ id:"SG"+(subgrids.length+1), cells:idxs, fp:{ v:mean, rots:[mean], hash:fpHashFromVec(mean) } });
+          }
+        }
+        fpTable={ cells:cells, subgrids:subgrids };
+        fpTableVersion=mapVersion;
+        updateFpStatus();
+        return fpTable;
+      }
+      // How many candidate boxes the fingerprint lookup keeps per piece.
+      function fpKeepCount(total){
+        var K=clamp(Math.round(total*0.125),5,10);
+        return Math.min(K,total);
+      }
+      // Look a piece's fingerprint up in the table — the entries are
+      // held in sub-grid groups, and comparing short fingerprints is
+      // cheap enough that every box's distance is exact — and return
+      // the indices of the few closest boxes.
+      function fpCandidates(piece,table){
+        var K=fpKeepCount(table.cells.length), dists=[];
+        for(var s=0;s<table.subgrids.length;s++){
+          var idxs=table.subgrids[s].cells;
+          for(var j=0;j<idxs.length;j++){
+            dists.push({ idx:idxs[j], d:fpDist(piece.feat.fp, table.cells[idxs[j]].fp) });
+          }
+        }
+        dists.sort(function(a,b){ return a.d-b.d; });
+        var out=[];
+        for(var k=0;k<K;k++) out.push(dists[k].idx);
+        return out;
+      }
+      function updateFpStatus(){
+        var el=$("fpStatus"); if(!el) return;
+        if(!fpEnabled){
+          el.textContent="Fingerprint matching is off — pieces are matched by colour and pattern only, exactly as before.";
+          el.classList.remove("done");
+          return;
+        }
+        if(fpTable && fpTableVersion===mapVersion){
+          el.textContent="Fingerprint table ready: "+fpTable.cells.length+" boxes fingerprinted, grouped in "+fpTable.subgrids.length+" sub-grids — built once and reused for every sheet. It is rebuilt only if the map changes.";
+          el.classList.add("done");
+        } else {
+          el.textContent="Fingerprint matching is on — the map's fingerprint table will be built once when matching next runs, then reused for every sheet.";
+          el.classList.remove("done");
+        }
+      }
+      // Same piece photographed twice: two pool pieces whose
+      // fingerprints are very close (or whose hash codes are identical)
+      // are almost certainly one physical piece seen in two sheets.
+      // Advisory only — the note on the card says so; nothing is
+      // removed or re-scored.
+      function markFpDups(){
+        var i, j;
+        for(i=0;i<pool.length;i++) pool[i].fpDup=null;
+        for(i=0;i<pool.length;i++){
+          if(!pool[i].feat || !pool[i].feat.fp) continue;
+          for(j=i+1;j<pool.length;j++){
+            if(!pool[j].feat || !pool[j].feat.fp) continue;
+            var same = pool[i].feat.fp.hash===pool[j].feat.fp.hash || fpDist(pool[i].feat.fp,pool[j].feat.fp)<0.35;
+            if(same){
+              if(!pool[i].fpDup) pool[i].fpDup=pool[j].n;
+              if(!pool[j].fpDup) pool[j].fpDup=pool[i].n;
+            }
+          }
+        }
+      }
+
+      $("fpToggle").addEventListener("change",function(){
+        fpEnabled=this.checked; // remembered for the whole sitting, and saved in the progress file
+        if(fpEnabled && mapImg.naturalWidth){
+          var el=$("fpStatus");
+          if(el){ el.textContent="Building the map's fingerprint table — this happens once…"; el.classList.remove("done"); }
+          setTimeout(function(){
+            try{ ensureFpTable(imgToSrc(mapImg)); }catch(err){}
+            updateFpStatus();
+          },30);
+        } else {
+          updateFpStatus();
+        }
+      });
 
       function clearMatch(){
-        match.results=[]; match.ran=false; match.filters=[];
+        match.results=[]; match.ran=false; match.filters=[]; match.fpOn=false; match.fpK=0;
         ["LOCKED","SOFT","CONFLICT","UNPLACED","PLACED"].forEach(function(k){
           var e=$("cnt"+k); if(e) e.textContent="\u2013";
         });
@@ -1495,7 +1701,7 @@
         return f;
       }
 
-      function buildMapCells(src){
+      function buildMapCells(src,withFp){
         var cells=[], S=48;
         for(var r=0;r<map.rows;r++){
           for(var c=0;c<map.cols;c++){
@@ -1509,16 +1715,17 @@
                 histSamples.push(px);
               }
             }
-            cells.push({ ci:c, rj:r, id:colLetter(c)+(r+1), hist:histOf(histSamples), grid:grid6(samples) });
+            cells.push({ ci:c, rj:r, id:colLetter(c)+(r+1), hist:histOf(histSamples), grid:grid6(samples), fp:withFp?makeFingerprint(samples):null });
           }
         }
         return cells;
       }
 
-      function scorePiece(piece,cells){
+      function scorePiece(piece,cells,onlyIdxs){
         var hi=piece.feat.hist, scored=[];
-        for(var i=0;i<cells.length;i++){
-          var cell=cells[i], histSim=histInter(hi,cell.hist), best=-1, bestRot=0;
+        var nCells=onlyIdxs?onlyIdxs.length:cells.length;
+        for(var i=0;i<nCells;i++){
+          var cell=cells[onlyIdxs?onlyIdxs[i]:i], histSim=histInter(hi,cell.hist), best=-1, bestRot=0;
           for(var rot=0;rot<4;rot++){
             var s=0.65*histSim+0.35*gridSim(piece.feat.grids[rot],cell.grid);
             if(s>best){ best=s; bestRot=rot; }
@@ -1772,6 +1979,21 @@
             rcSpan.textContent+=")";
           }
           left.appendChild(head);
+          // Fingerprint code, under the caption — only when this match
+          // run used fingerprint matching. The code is the piece's
+          // rotation-independent hash; a piece photographed twice
+          // carries the same code, and says so here.
+          if(match.fpOn){
+            var hashShow=(p.feat&&p.feat.fp)?p.feat.fp.short:((p.feat&&p.feat.fpHash)?String(p.feat.fpHash).slice(0,12):null);
+            if(hashShow){
+              var fpl=document.createElement("p"); fpl.className="fp-hash";
+              fpl.appendChild(document.createTextNode("Fingerprint "));
+              var fcode=document.createElement("code"); fcode.textContent=hashShow;
+              fpl.appendChild(fcode);
+              if(p.fpDup) fpl.appendChild(document.createTextNode(" — matches Piece "+p.fpDup));
+              left.appendChild(fpl);
+            }
+          }
 
           // The candidate list, ABOVE the gold info box: every possible
           // grid location for this piece, best first, each line in the
@@ -1823,6 +2045,9 @@
           var covered=false;
           if(r.state==="CONFLICT" && r.conflictWith){
             boxLines.push("Piece "+r.conflictWith.n+" keeps box "+r.best.id+" ("+fitText(r.conflictWith)+").");
+          }
+          if(match.fpOn && p.fpDup){
+            boxLines.push("Fingerprint: this piece has the same fingerprint as Piece "+p.fpDup+" — it looks like the same piece photographed twice. Place one, and set the other aside.");
           }
           if(r.state==="UNPLACED"){ boxLines.push("Retake: no box scored well enough. A clearer sheet photo, in better light, may find this piece a box \u2014 otherwise place it by hand."); covered=true; }
           else if(r.state==="CONFLICT"){ boxLines.push("Human look: two pieces want the same box. Settle it by eye before placing either one."); covered=true; }
@@ -1968,22 +2193,54 @@
         note.classList.remove("done");
         setTimeout(function(){
           var src=imgToSrc(mapImg);
-          var cells=buildMapCells(src);
+          var table=null, cells;
+          if(fpEnabled){
+            // Fingerprint ON: the map's table is built once (here, if
+            // it has not been built already) and reused — its cells
+            // carry the histograms and pattern grids too, so nothing
+            // about the map is recomputed for a new sheet.
+            table=ensureFpTable(src);
+            cells=table.cells;
+            match.fpOn=true;
+            match.fpK=fpKeepCount(cells.length);
+            note.textContent="Matching\u2026 fingerprint table ready ("+cells.length+" boxes) — looking each piece up in it.";
+          } else {
+            cells=buildMapCells(src);
+            match.fpOn=false;
+          }
           var ranked=[], i=0;
           function step(){
             if(i<pool.length){
-              ranked.push(scorePiece(pool[i],cells));
+              var sc;
+              if(table && pool[i].feat && pool[i].feat.fp){
+                // Coarse filter first: the fingerprint lookup narrows
+                // the piece to the few closest boxes, then the usual
+                // colour-and-pattern check runs on just those.
+                var cand=fpCandidates(pool[i],table);
+                sc=scorePiece(pool[i],cells,cand);
+                // Safety net: if no candidate scores at all well, the
+                // fingerprint may have missed the right box — fall back
+                // to checking every box rather than strand the piece.
+                if(sc.length && sc[0].raw<0.52 && cand.length<cells.length) sc=scorePiece(pool[i],cells);
+              } else {
+                sc=scorePiece(pool[i],cells);
+              }
+              ranked.push(sc);
               i++;
               note.textContent="Matching\u2026 piece "+i+" of "+pool.length+".";
               setTimeout(step,0);
               return;
             }
             resolveAndStore(ranked);
+            if(match.fpOn) markFpDups();
+            else for(var di=0;di<pool.length;di++) pool[di].fpDup=null;
             $("annotImg").src=mapImg.src;
             renderSummary(); renderPins(); renderCards();
             $("matchResults").hidden=false;
             var c=countsOf();
-            note.textContent="Done. "+c.LOCKED+" LOCKED, "+c.SOFT+" SOFT, "+c.CONFLICT+" CONFLICT, "+c.UNPLACED+" UNPLACED \u2014 the counts are in the state boxes above, and the filter dropdown above the cards can show one group or several at once.";
+            note.textContent= match.fpOn ?
+              "Done — fingerprint matching ON: the table's "+cells.length+" box fingerprints narrowed each piece to "+match.fpK+" candidate boxes, and the colour-and-pattern check picked the winner among them. "+c.LOCKED+" LOCKED, "+c.SOFT+" SOFT, "+c.CONFLICT+" CONFLICT, "+c.UNPLACED+" UNPLACED \u2014 the counts are in the state boxes above." :
+              "Done. "+c.LOCKED+" LOCKED, "+c.SOFT+" SOFT, "+c.CONFLICT+" CONFLICT, "+c.UNPLACED+" UNPLACED \u2014 the counts are in the state boxes above, and the filter dropdown above the cards can show one group or several at once.";
             note.classList.add("done");
             btn.disabled=false;
             $("matchResults").scrollIntoView({behavior:"auto",block:"start"});
@@ -2145,7 +2402,7 @@
         function jobDone(){
           if(++doneJobs<jobs) return;
           placed.sort(function(a,b){ return (a.rj-b.rj)||(a.ci-b.ci); });
-          var data={ app:"jigsaw-piece-finder", version:2, saved:new Date().toISOString(),
+          var data={ app:"jigsaw-piece-finder", version:2, saved:new Date().toISOString(), fpEnabled:fpEnabled,
                      map:{ cols:map.cols, rows:map.rows, corners:map.corners, img:snapDataURL(mapImg,1400) },
                      sheet:{ cols:sheet.cols, rows:sheet.rows, vlines:sheet.vlines, hlines:sheet.hlines,
                              img:(sheetFresh?snapDataURL(sheetImg,1400):null),
@@ -2161,6 +2418,7 @@
             pieceData[idx]={ n:p.n, sheetNo:p.sheetNo||1, row:p.row||0, col:p.col||0,
               label:(typeof p.label==="string"?p.label:""), found:!!p.found,
               shape:p.shape||null, plain:!!(p.feat&&p.feat.plain),
+              fpHash:(p.feat&&p.feat.fp)?p.feat.fp.hash:((p.feat&&p.feat.fpHash)?p.feat.fpHash:null),
               bboxPct:p.bboxPct||null, crop:t,
               match: res? { state:res.state, placed:!!res.placed, best:res.best,
                             ranked:res.ranked.slice(0,3), conflictWith:res.conflictWith,
@@ -2191,6 +2449,13 @@
         var mn2=$("mapConfirmNote");
         mn2.textContent="Grid loaded from the progress file — check it sits right on the picture, then tap the green button.";
         mn2.classList.remove("done");
+        // --- the fingerprint setting, saved with the sitting ---
+        if(typeof data.fpEnabled==="boolean"){
+          fpEnabled=data.fpEnabled;
+          var ftgl=$("fpToggle"); if(ftgl) ftgl.checked=fpEnabled;
+        }
+        fpTable=null; fpTableVersion=-1; // the loaded map needs its own table — built once, on next use
+        updateFpStatus();
         // --- the board (placed pieces) ---
         board={};
         data.placed.forEach(function(pl){
@@ -2227,7 +2492,7 @@
                         shape:(pd.shape && typeof pd.shape==="object")?pd.shape:null,
                         bboxPct:(pd.bboxPct && typeof pd.bboxPct==="object")?pd.bboxPct:null,
                         cropURL:pd.crop,
-                        feat:{ plain:!!pd.plain, hist:null, grids:null } };
+                        feat:{ plain:!!pd.plain, hist:null, grids:null, fp:null, fpHash:(typeof pd.fpHash==="string"?pd.fpHash:null) } };
             pool.push(piece);
             if(pd.match && typeof pd.match==="object"){
               var ranked=[];
@@ -2250,7 +2515,18 @@
               }
             }
           });
+          // Pieces restored with the same saved fingerprint were
+          // photographed twice — flag each with the other's number.
+          var seenH={};
+          pool.forEach(function(p2){ p2.fpDup=null; });
+          pool.forEach(function(p2){
+            var hh=p2.feat&&p2.feat.fpHash;
+            if(!hh) return;
+            if(seenH[hh]){ p2.fpDup=seenH[hh].n; if(!seenH[hh].fpDup) seenH[hh].fpDup=p2.n; }
+            else seenH[hh]=p2;
+          });
           if(match.results.length) match.ran=true;
+          match.fpOn=fpEnabled; // restored cards show their fingerprints when the saved sitting used them
         }
         // --- the sheet: photo, counts and the dragged grid lines ---
         sheet.cut=false; sheet.confirmed=false; sheet.pieces=[];
@@ -2341,6 +2617,7 @@
 
       drawMap();
       drawSheet();
+      updateFpStatus();
     })();
     </script>
   </body>
