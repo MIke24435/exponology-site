@@ -83,6 +83,42 @@
   .sitebar nav a.nav-app:hover{color:#fff;text-decoration:underline}
   @media (prefers-color-scheme: dark){.sitebar nav a.nav-app:hover{color:#0e1a13}}
 
+  /* Apps dropdown: same menu as the other Exponology pages */
+  .nav-dropdown{position:relative;display:flex;align-items:center}
+  .nav-drop-btn{
+    font:inherit;font-size:.98rem;font-weight:600;color:var(--ink-soft);
+    background:none;border:none;padding:6px 2px;cursor:pointer;min-height:44px;
+    display:inline-flex;align-items:center;gap:6px;
+  }
+  .nav-drop-btn:hover{color:var(--jade);text-decoration:underline}
+  .nav-drop-btn .caret{
+    display:inline-block;width:0;height:0;flex:0 0 auto;
+    border-left:4.5px solid transparent;border-right:4.5px solid transparent;border-top:6px solid currentColor;
+    transition:transform .15s ease;
+  }
+  .nav-drop-btn[aria-expanded="true"] .caret{transform:rotate(180deg)}
+  .sitebar nav .nav-menu{
+    position:absolute;top:calc(100% + 8px);left:0;z-index:60;list-style:none;margin:0;padding:7px;
+    min-width:248px;max-width:min(288px,82vw);
+    background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);
+  }
+  .sitebar nav .nav-menu a{
+    display:block;padding:11px 13px;border-radius:6px;
+    font-size:.98rem;font-weight:600;line-height:1.35;white-space:normal;color:var(--ink-soft);
+  }
+  .sitebar nav .nav-menu a:hover,.sitebar nav .nav-menu a:focus-visible{
+    color:var(--jade-strong);background:var(--surface-2);text-decoration:none;
+  }
+  .sitebar nav .nav-menu a:focus-visible{outline:2px solid var(--jade);outline-offset:-2px}
+  .sitebar nav .nav-menu a .here{
+    display:block;font-size:.78rem;font-weight:700;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--gold);margin-top:2px;
+  }
+  /* No-JS fallback: reveal the menu on hover / keyboard focus-within so the app links stay reachable */
+  .nav-dropdown:not(.dropdown-ready):hover .nav-menu,
+  .nav-dropdown:not(.dropdown-ready):focus-within .nav-menu{display:block}
+  @media (prefers-reduced-motion: reduce){.nav-drop-btn .caret{transition:none}}
+
   /* Hero */
   .hero{padding:34px 0 8px}
   @media(min-width:880px){
@@ -240,13 +276,23 @@
       <a href="#how">How it works</a>
       <a href="#filters">The filters</a>
       <a href="#key">Notation key</a>
+      <div class="nav-dropdown" id="apps-dropdown">
+        <button class="nav-drop-btn" id="apps-menu-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="apps-menu">Apps <span class="caret" aria-hidden="true"></span></button>
+        <ul class="nav-menu" id="apps-menu" role="menu" aria-label="Apps" hidden>
+          <li role="none"><a role="menuitem" href="https://exponology.com/apps/mah-jongg-hand-finder/app.html">The Mah Jongg Hand Finder<span class="here">You are learning this one</span></a></li>
+          <li role="none"><a role="menuitem" href="https://exponology.com/apps/mah-jongg-hand-matcher/app.html">The Mah Jongg Hand Matcher</a></li>
+          <li role="none"><a role="menuitem" href="https://exponology.com/apps/cipherdesk/app.html">CipherDesk</a></li>
+          <li role="none"><a role="menuitem" href="https://exponology.com/apps/factor-finder/app.html">Prime Factor Finder</a></li>
+          <li role="none"><a role="menuitem" href="https://exponology.com/apps/jigsaw-piece-finder/app.html">Jigsaw Piece Finder</a></li>
+        </ul>
+      </div>
       <a class="nav-app" href="https://exponology.com/apps/mah-jongg-hand-finder/app.html">Open the Mah Jongg Hand Finder</a>
     </nav>
   </div>
 
   <header class="hero" id="top">
     <div>
-      <p class="eyebrow"><span><a href="https://exponology.com/">Exponology</a> Apps &middot; 2026 Card</span></p>
+      <p class="eyebrow"><span>2026 Card &middot; 79 Hands</span></p>
       <h1>Find the hand that fits your tiles.</h1>
       <p class="lede">The <strong>Mah Jongg Hand Finder</strong> turns the 2026 card into a search. Instead of scanning all nine sections line by line, you say what a hand <strong>must contain</strong> &mdash; the numbers, the points, the flowers, dragons, winds and groups you&rsquo;re holding &mdash; and it shows you only the hands that fit.</p>
       <div class="cta-row">
@@ -504,6 +550,75 @@
       try{ target.focus({preventScroll: true}); }catch(err){ target.focus(); }
     });
   }
+})();
+
+/* Apps dropdown: click / keyboard open and close, matching the
+   other Exponology pages. Without JS the menu still opens on
+   hover / focus-within (see the CSS fallback). */
+(function(){
+  var wrap = document.getElementById('apps-dropdown');
+  var btn = document.getElementById('apps-menu-btn');
+  var menu = document.getElementById('apps-menu');
+  if(!wrap || !btn || !menu) return;
+  wrap.classList.add('dropdown-ready');
+  var items = Array.prototype.slice.call(menu.querySelectorAll('a'));
+  function isOpen(){ return btn.getAttribute('aria-expanded') === 'true'; }
+  function openMenu(){
+    menu.hidden = false;
+    btn.setAttribute('aria-expanded', 'true');
+  }
+  function closeMenu(returnFocus){
+    menu.hidden = true;
+    btn.setAttribute('aria-expanded', 'false');
+    if(returnFocus) btn.focus();
+  }
+  btn.addEventListener('click', function(){
+    if(isOpen()){ closeMenu(false); } else { openMenu(); }
+  });
+  btn.addEventListener('keydown', function(e){
+    if(e.key === 'ArrowDown'){
+      e.preventDefault();
+      openMenu();
+      if(items.length) items[0].focus();
+    } else if(e.key === 'ArrowUp'){
+      e.preventDefault();
+      openMenu();
+      if(items.length) items[items.length - 1].focus();
+    }
+  });
+  menu.addEventListener('keydown', function(e){
+    var idx = items.indexOf(document.activeElement);
+    if(e.key === 'Escape'){
+      e.preventDefault();
+      closeMenu(true);
+    } else if(e.key === 'ArrowDown'){
+      e.preventDefault();
+      items[(idx + 1) % items.length].focus();
+    } else if(e.key === 'ArrowUp'){
+      e.preventDefault();
+      items[(idx - 1 + items.length) % items.length].focus();
+    } else if(e.key === 'Home'){
+      e.preventDefault();
+      items[0].focus();
+    } else if(e.key === 'End'){
+      e.preventDefault();
+      items[items.length - 1].focus();
+    } else if(e.key === 'Tab'){
+      closeMenu(false);
+    }
+  });
+  items.forEach(function(link){
+    link.addEventListener('click', function(){ closeMenu(false); });
+  });
+  document.addEventListener('click', function(e){
+    if(isOpen() && !wrap.contains(e.target)) closeMenu(false);
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && isOpen()) closeMenu(true);
+  });
+  wrap.addEventListener('focusout', function(e){
+    if(isOpen() && !wrap.contains(e.relatedTarget)) closeMenu(false);
+  });
 })();
 </script>
 </body>
