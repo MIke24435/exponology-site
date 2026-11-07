@@ -250,11 +250,48 @@
       .fitline .st{font-weight:800;letter-spacing:.3px;}
       .piece-note{color:var(--ink-soft);font-size:15px;margin:8px 0 0;}
 
-      /* State legend */
-      .states{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:14px;}
+      /* State legend — after matching, each box also carries its count */
+      .states{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:14px;}
       .state-box{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--panel-soft);}
       .state-box .word{font-weight:800;letter-spacing:.4px;font-size:16px;}
       .state-box p{margin:4px 0 0;color:var(--ink-soft);font-size:15px;}
+      .state-box .count-line{display:flex;align-items:baseline;gap:10px;}
+      .state-box .num{font-size:30px;font-weight:800;line-height:1;}
+      .word.placed{color:var(--green);}
+
+      /* Candidate list on a piece card, above the gold info box: every
+         possible grid location, best first, "<Grid> - <STATE> [★] Fit n/10" */
+      .candidates{margin:10px 0 4px;display:grid;gap:3px;}
+      .cand-line{font-size:17px;margin:0;line-height:1.35;}
+      .cand-line .cellid{font-family:"Newsreader",Georgia,serif;font-weight:700;font-size:19px;}
+      .cand-line .st{font-weight:800;letter-spacing:.3px;}
+      .cand-line.best{font-weight:700;}
+      .cand-line .star{color:var(--gold);}
+      .cand-line.no-fit{color:var(--ink-soft);font-weight:600;}
+
+      /* Filter above the piece cards: a single dropdown multiselect */
+      .filterbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin:0 0 14px;}
+      .filter-label{font-weight:700;font-size:15px;}
+      .multiselect{position:relative;}
+      .multiselect-btn{
+        display:inline-flex;align-items:center;gap:10px;min-height:48px;padding:10px 16px;
+        border-radius:10px;border:2px solid var(--line);background:var(--panel);
+        color:var(--ink);font-size:16px;font-weight:600;cursor:pointer;max-width:100%;
+      }
+      .multiselect-btn .ms-caret{color:var(--ink-soft);flex:none;}
+      .multiselect-panel{
+        position:absolute;left:0;top:calc(100% + 6px);z-index:20;min-width:240px;
+        background:var(--panel);border:1px solid var(--line);border-radius:10px;
+        box-shadow:var(--shadow);padding:6px;
+      }
+      .ms-option{
+        display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+        min-height:44px;padding:8px 10px;border:0;border-radius:7px;background:transparent;
+        color:var(--ink);font-size:15.5px;font-weight:600;cursor:pointer;
+      }
+      .ms-option:hover{background:var(--panel-soft);}
+      .ms-option .ms-check{width:18px;flex:none;text-align:center;color:var(--green);font-weight:800;}
+      .ms-option .ms-count{color:var(--ink-soft);font-weight:500;margin-left:auto;}
 
       .recap{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;}
       .recap .item{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--panel);}
@@ -470,14 +507,7 @@
           <h2>Match the pieces</h2>
           <a class="help-link" href="#help-match">Help</a>
         </div>
-        <p class="sec-intro">The app compares every cut-out piece against every box on the map — by colour and by the pattern of the picture — trying each piece at 0&deg;, 90&deg;, 180&deg; and 270&deg; and keeping the best fit. Each card shows the piece turned the way it fits — the rotation that produced its best fit. Each piece gets a <strong>Fit score out of 10</strong>, always shown with its word:</p>
-
-        <div class="states" style="margin:0 0 18px;">
-          <div class="state-box"><span class="word locked">LOCKED</span><p>Fit 8 to 10. The app is sure. Place the piece.</p></div>
-          <div class="state-box"><span class="word soft">SOFT</span><p>Fit 5 to 7. Probably right — worth a quick look before placing.</p></div>
-          <div class="state-box"><span class="word conflict">CONFLICT</span><p>Two pieces want the same box. The higher score keeps it; the other piece is shown its next-best box.</p></div>
-          <div class="state-box"><span class="word unplaced">UNPLACED</span><p>Fit below 5. No box scored well enough. Take a better photo, or place it by hand.</p></div>
-        </div>
+        <p class="sec-intro">The app compares every cut-out piece against every box on the map — by colour and by the pattern of the picture — trying each piece at 0&deg;, 90&deg;, 180&deg; and 270&deg; and keeping the best fit. Each card shows the piece turned the way it fits — the rotation that produced its best fit. Each piece gets a <strong>Fit score out of 10</strong>, always shown with its word.</p>
 
         <div class="card">
           <div class="btn-row" style="margin-top:0;">
@@ -486,13 +516,15 @@
           <p class="confirm-note" id="matchNote">Cut the sheet in step 2 first — matching works on the cut-out pieces.</p>
         </div>
 
-        <div id="matchResults" hidden>
-          <div class="card">
-            <h3 style="font-family:'Newsreader',Georgia,serif;font-size:22px;margin:0 0 4px;font-weight:600;">How the matching came out</h3>
-            <div class="counts" id="matchCounts"></div>
-            <div id="matchAttention"></div>
-          </div>
+        <div class="states" style="margin:0 0 18px;">
+          <div class="state-box"><div class="count-line"><span class="num" id="cntLOCKED">&ndash;</span><span class="word locked">LOCKED</span></div><p>Fit 8 to 10. The app is sure. Place the piece.</p></div>
+          <div class="state-box"><div class="count-line"><span class="num" id="cntSOFT">&ndash;</span><span class="word soft">SOFT</span></div><p>Fit 5 to 7. Probably right — worth a quick look before placing.</p></div>
+          <div class="state-box"><div class="count-line"><span class="num" id="cntCONFLICT">&ndash;</span><span class="word conflict">CONFLICT</span></div><p>Two pieces want the same box. The higher score keeps it; the other piece is shown its next-best box.</p></div>
+          <div class="state-box"><div class="count-line"><span class="num" id="cntUNPLACED">&ndash;</span><span class="word unplaced">UNPLACED</span></div><p>Fit below 5. No box scored well enough. Take a better photo, or place it by hand.</p></div>
+          <div class="state-box"><div class="count-line"><span class="num" id="cntPLACED">&ndash;</span><span class="word placed">PLACED</span></div><p id="placedBlurb">Pieces put in by hand.</p></div>
+        </div>
 
+        <div id="matchResults" hidden>
           <div class="card">
             <h3 style="font-family:'Newsreader',Georgia,serif;font-size:22px;margin:0 0 10px;font-weight:600;">The map, with every match pinned</h3>
             <div class="stage" id="annotStage" style="touch-action:auto;">
@@ -509,6 +541,14 @@
           </div>
 
           <h3 style="font-family:'Newsreader',Georgia,serif;font-size:24px;margin:26px 0 12px;font-weight:600;">One card per piece</h3>
+          <div class="filterbar">
+            <span class="filter-label" id="filterLabel">Show pieces:</span>
+            <div class="multiselect">
+              <button type="button" class="multiselect-btn" id="filterBtn" aria-haspopup="true" aria-expanded="false" aria-labelledby="filterLabel filterBtnText"><span id="filterBtnText">All pieces</span><span class="ms-caret" aria-hidden="true">&#9662;</span></button>
+              <div class="multiselect-panel" id="filterPanel" role="group" aria-label="Filter pieces by state" hidden></div>
+            </div>
+            <span class="confirm-note" id="filterCount"></span>
+          </div>
           <div id="pieceCards"></div>
         </div>
       </section>
@@ -588,7 +628,8 @@
             <li>Plain or dark pieces look like many boxes at once. Their other possible fits appear on the card&rsquo;s map as gray squares, so a person can judge between them.</li>
             <li>Changing the map grid or re-cutting the sheet clears the matching — run it again afterwards.</li>
             <li>The piece photo on each card is turned the way the piece will sit in the puzzle — the rotation that gave its best fit — so what you see is the piece as it goes in, not as it lay on the sheet.</li>
-            <li>On each card the piece photo sits in the left column, with the suggested fit shown below the gold info box, marked with a gold star (for example, &ldquo;&#9733; Goes in D6&rdquo;), and the small map sits right-justified in the right column; the piece&rsquo;s other possible fits appear on that map as gray squares with the piece number in gray inside — square, so they can&rsquo;t be mistaken for the round best-fit pin — and <strong>Mark as placed</strong> sits under the map. CONFLICT pieces are pinned on the map too, at the box they wanted — their next-best box shows as a gray square.</li>
+            <li>On each card the piece photo sits in the left column. Above the gold info box, every possible box for the piece is listed, best first — for example &ldquo;B7 - SOFT &#9733; Fit 6/10&rdquo; for the best fit, then &ldquo;A7 - SOFT Fit 5/10&rdquo; — the box, its word, a gold star on the best fit only, and the Fit score. The comments sit in the gold box under that list. The small map sits right-justified in the right column; the piece&rsquo;s other possible fits appear on that map as gray squares with the piece number in gray inside — square, so they can&rsquo;t be mistaken for the round best-fit pin — and <strong>Mark as placed</strong> sits under the map. CONFLICT pieces are pinned on the map too, at the box they wanted — their next-best box shows as a gray square.</li>
+            <li>Above the cards, one dropdown filter picks which pieces the cards show: open it and tick any mix of LOCKED, SOFT, CONFLICT, UNPLACED and Placed — or All pieces to see everything again.</li>
             <li>When you physically put a piece in, tap <strong>Mark as placed</strong> on its card. It is remembered on the board in step 4, in its box, and stays there while you add more sheets.</li>
           </ol>
         </div>
@@ -1267,10 +1308,14 @@
       window.addEventListener("resize",drawSheet);
 
       /* ================= MATCHING ================= */
-      var match={ results:[], ran:false, filter:"all" };
+      var match={ results:[], ran:false, filters:[] };
 
       function clearMatch(){
-        match.results=[]; match.ran=false; match.filter="all";
+        match.results=[]; match.ran=false; match.filters=[];
+        ["LOCKED","SOFT","CONFLICT","UNPLACED","PLACED"].forEach(function(k){
+          var e=$("cnt"+k); if(e) e.textContent="\u2013";
+        });
+        var pb=$("placedBlurb"); if(pb) pb.textContent="Pieces put in by hand.";
         $("matchResults").hidden=true;
         $("recapMatch").textContent="Not run yet";
         var mn=$("matchNote");
@@ -1401,19 +1446,17 @@
 
       function renderSummary(){
         var c=countsOf(), total=match.results.length;
-        function box(st,word,blurb){
-          return '<div class="count-box"><div class="num">'+c[st]+'</div><div class="word '+stateClass(st)+'">'+word+'</div><p>'+blurb+'</p></div>';
-        }
-        $("matchCounts").innerHTML=
-          box("LOCKED","LOCKED","Fit 8–10 · ready to place")+
-          box("SOFT","SOFT","Fit 5–7 · check first")+
-          box("CONFLICT","CONFLICT","lost their best box")+
-          box("UNPLACED","UNPLACED","Fit below 5 · no match")+
-          '<div class="count-box"><div class="num" id="placedNum">'+c.placed+'</div><div class="word" style="color:var(--green);">PLACED</div><p>of '+total+' pieces put in by hand</p></div>';
-        // There is no separate retake / human-look section: each
-        // piece's own card carries that note beside its LOCKED / SOFT /
-        // CONFLICT / UNPLACED word (see renderCards).
-        $("matchAttention").innerHTML="";
+        // The counts live in the state boxes above the map — there is
+        // no separate "How the matching came out" section any more.
+        // There is also no separate retake / human-look section: each
+        // piece's own card carries that note in its gold box (see
+        // renderCards).
+        $("cntLOCKED").textContent=c.LOCKED;
+        $("cntSOFT").textContent=c.SOFT;
+        $("cntCONFLICT").textContent=c.CONFLICT;
+        $("cntUNPLACED").textContent=c.UNPLACED;
+        $("cntPLACED").textContent=c.placed;
+        $("placedBlurb").textContent="of "+total+" pieces put in by hand";
         $("recapMatch").textContent=total+" pieces: "+c.LOCKED+" LOCKED \u00B7 "+c.SOFT+" SOFT \u00B7 "+c.CONFLICT+" CONFLICT \u00B7 "+c.UNPLACED+" UNPLACED \u00B7 "+c.placed+" placed";
       }
 
@@ -1476,28 +1519,58 @@
         return "Fit "+cand.fit+"/10 \u00B7 "+cand.state;
       }
 
+      /* The filter is a single dropdown multiselect: match.filters
+         holds the selected states (plus "placed"); an empty selection
+         shows every piece, otherwise a card shows when it matches any
+         selected entry. */
+      function passesFilter(r){
+        if(!match.filters.length) return true;
+        for(var i=0;i<match.filters.length;i++){
+          var f=match.filters[i];
+          if(f==="placed"){ if(r.placed) return true; }
+          else if(r.state===f) return true;
+        }
+        return false;
+      }
+
+      function renderFilter(){
+        var panel=$("filterPanel"); if(!panel) return;
+        var c=countsOf(), total=match.results.length;
+        var opts=[["LOCKED","LOCKED",c.LOCKED],["SOFT","SOFT",c.SOFT],["CONFLICT","CONFLICT",c.CONFLICT],
+                  ["UNPLACED","UNPLACED",c.UNPLACED],["placed","Placed",c.placed]];
+        panel.innerHTML="";
+        function option(value,label,count,selected,onPick){
+          var b=document.createElement("button");
+          b.type="button"; b.className="ms-option";
+          b.setAttribute("aria-pressed",selected?"true":"false");
+          var check=document.createElement("span"); check.className="ms-check"; check.setAttribute("aria-hidden","true");
+          check.textContent=selected?"\u2713":"";
+          var name=document.createElement("span"); name.textContent=label;
+          var cnt=document.createElement("span"); cnt.className="ms-count"; cnt.textContent="("+count+")";
+          b.appendChild(check); b.appendChild(name); b.appendChild(cnt);
+          b.addEventListener("click",onPick);
+          panel.appendChild(b);
+        }
+        option("all","All pieces",total,!match.filters.length,function(){ match.filters=[]; renderCards(); });
+        opts.forEach(function(o){
+          var sel=match.filters.indexOf(o[0])>=0;
+          option(o[0],o[1],o[2],sel,function(){
+            var i=match.filters.indexOf(o[0]);
+            if(i>=0) match.filters.splice(i,1); else match.filters.push(o[0]);
+            renderCards();
+          });
+        });
+        $("filterBtnText").textContent= !match.filters.length ? "All pieces" :
+          match.filters.map(function(f){ return f==="placed"?"Placed":f; }).join(", ");
+      }
+
       function renderCards(){
         var wrap=$("pieceCards"); wrap.innerHTML="";
-        // Filter chips
-        var c=countsOf(), total=match.results.length;
-        var chips=[["all","All pieces",total],["LOCKED","LOCKED",c.LOCKED],["SOFT","SOFT",c.SOFT],
-                   ["CONFLICT","CONFLICT",c.CONFLICT],["UNPLACED","UNPLACED",c.UNPLACED],["placed","Placed",c.placed]];
-        var fbar=document.createElement("div");
-        fbar.style.cssText="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;";
-        chips.forEach(function(ch){
-          var b=document.createElement("button");
-          b.type="button"; b.className="corner-btn"+(match.filter===ch[0]?" active":"");
-          b.style.cssText="min-height:48px;flex:1 1 30%;font-size:15px;padding:8px 6px;";
-          b.textContent=ch[1]+" ("+ch[2]+")";
-          b.addEventListener("click",function(){ match.filter=ch[0]; renderCards(); });
-          fbar.appendChild(b);
-        });
-        wrap.appendChild(fbar);
-
+        renderFilter();
+        var total=match.results.length;
         var shown=0;
         match.results.forEach(function(r){
-          if(match.filter==="placed" && !r.placed) return;
-          if(match.filter!=="all" && match.filter!=="placed" && r.state!==match.filter) return;
+          if(!passesFilter(r)) return;
           shown++;
           var p=r.piece;
           // A piece has a suggested fit unless it is UNPLACED. CONFLICT
@@ -1516,10 +1589,11 @@
           var card=document.createElement("div"); card.className="piece-card";
 
           /* LEFT: the piece photo, then — below it, as a small caption —
-             the piece number in compact code form, then the state line,
-             the gold info box, and below that box the suggested fit
-             marked with a gold star. No candidate list: the other
-             possible fits stay on the map as gray squares. */
+             the piece number in compact code form, then the candidate
+             list (every possible grid location, best first, ABOVE the
+             gold info box), then the gold info box with the comments.
+             The other possible fits also stay on the map as gray
+             squares. */
           var left=document.createElement("div");
           var pwrap=document.createElement("div"); pwrap.className="pimg";
           var im=document.createElement("img"); im.src=p.cropURL;
@@ -1550,12 +1624,40 @@
           }
           left.appendChild(head);
 
-          // The state line stays short: just the state word and the Fit —
-          // "SOFT · Fit 7/10". Every comment that used to trail it lives
-          // in the gold-bordered box below.
-          var fit=document.createElement("p"); fit.className="fitline";
-          fit.innerHTML='<span class="st word '+stateClass(r.state)+'">'+r.state+'</span> \u00B7 Fit '+r.best.fit+'/10';
-          left.appendChild(fit);
+          // The candidate list, ABOVE the gold info box: every possible
+          // grid location for this piece, best first, each line in the
+          // form "<Grid> - <STATE> [★ if best] Fit <n>/10" — e.g.
+          // "B7 - SOFT ★ Fit 6/10", then "A7 - SOFT Fit 5/10". This
+          // list replaces the old separate state line.
+          var cands=document.createElement("div"); cands.className="candidates";
+          if(!hasFit){
+            var nf=document.createElement("p"); nf.className="cand-line no-fit";
+            nf.textContent="No box found for this piece";
+            cands.appendChild(nf);
+          } else {
+            r.ranked.slice(0,3).forEach(function(cand,ci2){
+              var isBest=ci2===0;
+              var line=document.createElement("p"); line.className="cand-line"+(isBest?" best":"");
+              var idSpan=document.createElement("span"); idSpan.className="cellid";
+              idSpan.textContent=cand.id;
+              line.appendChild(idSpan);
+              line.appendChild(document.createTextNode(" - "));
+              var stWord=(isBest && r.state==="CONFLICT")?"CONFLICT":cand.state;
+              var stSpan=document.createElement("span");
+              stSpan.className="st word "+stateClass(stWord);
+              stSpan.textContent=stWord;
+              line.appendChild(stSpan);
+              if(isBest){
+                line.appendChild(document.createTextNode(" "));
+                var star=document.createElement("span"); star.className="star";
+                star.setAttribute("aria-hidden","true"); star.textContent="\u2605";
+                line.appendChild(star);
+              }
+              line.appendChild(document.createTextNode(" Fit "+cand.fit+"/10"));
+              cands.appendChild(line);
+            });
+          }
+          left.appendChild(cands);
           // ALL comments go in the one gold-bordered box: the comment that
           // follows the state word, the retake / human-look note, and the
           // plain-piece warning — nothing comment-like sits outside it.
@@ -1587,24 +1689,9 @@
           });
           left.appendChild(hn);
           // The top candidates, kept for the map on the right (gray
-          // squares for the other possible fits) — they are no longer
-          // listed as text on the card.
+          // squares for the other possible fits). They are also listed
+          // as text above the gold box — see the candidate list.
           var top=r.ranked.slice(0,3);
-          // Suggested fit, below the gold info box, with a gold star
-          // next to it — e.g. "★ Goes in D6". No star when there is
-          // no fit to suggest.
-          var verdict=document.createElement("p");
-          if(r.state==="UNPLACED"){
-            verdict.className="suggested-fit no-fit";
-            verdict.innerHTML='No box found for this piece';
-          } else if(r.state==="CONFLICT"){
-            verdict.className="suggested-fit";
-            verdict.innerHTML='<span class="star" aria-hidden="true">\u2605</span><span>Best box <span class="cellid">'+r.best.id+'</span> is taken'+(r.fallback?' \u2014 try <span class="cellid">'+r.fallback.id+'</span>':'')+'</span>';
-          } else {
-            verdict.className="suggested-fit";
-            verdict.innerHTML='<span class="star" aria-hidden="true">\u2605</span><span>Goes in <span class="cellid">'+r.best.id+'</span></span>';
-          }
-          left.appendChild(verdict);
           card.appendChild(left);
 
           /* RIGHT: the map, with Mark as Placed under it */
@@ -1680,13 +1767,32 @@
           card.appendChild(right);
           wrap.appendChild(card);
         });
+        $("filterCount").textContent="Showing "+shown+" of "+total+" pieces";
         if(!shown){
           var none=document.createElement("p");
           none.className="confirm-note";
-          none.textContent= match.filter==="placed" ? "No pieces marked as placed yet \u2014 place a LOCKED piece, then tap Mark as placed on its card." : "No pieces in this group.";
+          none.textContent= (match.filters.length===1 && match.filters[0]==="placed") ? "No pieces marked as placed yet \u2014 place a LOCKED piece, then tap Mark as placed on its card." : "No pieces match the states picked in the filter \u2014 open the dropdown and pick more states, or All pieces.";
           wrap.appendChild(none);
         }
       }
+
+      /* The filter dropdown: the button opens and closes the panel;
+         picking states keeps it open (it is a multiselect); a click
+         anywhere else, or Escape, closes it. */
+      (function(){
+        var btn=$("filterBtn"), panel=$("filterPanel");
+        if(!btn||!panel) return;
+        function close(){ panel.hidden=true; btn.setAttribute("aria-expanded","false"); }
+        btn.addEventListener("click",function(e){
+          e.stopPropagation();
+          var willOpen=panel.hidden;
+          panel.hidden=!willOpen;
+          btn.setAttribute("aria-expanded",willOpen?"true":"false");
+        });
+        panel.addEventListener("click",function(e){ e.stopPropagation(); });
+        document.addEventListener("click",function(){ if(!panel.hidden) close(); });
+        document.addEventListener("keydown",function(e){ if(e.key==="Escape" && !panel.hidden) close(); });
+      })();
 
       $("matchRun").addEventListener("click",function(){
         var note=$("matchNote");
@@ -1717,7 +1823,7 @@
             renderSummary(); renderPins(); renderCards();
             $("matchResults").hidden=false;
             var c=countsOf();
-            note.textContent="Done. "+c.LOCKED+" LOCKED, "+c.SOFT+" SOFT, "+c.CONFLICT+" CONFLICT, "+c.UNPLACED+" UNPLACED \u2014 the cards are grouped by those words with the filter buttons above them.";
+            note.textContent="Done. "+c.LOCKED+" LOCKED, "+c.SOFT+" SOFT, "+c.CONFLICT+" CONFLICT, "+c.UNPLACED+" UNPLACED \u2014 the counts are in the state boxes above, and the filter dropdown above the cards can show one group or several at once.";
             note.classList.add("done");
             btn.disabled=false;
             $("matchResults").scrollIntoView({behavior:"smooth",block:"start"});
@@ -1949,7 +2055,7 @@
                            shape:(pl.shape && typeof pl.shape==="object")?pl.shape:null };
         });
         // --- every piece cut so far, with its match (version 2 files) ---
-        pool=[]; match.results=[]; match.ran=false; match.filter="all";
+        pool=[]; match.results=[]; match.ran=false; match.filters=[];
         var full=Array.isArray(data.pieces);
         if(full){
           data.pieces.forEach(function(pd){
@@ -2024,6 +2130,8 @@
         } else {
           $("matchResults").hidden=true;
           $("recapMatch").textContent="Not run yet";
+          var placedBack=Object.keys(board).length;
+          if(placedBack){ $("cntPLACED").textContent=placedBack; $("placedBlurb").textContent="put in by hand"; }
           var mn4=$("matchNote");
           mn4.textContent= pool.length? "Tap Match the pieces (step 3) — it uses all "+pool.length+" pieces cut so far." : "Cut the sheet in step 2 first — matching works on the cut-out pieces.";
           mn4.classList.remove("done");
