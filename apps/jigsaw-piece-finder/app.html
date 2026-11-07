@@ -363,8 +363,8 @@
         #printArea .print-stage img{display:block;width:100%;height:auto;}
         #printArea .print-stage svg{position:absolute;inset:0;width:100%;height:100%;}
         #printArea .cell-label{
-          position:absolute;transform:translate(-50%,-50%);font-weight:400;color:#000;
-          text-shadow:0 1px 2px #fff,0 0 5px #fff;line-height:1;white-space:nowrap;
+          position:absolute;transform:translate(-50%,-50%);font-weight:400;color:#fff;
+          text-shadow:0 1px 3px rgba(0,0,0,.85),0 0 6px rgba(0,0,0,.6);line-height:1;white-space:nowrap;
         }
       }
     </style>
@@ -862,12 +862,12 @@
         for(i=0;i<=cols;i++){
           u=i/cols; pts=[];
           for(j=0;j<=16;j++){ v=j/16; p=bilinear(c,u,v); pts.push(p.x.toFixed(2)+","+p.y.toFixed(2)); }
-          html+='<polyline points="'+pts.join(" ")+'" fill="none" stroke="'+(i===0||i===cols?'#b98a1c':'rgba(0,0,0,.5)')+'" vector-effect="non-scaling-stroke" style="stroke-width:'+(i===0||i===cols?1.1:0.7)+'px"/>';
+          html+='<polyline points="'+pts.join(" ")+'" fill="none" stroke="'+(i===0||i===cols?'#fff':'rgba(255,255,255,.75)')+'" vector-effect="non-scaling-stroke" style="stroke-width:'+(i===0||i===cols?1.1:0.7)+'px"/>';
         }
         for(j=0;j<=rows;j++){
           v=j/rows; pts=[];
           for(i=0;i<=16;i++){ u=i/16; p=bilinear(c,u,v); pts.push(p.x.toFixed(2)+","+p.y.toFixed(2)); }
-          html+='<polyline points="'+pts.join(" ")+'" fill="none" stroke="'+(j===0||j===rows?'#b98a1c':'rgba(0,0,0,.5)')+'" vector-effect="non-scaling-stroke" style="stroke-width:'+(j===0||j===rows?1.1:0.7)+'px"/>';
+          html+='<polyline points="'+pts.join(" ")+'" fill="none" stroke="'+(j===0||j===rows?'#fff':'rgba(255,255,255,.75)')+'" vector-effect="non-scaling-stroke" style="stroke-width:'+(j===0||j===rows?1.1:0.7)+'px"/>';
         }
         var lh="", fs=clamp(Math.min(1000/cols,760/rows)*0.3,10,20);
         for(j=0;j<rows;j++) for(i=0;i<cols;i++){
@@ -1670,21 +1670,31 @@
             });
           }
           left.appendChild(cands);
-          // ALL comments go in the one gold-bordered box: the comment that
-          // follows the state word, the retake / human-look note, and the
-          // plain-piece warning — nothing comment-like sits outside it.
+          // ALL comments go in the one gold-bordered box — nothing
+          // comment-like sits outside it. Each message appears ONCE:
+          // the Human look / Retake notes already say what the state
+          // word's comment says (SOFT = "probably right, check first";
+          // UNPLACED = "no box scored well enough"; CONFLICT = "two
+          // pieces want the same box"), and the state itself is already
+          // in the candidate lines above, so when one of those notes is
+          // present the state-word comment is dropped. It is kept only
+          // when no note covers it (LOCKED), so the box is never empty.
+          // Distinct notes always stay: the CONFLICT detail (which piece
+          // keeps the box) and the plain-piece warning.
           var boxLines=[];
-          var stateComment=statePhrase(r.state);
-          stateComment=stateComment.charAt(0).toUpperCase()+stateComment.slice(1);
+          var covered=false;
           if(r.state==="CONFLICT" && r.conflictWith){
-            boxLines.push(stateComment+": piece "+r.conflictWith.n+" keeps box "+r.best.id+" ("+fitText(r.conflictWith)+").");
-          } else {
-            boxLines.push(stateComment+".");
+            boxLines.push("Piece "+r.conflictWith.n+" keeps box "+r.best.id+" ("+fitText(r.conflictWith)+").");
           }
-          if(r.state==="UNPLACED") boxLines.push("Retake: no box scored well enough. A clearer sheet photo, in better light, may find this piece a box \u2014 otherwise place it by hand.");
-          else if(r.state==="CONFLICT") boxLines.push("Human look: two pieces want the same box. Settle it by eye before placing either one.");
-          else if(r.state==="SOFT") boxLines.push("Human look: probably right, but check it by eye before placing.");
+          if(r.state==="UNPLACED"){ boxLines.push("Retake: no box scored well enough. A clearer sheet photo, in better light, may find this piece a box \u2014 otherwise place it by hand."); covered=true; }
+          else if(r.state==="CONFLICT"){ boxLines.push("Human look: two pieces want the same box. Settle it by eye before placing either one."); covered=true; }
+          else if(r.state==="SOFT"){ boxLines.push("Human look: probably right, but check it by eye before placing."); covered=true; }
           if(p.feat && p.feat.plain) boxLines.push("Human look: this piece is mostly one plain colour, so several boxes look alike \u2014 judge between the candidates rather than trusting the top one.");
+          if(!covered){
+            var stateComment=statePhrase(r.state);
+            stateComment=stateComment.charAt(0).toUpperCase()+stateComment.slice(1);
+            boxLines.unshift(stateComment+".");
+          }
           // Placed checkbox — ABOVE the gold info box, right-justified
           // with it (its right edge aligns with the note box's right
           // edge). Ticking it marks the piece as placed and remembers
