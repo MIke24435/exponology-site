@@ -126,8 +126,7 @@
       .handle.active{outline:4px solid var(--gold);outline-offset:1px;z-index:6;}
       .handle span{pointer-events:none;}
 
-      /* Corner picker */
-      .corner-picker{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 4px;}
+      /* Filter chips on the piece cards reuse this button style */
       .corner-btn{
         min-height:54px;border-radius:10px;border:2px solid var(--line);background:var(--panel-soft);
         color:var(--ink);font-size:16px;font-weight:600;cursor:pointer;padding:10px;
@@ -231,27 +230,24 @@
       @media (max-width:560px){ .piece-card{gap:12px;padding:12px;} }
       .piece-card .pimg{max-width:300px;}
       .piece-card .pimg img{display:block;width:100%;height:auto;border-radius:8px;}
+      /* Caption under the piece photo: small caption-sized text, e.g.
+         "Piece 13 (S1, R3, C3, 180°)" — it sits under the photo as a
+         caption, not as a headline. */
       .piece-head{
-        font-family:"Newsreader",Georgia,serif;font-weight:700;
-        font-size:clamp(32px,5vw,42px);line-height:1.15;margin:12px 0 10px;
+        font-weight:700;font-size:15px;line-height:1.4;margin:8px 0 6px;color:var(--ink);
       }
-      .piece-head .rc{font-size:.74em;font-weight:600;color:var(--ink-soft);white-space:nowrap;}
+      .piece-head .rc{font-size:1em;font-weight:600;color:var(--ink-soft);white-space:nowrap;}
       .piece-head .turn{font-weight:700;color:var(--gold);}
       .piece-card .pimg .cap{font-size:13.5px;font-weight:700;color:var(--ink-soft);margin-top:6px;line-height:1.35;}
       .piece-card .minimap{position:relative;line-height:0;max-width:300px;}
       .piece-card .minimap img{display:block;width:100%;height:auto;border-radius:6px;pointer-events:none;}
-      .piece-card .verdict{font-size:19px;font-weight:700;margin:0 0 2px;}
-      .piece-card .verdict .cellid{font-family:"Newsreader",Georgia,serif;font-size:24px;}
+      /* Suggested fit, shown below the gold info box with a gold star */
+      .suggested-fit{font-size:19px;font-weight:700;margin:12px 0 2px;display:flex;align-items:baseline;gap:8px;}
+      .suggested-fit .star{color:var(--gold);font-size:22px;line-height:1;flex:none;}
+      .suggested-fit .cellid{font-family:"Newsreader",Georgia,serif;font-size:24px;}
+      .suggested-fit.no-fit{color:var(--ink-soft);font-size:17px;}
       .fitline{font-size:16.5px;margin:2px 0;}
       .fitline .st{font-weight:800;letter-spacing:.3px;}
-      .cand-list{margin:10px 0 0;padding:0;list-style:none;}
-      .cand-list li{
-        display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;
-        padding:7px 10px;border:1px solid var(--line);border-radius:8px;margin-bottom:6px;background:var(--panel-soft);
-      }
-      .cand-list .cid{font-weight:800;font-size:16.5px;min-width:38px;}
-      .cand-list .cfit{font-size:15px;}
-      .cand-list .cnote{font-size:14px;color:var(--ink-soft);flex-basis:100%;}
       .piece-note{color:var(--ink-soft);font-size:15px;margin:8px 0 0;}
 
       /* State legend */
@@ -305,9 +301,6 @@
       .piece-card .mapcol .minimap{max-width:440px;width:100%;margin-left:auto;}
       .piece-card .mapcol .piece-note{max-width:440px;width:100%;margin-left:auto;}
       .piece-card .mapcol .btn-row{justify-content:flex-end;}
-      .piece-card .fits-head{
-        font-family:"Newsreader",Georgia,serif;font-size:19px;font-weight:600;margin:14px 0 4px;
-      }
       @media (max-width:700px){ .piece-card{grid-template-columns:1fr;} }
 
       /* Print: only the puzzle map sheet prints */
@@ -347,7 +340,7 @@
           <h2>Set up the map</h2>
           <a class="help-link" href="#help-map">Help</a>
         </div>
-        <p class="sec-intro">This is the bookshelf puzzle, already finished. The four red dots start in the outer corners of the photo and mark the corners of the picture. Drag a dot — or tap a corner button below, then tap the photo — until the dots sit exactly on the picture&rsquo;s corners. Then set how many boxes the grid has, across and down.</p>
+        <p class="sec-intro">This is the bookshelf puzzle, already finished. The four red dots start in the outer corners of the photo and mark the corners of the picture. Drag each dot until the dots sit exactly on the picture&rsquo;s corners. Then set how many boxes the grid has, across and down.</p>
 
         <div class="card">
           <div class="btn-row" style="margin:0 0 14px;">
@@ -365,13 +358,7 @@
             <div class="handle" data-corner="3" style="left:0%;top:100%;"><span>BL</span></div>
           </div>
 
-          <div class="corner-picker" role="group" aria-label="Choose a corner to move">
-            <button type="button" class="corner-btn active" data-corner="0">Top left corner</button>
-            <button type="button" class="corner-btn" data-corner="1">Top right corner</button>
-            <button type="button" class="corner-btn" data-corner="3">Bottom left corner</button>
-            <button type="button" class="corner-btn" data-corner="2">Bottom right corner</button>
-          </div>
-          <p class="hint">Tap a corner button, then tap the photo where that corner of the picture is — or just drag the red dot. Fine-tune by dragging; the grid follows.</p>
+          <p class="hint">Drag a red dot onto its corner of the picture. Fine-tune by dragging; the grid follows.</p>
 
           <div class="controls">
             <div class="stepper-group">
@@ -560,7 +547,7 @@
 
         <div class="card">
           <h3 style="font-family:'Newsreader',Georgia,serif;font-size:22px;margin:0;font-weight:600;">A word of caution</h3>
-          <p style="color:var(--ink-soft);margin:8px 0 0;">Matching from photos is a first pass, not gospel — plain and dark pieces are genuinely hard, because several boxes look alike. That is why every score travels with its word, why plain pieces show several candidate boxes instead of one answer, and why a SOFT or CONFLICT card always asks for a human glance before the piece goes in.</p>
+          <p style="color:var(--ink-soft);margin:8px 0 0;">Matching from photos is a first pass, not gospel — plain and dark pieces are genuinely hard, because several boxes look alike. That is why every score travels with its word, why plain pieces show their other possible fits as gray squares on the map instead of one answer, and why a SOFT or CONFLICT card always asks for a human glance before the piece goes in.</p>
         </div>
       </section>
 
@@ -572,7 +559,7 @@
           <h3>Setting up the map</h3>
           <ol>
             <li>Start from a photo of the finished puzzle — the completed puzzle itself, the box lid, or the poster picture.</li>
-            <li>The four red dots mark the corners of the picture (not the photo). They start in the photo&rsquo;s outer corners — if the picture fills the photo edge to edge, they may already be right. Drag each dot onto its corner, or tap a corner button, then tap the photo.</li>
+            <li>The four red dots mark the corners of the picture (not the photo). They start in the photo&rsquo;s outer corners — if the picture fills the photo edge to edge, they may already be right. Drag each dot onto its corner.</li>
             <li>Set the boxes across and boxes down to match how you want the picture divided. Each box gets a name: a column letter plus a row number — A1 is top left, and with 6 across and 8 down the bottom right box is F8.</li>
             <li>Look along the grid lines: they should follow the picture evenly, with no drift at the far side. If the bottom lines sit lower than they should, a corner is off — nudge it.</li>
             <li>When the grid sits right, tap <strong>The grid sits right on the picture</strong>. Changing a corner or a count afterwards asks you to confirm again.</li>
@@ -598,10 +585,10 @@
             <li>Tap <strong>Match the pieces</strong> once the sheet is cut. The app tries every piece against every box on the map, at four rotations, comparing colour and the pattern of the picture.</li>
             <li>Every piece gets a Fit score out of 10, always with its word: <strong>LOCKED</strong> (8–10, the app is sure), <strong>SOFT</strong> (5–7, probably right — look before placing), <strong>UNPLACED</strong> (below 5, no good match).</li>
             <li>If two pieces both fit one box best, the higher score keeps the box and the other is marked <strong>CONFLICT</strong>, with its next-best box shown. A box is never given to two pieces without saying so.</li>
-            <li>Plain or dark pieces look like many boxes at once. Their cards list the top three candidate boxes with scores, so a person can judge between them.</li>
+            <li>Plain or dark pieces look like many boxes at once. Their other possible fits appear on the card&rsquo;s map as gray squares, so a person can judge between them.</li>
             <li>Changing the map grid or re-cutting the sheet clears the matching — run it again afterwards.</li>
             <li>The piece photo on each card is turned the way the piece will sit in the puzzle — the rotation that gave its best fit — so what you see is the piece as it goes in, not as it lay on the sheet.</li>
-            <li>On each card the piece photo and its suggested fits sit in the left column, and the small map sits right-justified in the right column; the piece&rsquo;s other possible fits appear on that map as gray squares with the piece number in gray inside — square, so they can&rsquo;t be mistaken for the round best-fit pin — and <strong>Mark as placed</strong> sits under the map. CONFLICT pieces are pinned on the map too, at the box they wanted — their next-best box shows as a gray square.</li>
+            <li>On each card the piece photo sits in the left column, with the suggested fit shown below the gold info box, marked with a gold star (for example, &ldquo;&#9733; Goes in D6&rdquo;), and the small map sits right-justified in the right column; the piece&rsquo;s other possible fits appear on that map as gray squares with the piece number in gray inside — square, so they can&rsquo;t be mistaken for the round best-fit pin — and <strong>Mark as placed</strong> sits under the map. CONFLICT pieces are pinned on the map too, at the box they wanted — their next-best box shows as a gray square.</li>
             <li>When you physically put a piece in, tap <strong>Mark as placed</strong> on its card. It is remembered on the board in step 4, in its box, and stays there while you add more sheets.</li>
           </ol>
         </div>
@@ -707,8 +694,7 @@
         cols: 6, rows: 8, selected: 0, confirmed: false
       };
       var mapStage=$("mapStage"), mapSvg=$("mapGrid"), mapLabels=$("mapLabels"),
-          mapImg=$("mapImg"), handles=mapStage.querySelectorAll(".handle"),
-          cornerBtns=document.querySelectorAll(".corner-btn");
+          mapImg=$("mapImg"), handles=mapStage.querySelectorAll(".handle");
 
       function drawMap(){
         var c=map.corners, cols=map.cols, rows=map.rows, i, j, u, v, pts, p;
@@ -728,9 +714,6 @@
           handles[i].style.left=map.corners[i].x+"%";
           handles[i].style.top=map.corners[i].y+"%";
           handles[i].classList.toggle("active", map.selected===i);
-        }
-        for(i=0;i<cornerBtns.length;i++){
-          cornerBtns[i].classList.toggle("active", map.selected===parseInt(cornerBtns[i].getAttribute("data-corner"),10));
         }
         var lh="";
         var rect=mapStage.getBoundingClientRect();
@@ -766,11 +749,6 @@
       }
 
       function selectCorner(i){ map.selected=i; drawMap(); }
-      for(var b=0;b<cornerBtns.length;b++){
-        cornerBtns[b].addEventListener("click",function(){
-          selectCorner(parseInt(this.getAttribute("data-corner"),10));
-        });
-      }
       for(var h=0;h<handles.length;h++){
         handles[h].addEventListener("pointerdown",function(){
           selectCorner(parseInt(this.getAttribute("data-corner"),10));
@@ -783,11 +761,12 @@
         return { x:clamp((e.clientX-r.left)/r.width*100,0,100), y:clamp((e.clientY-r.top)/r.height*100,0,100) };
       }
       mapStage.addEventListener("pointerdown",function(e){
-        var p=stagePoint(e);
-        if(e.target.classList && e.target.classList.contains("handle")){
-          selectCorner(parseInt(e.target.getAttribute("data-corner"),10));
-        }
-        map.corners[map.selected]=p;
+        // Corners move only by dragging their red dot directly — there
+        // are no corner buttons and no tap-to-place any more, so a tap
+        // elsewhere on the photo does not move a corner.
+        if(!(e.target.classList && e.target.classList.contains("handle"))) return;
+        selectCorner(parseInt(e.target.getAttribute("data-corner"),10));
+        map.corners[map.selected]=stagePoint(e);
         dragging=true;
         try{ mapStage.setPointerCapture(e.pointerId); }catch(err){}
         mapChanged();
@@ -1536,8 +1515,11 @@
 
           var card=document.createElement("div"); card.className="piece-card";
 
-          /* LEFT: the piece photo, then — below it, in larger type —
-             the piece number in compact code form, then its suggested fits */
+          /* LEFT: the piece photo, then — below it, as a small caption —
+             the piece number in compact code form, then the state line,
+             the gold info box, and below that box the suggested fit
+             marked with a gold star. No candidate list: the other
+             possible fits stay on the map as gray squares. */
           var left=document.createElement("div");
           var pwrap=document.createElement("div"); pwrap.className="pimg";
           var im=document.createElement("img"); im.src=p.cropURL;
@@ -1547,10 +1529,10 @@
           }
           pwrap.appendChild(im);
           left.appendChild(pwrap);
-          // Below the photo, large: the piece number with its sheet,
-          // row and column on the sheet and the orientation turn the
-          // app matched it at, in degrees, all in compact code form —
-          // e.g. "Piece 13 (S1, R3, C3, 180°)". No wordy caption.
+          // Below the photo, as a caption: the piece number with its
+          // sheet, row and column on the sheet and the orientation turn
+          // the app matched it at, in degrees, all in compact code form —
+          // e.g. "Piece 13 (S1, R3, C3, 180°)". Caption-sized text.
           var head=document.createElement("p"); head.className="piece-head";
           head.appendChild(document.createTextNode("Piece "+r.n+" "));
           var rcSpan=document.createElement("span"); rcSpan.className="rc";
@@ -1568,18 +1550,6 @@
           }
           left.appendChild(head);
 
-          var fh=document.createElement("h4"); fh.className="fits-head";
-          fh.textContent="Suggested fits";
-          left.appendChild(fh);
-          var verdict=document.createElement("p"); verdict.className="verdict";
-          if(r.state==="UNPLACED"){
-            verdict.innerHTML='No box found for this piece';
-          } else if(r.state==="CONFLICT"){
-            verdict.innerHTML='Best box <span class="cellid">'+r.best.id+'</span> is taken'+(r.fallback?' \u2014 try <span class="cellid">'+r.fallback.id+'</span>':'');
-          } else {
-            verdict.innerHTML='Goes in <span class="cellid">'+r.best.id+'</span>';
-          }
-          left.appendChild(verdict);
           // The state line stays short: just the state word and the Fit —
           // "SOFT · Fit 7/10". Every comment that used to trail it lives
           // in the gold-bordered box below.
@@ -1616,20 +1586,25 @@
             hn.appendChild(lp);
           });
           left.appendChild(hn);
-          // Candidate boxes, best first
-          var list=document.createElement("ul"); list.className="cand-list";
+          // The top candidates, kept for the map on the right (gray
+          // squares for the other possible fits) — they are no longer
+          // listed as text on the card.
           var top=r.ranked.slice(0,3);
-          top.forEach(function(cand,idx){
-            var li=document.createElement("li");
-            var note="";
-            if(idx===0 && r.state!=="CONFLICT") note="Best fit";
-            if(idx===0 && r.state==="CONFLICT") note="Wanted this box, but piece "+r.conflictWith.n+" keeps it";
-            if(r.state==="CONFLICT" && r.fallback && cand.id===r.fallback.id && idx>0) note="Next best \u2014 the box to try";
-            if(r.piece.feat && r.piece.feat.plain) note=(note?note+" \u00B7 ":"")+"one of several similar boxes";
-            li.innerHTML='<span class="cid">'+cand.id+'</span><span class="cfit">'+fitText(cand)+'</span>'+(note?'<span class="cnote">'+note+'</span>':"");
-            list.appendChild(li);
-          });
-          left.appendChild(list);
+          // Suggested fit, below the gold info box, with a gold star
+          // next to it — e.g. "★ Goes in D6". No star when there is
+          // no fit to suggest.
+          var verdict=document.createElement("p");
+          if(r.state==="UNPLACED"){
+            verdict.className="suggested-fit no-fit";
+            verdict.innerHTML='No box found for this piece';
+          } else if(r.state==="CONFLICT"){
+            verdict.className="suggested-fit";
+            verdict.innerHTML='<span class="star" aria-hidden="true">\u2605</span><span>Best box <span class="cellid">'+r.best.id+'</span> is taken'+(r.fallback?' \u2014 try <span class="cellid">'+r.fallback.id+'</span>':'')+'</span>';
+          } else {
+            verdict.className="suggested-fit";
+            verdict.innerHTML='<span class="star" aria-hidden="true">\u2605</span><span>Goes in <span class="cellid">'+r.best.id+'</span></span>';
+          }
+          left.appendChild(verdict);
           card.appendChild(left);
 
           /* RIGHT: the map, with Mark as Placed under it */
