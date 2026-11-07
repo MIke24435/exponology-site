@@ -224,12 +224,19 @@
       .sw.locked{background:var(--green);} .sw.soft{background:var(--gold);} .sw.conflict{background:var(--red);}
 
       .piece-card{
-        display:grid;grid-template-columns:minmax(120px,220px) 1fr;gap:16px;
+        display:grid;grid-template-columns:minmax(0,1.1fr) minmax(230px,0.9fr);gap:20px;
         background:var(--panel);border:1px solid var(--line);border-radius:14px;
         box-shadow:var(--shadow);padding:16px;margin-bottom:14px;align-items:start;
       }
-      @media (max-width:560px){ .piece-card{grid-template-columns:110px 1fr;gap:12px;padding:12px;} }
+      @media (max-width:560px){ .piece-card{gap:12px;padding:12px;} }
+      .piece-card .pimg{max-width:300px;}
       .piece-card .pimg img{display:block;width:100%;height:auto;border-radius:8px;}
+      .piece-head{
+        font-family:"Newsreader",Georgia,serif;font-weight:700;
+        font-size:clamp(27px,4vw,34px);line-height:1.15;margin:0 0 10px;
+      }
+      .piece-head .rc{font-size:.66em;font-weight:600;color:var(--ink-soft);white-space:nowrap;}
+      .piece-head .turn{font-size:.66em;font-weight:700;color:var(--gold);white-space:nowrap;}
       .piece-card .pimg .cap{font-size:13.5px;font-weight:700;color:var(--ink-soft);margin-top:6px;line-height:1.35;}
       .piece-card .minimap{position:relative;line-height:0;max-width:300px;}
       .piece-card .minimap img{display:block;width:100%;height:auto;border-radius:6px;pointer-events:none;}
@@ -276,11 +283,14 @@
       footer{margin-top:44px;padding-top:14px;border-top:1px solid var(--line);color:var(--ink-soft);font-size:14px;}
       footer a{color:var(--green);}
 
-      /* Other candidate fits on a map: small gray circles */
+      /* Other candidate fits on a map: small gray SQUARES with the piece
+         number in gray inside — square, not round, so an alternative can
+         never be mistaken for the best pick's round pin. */
       .pin.alt{
         background:#d6d3c9;color:#63615a;min-width:21px;height:21px;font-size:11.5px;z-index:2;
+        border-radius:3px;
       }
-      .sw.alt{background:#d6d3c9;}
+      .sw.alt{background:#d6d3c9;border-radius:3px;}
 
       /* Retake / human-look note on a piece's own card, beside its state word */
       .look-note{
@@ -288,8 +298,13 @@
         padding:8px 10px;font-size:15px;margin:10px 0 0;color:var(--ink);
       }
 
-      /* Step 3 cards: suggested fits left of the map, placed button under the map */
-      .piece-card .mapcol .minimap{max-width:520px;}
+      /* Step 3 cards: two columns — piece photo and text on the left, the
+         map right-justified in its column on the right, placed button
+         under the map, aligned with it. */
+      .piece-card .mapcol{min-width:0;}
+      .piece-card .mapcol .minimap{max-width:440px;width:100%;margin-left:auto;}
+      .piece-card .mapcol .piece-note{max-width:440px;width:100%;margin-left:auto;}
+      .piece-card .mapcol .btn-row{justify-content:flex-end;}
       .piece-card .fits-head{
         font-family:"Newsreader",Georgia,serif;font-size:19px;font-weight:600;margin:14px 0 4px;
       }
@@ -501,7 +516,7 @@
               <span><span class="sw locked"></span>LOCKED</span>
               <span><span class="sw soft"></span>SOFT</span>
               <span><span class="sw conflict"></span>CONFLICT — pinned at the box it wanted</span>
-              <span><span class="sw alt"></span>Other possible fit (gray circle)</span>
+              <span><span class="sw alt"></span>Other possible fit (gray square)</span>
               <span>Pin numbers are the piece numbers on the cards below. Every piece with a suggested fit is pinned, CONFLICT pieces included. UNPLACED pieces get no pin.</span>
             </div>
           </div>
@@ -586,7 +601,7 @@
             <li>Plain or dark pieces look like many boxes at once. Their cards list the top three candidate boxes with scores, so a person can judge between them.</li>
             <li>Changing the map grid or re-cutting the sheet clears the matching — run it again afterwards.</li>
             <li>The piece photo on each card is turned the way the piece will sit in the puzzle — the rotation that gave its best fit — so what you see is the piece as it goes in, not as it lay on the sheet.</li>
-            <li>On each card the suggested fits sit to the left of the small map, the piece&rsquo;s other possible fits appear on that map as gray circles with the piece number in gray inside, and <strong>Mark as placed</strong> sits under the map. CONFLICT pieces are pinned on the map too, at the box they wanted — their next-best box shows as a gray circle.</li>
+            <li>On each card the piece photo and its suggested fits sit in the left column, and the small map sits right-justified in the right column; the piece&rsquo;s other possible fits appear on that map as gray squares with the piece number in gray inside — square, so they can&rsquo;t be mistaken for the round best-fit pin — and <strong>Mark as placed</strong> sits under the map. CONFLICT pieces are pinned on the map too, at the box they wanted — their next-best box shows as a gray square.</li>
             <li>When you physically put a piece in, tap <strong>Mark as placed</strong> on its card. It is remembered on the board in step 4, in its box, and stays there while you add more sheets.</li>
           </ol>
         </div>
@@ -1456,7 +1471,7 @@
           var r=match.results[k];
           if(!r.pinCand || r.state==="UNPLACED") continue;
           var pc=plotOf(r);
-          // Other possible fits first (gray circles with gray numbers),
+          // Other possible fits first (gray squares with gray numbers),
           // so the best-fit pins draw on top of them.
           var top=r.ranked.slice(0,3);
           for(var t=0;t<top.length;t++){
@@ -1521,8 +1536,23 @@
 
           var card=document.createElement("div"); card.className="piece-card";
 
-          /* LEFT: the piece photo, then its suggested fits */
+          /* LEFT: the piece number, the piece photo, then its suggested fits */
           var left=document.createElement("div");
+          // The piece number, big, with where it sat on the sheet as
+          // (R<row>, C<column>) and the orientation turn the app matched
+          // it at next to it — e.g. "Piece 13 (R3, C3) 180°".
+          var head=document.createElement("p"); head.className="piece-head";
+          head.appendChild(document.createTextNode("Piece "+r.n+" "));
+          var rcSpan=document.createElement("span"); rcSpan.className="rc";
+          rcSpan.textContent="(R"+((p.row||0)+1)+", C"+((p.col||0)+1)+")";
+          head.appendChild(rcSpan);
+          if(hasFit){
+            head.appendChild(document.createTextNode(" "));
+            var turnSpan=document.createElement("span"); turnSpan.className="turn";
+            turnSpan.textContent=(fitRot*90)+"\u00B0";
+            head.appendChild(turnSpan);
+          }
+          left.appendChild(head);
           var pwrap=document.createElement("div"); pwrap.className="pimg";
           var im=document.createElement("img"); im.src=p.cropURL;
           im.alt="Piece "+r.n+(fitRot?(", turned "+(fitRot*90)+" degrees, the way it fits"):" as photographed on the sheet");
@@ -1530,8 +1560,10 @@
             rotatedURL(p,fitRot,function(u){ im.src=u; });
           }
           var cap=document.createElement("div"); cap.className="cap";
-          cap.textContent="Piece "+r.n+" \u00B7 Sheet "+(p.sheetNo||1)+" \u00B7 "+p.label+
-            (hasFit&&fitRot?(" \u00B7 Photo turned "+(fitRot*90)+"\u00B0 \u2014 the way it fits"):"");
+          cap.textContent="Sheet "+(p.sheetNo||1)+
+            (hasFit&&fitRot?(" \u00B7 Photo turned "+(fitRot*90)+"\u00B0 \u2014 the way it fits"):
+             hasFit?" \u00B7 Fits as photographed \u2014 no turn needed":
+             " \u00B7 As photographed on the sheet");
           pwrap.appendChild(im); pwrap.appendChild(cap);
           left.appendChild(pwrap);
 
@@ -1547,26 +1579,42 @@
             verdict.innerHTML='Goes in <span class="cellid">'+r.best.id+'</span>';
           }
           left.appendChild(verdict);
+          // The state line stays short: just the state word and the Fit —
+          // "SOFT · Fit 7/10". Every comment that used to trail it lives
+          // in the gold-bordered box below.
           var fit=document.createElement("p"); fit.className="fitline";
-          if(r.state==="CONFLICT"){
-            fit.innerHTML='<span class="st word conflict">CONFLICT</span> \u00B7 '+fitText(r.best)+' for '+r.best.id+', but piece '+r.conflictWith.n+' scored higher and keeps that box ('+fitText(r.conflictWith)+').';
-          } else {
-            fit.innerHTML='<span class="st word '+stateClass(r.state)+'">'+r.state+'</span> \u00B7 '+fitText(r.best)+' \u2014 '+statePhrase(r.state)+'.';
-          }
+          fit.innerHTML='<span class="st word '+stateClass(r.state)+'">'+r.state+'</span> \u00B7 Fit '+r.best.fit+'/10';
           left.appendChild(fit);
-          // Retake / human-look note, on this piece's own card beside its
-          // state word — there is no separate list for these any more.
-          var lookText=null, lookLead=null;
-          if(r.state==="UNPLACED"){ lookLead="Retake:"; lookText="no box scored well enough. A clearer sheet photo, in better light, may find this piece a box \u2014 otherwise place it by hand."; }
-          else if(r.state==="CONFLICT"){ lookLead="Human look:"; lookText="two pieces want the same box. Settle it by eye before placing either one."; }
-          else if(r.state==="SOFT"){ lookLead="Human look:"; lookText="probably right, but check it by eye before placing."; }
-          if(lookText){
-            var hn=document.createElement("p"); hn.className="look-note";
-            var hb=document.createElement("strong"); hb.textContent=lookLead+" ";
-            hn.appendChild(hb);
-            hn.appendChild(document.createTextNode(lookText));
-            left.appendChild(hn);
+          // ALL comments go in the one gold-bordered box: the comment that
+          // follows the state word, the retake / human-look note, and the
+          // plain-piece warning — nothing comment-like sits outside it.
+          var boxLines=[];
+          var stateComment=statePhrase(r.state);
+          stateComment=stateComment.charAt(0).toUpperCase()+stateComment.slice(1);
+          if(r.state==="CONFLICT" && r.conflictWith){
+            boxLines.push(stateComment+": piece "+r.conflictWith.n+" keeps box "+r.best.id+" ("+fitText(r.conflictWith)+").");
+          } else {
+            boxLines.push(stateComment+".");
           }
+          if(r.state==="UNPLACED") boxLines.push("Retake: no box scored well enough. A clearer sheet photo, in better light, may find this piece a box \u2014 otherwise place it by hand.");
+          else if(r.state==="CONFLICT") boxLines.push("Human look: two pieces want the same box. Settle it by eye before placing either one.");
+          else if(r.state==="SOFT") boxLines.push("Human look: probably right, but check it by eye before placing.");
+          if(p.feat && p.feat.plain) boxLines.push("Human look: this piece is mostly one plain colour, so several boxes look alike \u2014 judge between the candidates rather than trusting the top one.");
+          var hn=document.createElement("div"); hn.className="look-note";
+          boxLines.forEach(function(line,li2){
+            var lp=document.createElement("p");
+            lp.style.cssText= li2? "margin:6px 0 0;" : "margin:0;";
+            var ci=line.indexOf(": ");
+            if(ci>0 && ci<14){
+              var hb=document.createElement("strong"); hb.textContent=line.slice(0,ci+1)+" ";
+              lp.appendChild(hb);
+              lp.appendChild(document.createTextNode(line.slice(ci+2)));
+            } else {
+              lp.appendChild(document.createTextNode(line));
+            }
+            hn.appendChild(lp);
+          });
+          left.appendChild(hn);
           // Candidate boxes, best first
           var list=document.createElement("ul"); list.className="cand-list";
           var top=r.ranked.slice(0,3);
@@ -1581,11 +1629,6 @@
             list.appendChild(li);
           });
           left.appendChild(list);
-          if(p.feat && p.feat.plain){
-            var pn=document.createElement("p"); pn.className="piece-note";
-            pn.textContent="Human look: this piece is mostly one plain colour, so several boxes look alike \u2014 judge between the candidates rather than trusting the top one.";
-            left.appendChild(pn);
-          }
           card.appendChild(left);
 
           /* RIGHT: the map, with Mark as Placed under it */
@@ -1595,7 +1638,7 @@
           mimg.alt="The puzzle map"+(hasFit?(" with box "+plotCand.id+" marked"):"");
           mm.appendChild(mimg);
           if(hasFit){
-            // Other possible fits as gray circles (gray number inside),
+            // Other possible fits as gray squares (gray number inside),
             // under the best-fit pin. A CONFLICT piece's next-best box is
             // always one of them — it is the box to try.
             top.forEach(function(cand){
@@ -1622,8 +1665,8 @@
           if(hasFit){
             var lg=document.createElement("p"); lg.className="piece-note";
             lg.textContent= r.state==="CONFLICT" ?
-              "The red pin is the box this piece wanted, which another piece keeps. The gray circle is its next-best box \u2014 the one to try." :
-              "The numbered pin is the suggested box. Gray circles are this piece\u2019s other possible fits.";
+              "The red pin is the box this piece wanted, which another piece keeps. The gray square is its next-best box \u2014 the one to try." :
+              "The numbered pin is the suggested box. Gray squares are this piece\u2019s other possible fits.";
             right.appendChild(lg);
           } else {
             var np=document.createElement("p"); np.className="piece-note";
