@@ -45,6 +45,26 @@
   .topnav{display:flex;gap:8px 22px;flex-wrap:wrap;align-items:center}
   .topnav a{color:var(--ink-soft);text-decoration:none;font-size:15.5px;font-weight:600;padding:6px 2px;border-bottom:2px solid transparent}
   .topnav a:hover{color:var(--green-strong);border-bottom-color:var(--green)}
+  .wordmark:hover{color:var(--green-strong)}
+
+  /* ---- Apps dropdown: same menu as the Exponology home page ---- */
+  .nav-dropdown{position:relative;display:flex;align-items:center}
+  .nav-drop-btn{font:inherit;font-size:15.5px;font-weight:600;color:var(--ink-soft);background:none;border:none;border-bottom:2px solid transparent;padding:6px 2px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+  .nav-drop-btn:hover{color:var(--green-strong);border-bottom-color:var(--green)}
+  .nav-drop-btn:focus-visible{color:var(--green-strong);border-bottom-color:var(--green);outline:2px solid var(--green);outline-offset:3px;border-radius:2px}
+  .nav-drop-btn .caret{display:inline-block;width:0;height:0;flex:0 0 auto;border-left:4.5px solid transparent;border-right:4.5px solid transparent;border-top:6px solid currentColor;transition:transform .15s ease}
+  .nav-drop-btn[aria-expanded="true"] .caret{transform:rotate(180deg)}
+  .nav-menu{position:absolute;top:calc(100% + 10px);left:0;z-index:60;list-style:none;margin:0;padding:7px;min-width:248px;max-width:min(288px,82vw);background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow)}
+  .nav-menu a{display:block;padding:11px 13px;border-bottom:none;border-radius:6px;font-size:15.5px;line-height:1.35;white-space:normal;color:var(--ink-soft)}
+  .nav-menu a:hover,.nav-menu a:focus-visible{color:var(--green-strong);background:var(--surface-soft);border-bottom:none}
+  .nav-menu a:focus-visible{outline:2px solid var(--green);outline-offset:-2px}
+  .nav-menu a .here{display:block;font-size:12.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);margin-top:2px}
+  .nav-dropdown:not(.dropdown-ready):hover .nav-menu,
+  .nav-dropdown:not(.dropdown-ready):focus-within .nav-menu{display:block}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto}
+    .nav-drop-btn .caret{transition:none}
+  }
 
   .btn{display:inline-flex;align-items:center;gap:9px;font:inherit;font-size:16px;font-weight:600;text-decoration:none;padding:13px 22px;border-radius:10px;border:1.5px solid var(--green)}
   .btn-solid{background:var(--green);color:#fff}
@@ -56,16 +76,19 @@
 
   /* ---- hero ---- */
   .hero{padding:38px 0 10px;max-width:820px}
+  .eyebrow{display:flex;align-items:center;gap:10px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--green)}
+  .eyebrow::before{content:"";width:28px;height:3px;background:var(--red);border-radius:2px;display:inline-block;flex:none}
   .hero h1{font-size:clamp(38px,6vw,58px);line-height:1.06;font-weight:600;letter-spacing:-.015em;margin:16px 0 14px}
   .hero h1 em{font-style:italic;color:var(--green-strong)}
   .hero .lead{font-size:20px;line-height:1.55;color:var(--ink-soft);margin:0;max-width:640px}
   .hero .lead strong{color:var(--ink)}
   .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
-  .proto-note{margin-top:18px;background:var(--gold-soft);border:1px solid color-mix(in srgb,var(--gold) 30%,transparent);border-radius:var(--radius);padding:13px 16px;font-size:15px;max-width:720px}
-  .proto-note strong{color:var(--ink)}
 
-  section{padding:44px 0 6px}
+  section{padding:44px 0 6px;scroll-margin-top:14px}
+  .sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:14px;flex-wrap:wrap}
   h2{font-size:clamp(28px,4.2vw,38px);line-height:1.15;font-weight:600;margin:0 0 8px;letter-spacing:-.01em}
+  .help-link{color:var(--green);font-weight:700;font-size:16.5px;text-decoration:underline;text-underline-offset:3px;white-space:nowrap;padding:6px 2px}
+  .help-link:hover{color:var(--green-strong)}
   .sec-lede{color:var(--ink-soft);font-size:17.5px;margin:0 0 22px;max-width:640px}
   .figcap{font-size:13.5px;color:var(--ink-faint);margin-top:10px;text-align:center}
 
@@ -101,7 +124,7 @@
   .closing h2{color:var(--on-deep);margin-top:12px}
   .closing p{color:var(--on-deep-soft);max-width:56ch;margin:0 0 18px}
   .closing .btn-solid{background:#fff;border-color:#fff;color:var(--bg-deep)}
-  .closing .planned{font-size:14px;margin:14px 0 0}
+  .closing .planned{font-size:14px;margin:14px 0 0;overflow-wrap:anywhere}
   footer{margin-top:56px;border-top:1px solid var(--line);padding:26px 0 42px;color:var(--ink-faint);font-size:14.5px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
   .fname{font-family:"Newsreader",serif;font-weight:700;font-size:18px;color:var(--ink)}
   .fname i{color:var(--red);font-style:normal}
@@ -118,21 +141,30 @@
     <nav class="topnav" aria-label="Main">
       <a href="#read">Read a hand card</a>
       <a href="#use">How to use it</a>
-      <a href="https://exponology.com/apps/mah-jongg-hand-matcher/app.html">Try the Matcher</a>
+      <div class="nav-dropdown" id="apps-dropdown">
+        <button class="nav-drop-btn" id="apps-menu-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="apps-menu">Apps <span class="caret" aria-hidden="true"></span></button>
+        <ul class="nav-menu" id="apps-menu" role="menu" aria-label="Apps" hidden>
+          <li role="none"><a role="menuitem" href="https://exponology.com/apps/mah-jongg-hand-finder/app.html">The Mah Jongg Hand Finder</a></li>
+          <li role="none"><a role="menuitem" href="https://exponology.com/apps/mah-jongg-hand-matcher/app.html">The Mah Jongg Hand Matcher<span class="here">You are learning this one</span></a></li>
+          <li role="none"><a role="menuitem" href="https://exponology.com/apps/cipherdesk/app.html">CipherDesk</a></li>
+          <li role="none"><a role="menuitem" href="https://exponology.com/apps/factor-finder/app.html">Prime Factor Finder</a></li>
+          <li role="none"><a role="menuitem" href="https://exponology.com/apps/jigsaw-piece-finder/app.html">Jigsaw Piece Finder</a></li>
+        </ul>
+      </div>
+      <a href="https://exponology.com/apps/mah-jongg-hand-matcher/app.html">Open Mah Jongg Hand Matcher</a>
     </nav>
   </header>
 
   <main>
     <!-- HERO -->
     <div class="hero">
-      <span class="pill">Prototype — not live yet</span>
+      <p class="eyebrow">2026 Card · 79 Hands</p>
       <h1>You have the tiles. <em>Which hand are you closest to?</em></h1>
       <p class="lead">Tap your rack into the <strong>Mah Jongg Hand Matcher</strong> and it ranks all <strong>79 hands on the 2026 card</strong> — closest first. Every picture on this page is a <strong>screenshot from the app itself</strong> — nothing redrawn.</p>
       <div class="hero-actions">
-        <a class="btn btn-solid" href="https://exponology.com/apps/mah-jongg-hand-matcher/app.html">Open the Hand Matcher →</a>
+        <a class="btn btn-solid" href="https://exponology.com/apps/mah-jongg-hand-matcher/app.html">Open Mah Jongg Hand Matcher →</a>
         <a class="btn btn-ghost" href="#read">Skip to the hand cards</a>
       </div>
-      <div class="proto-note"><strong>Prototype:</strong> still being tested — including by an experienced player who teaches Mah Jongg — and not approved to go live. Fine for practice; not the final word in a real game yet.</div>
     </div>
 
     <!-- THE APP AT A GLANCE -->
@@ -153,7 +185,10 @@
 
     <!-- READ A HAND CARD — the focus -->
     <section id="read" aria-labelledby="read-h">
-      <h2 id="read-h">How to read a hand card</h2>
+      <div class="sec-head">
+        <h2 id="read-h">How to read a hand card</h2>
+        <a class="help-link" href="https://exponology.com/apps/mah-jongg-hand-matcher/app.html#help-read">Help</a>
+      </div>
       <p class="sec-lede">This is the real top result for the rack above. Six things on it — numbered here, explained at the side.</p>
 
       <div class="annotated">
@@ -191,7 +226,10 @@
 
     <!-- HOW TO USE, VISUAL -->
     <section id="use" aria-labelledby="use-h">
-      <h2 id="use-h">How to use it — four taps</h2>
+      <div class="sec-head">
+        <h2 id="use-h">How to use it — four taps</h2>
+        <a class="help-link" href="https://exponology.com/apps/mah-jongg-hand-matcher/app.html#help-use">Help</a>
+      </div>
       <div class="steps4">
         <div class="step4"><div class="n">1</div><h3>Add tiles</h3><p>Tap a kind — Bams, Craks, Dots, Winds, Dragons — then the tile. Flower and Joker go straight in, one tap.</p></div>
         <div class="step4"><div class="n">2</div><h3>Fix mistakes</h3><p>Tap any tile in Your Rack to take it back out.</p></div>
@@ -209,19 +247,87 @@
 
     <!-- CLOSING -->
     <div class="closing">
-      <span class="pill">Prototype — still being tested</span>
+      <span class="pill">App No. 2 · Exponology</span>
       <h2>Try it with a rack of your own</h2>
       <p>Deal a Random hand, or tap in the tiles from your last game, and see which hands you were closest to.</p>
-      <a class="btn btn-solid" href="https://exponology.com/apps/mah-jongg-hand-matcher/app.html">Open the Hand Matcher →</a>
-      <p class="planned">Planned address: <a href="https://exponology.com/">exponology.com</a>/apps/mah-jongg-hand-matcher/app.html</p>
+      <a class="btn btn-solid" href="https://exponology.com/apps/mah-jongg-hand-matcher/app.html">Open Mah Jongg Hand Matcher →</a>
+      <p class="planned">App address: <a href="https://exponology.com/apps/mah-jongg-hand-matcher/app.html">exponology.com</a>/apps/mah-jongg-hand-matcher/app.html · This Learn page: <a href="https://exponology.com/apps/mah-jongg-hand-matcher/">exponology.com</a>/apps/mah-jongg-hand-matcher/</p>
     </div>
-    <p style="color:var(--ink-soft);margin-top:20px">The other Mah Jongg tool works in reverse: the Hand <em>Finder</em> starts from the kind of hand you want; the Matcher starts from your tiles. A third app, CipherDesk, is coming soon.</p>
+    <p style="color:var(--ink-soft);margin-top:20px">The Mah Jongg Hand Matcher is one of the apps on the <a href="https://exponology.com/">Exponology home page</a> — App No. 2, after The Mah Jongg Hand Finder (App No. 1) and before CipherDesk (App No. 3).</p>
+    <p style="color:var(--ink-soft);margin-top:20px">The other Mah Jongg tool works in reverse: the Hand <em>Finder</em> starts from the kind of hand you want; the Matcher starts from your tiles.</p>
   </main>
 
   <footer>
     <span><a class="fname-link" href="https://exponology.com/"><span class="fname">Exponology<i>.</i></span></a> — small apps, developed with the help of AI, born from everyday frustrations.</span>
-    <span><a href="https://exponology.com/apps/mah-jongg-hand-matcher/app.html">Hand Matcher (prototype)</a> · <a href="https://exponology.com/">exponology.com</a></span>
+    <span><a href="https://exponology.com/apps/mah-jongg-hand-matcher/app.html">Mah Jongg Hand Matcher</a> · <a href="https://exponology.com/">exponology.com</a></span>
   </footer>
 </div>
+<script>
+  (function () {
+    var wrap = document.getElementById('apps-dropdown');
+    var btn = document.getElementById('apps-menu-btn');
+    var menu = document.getElementById('apps-menu');
+    if (!wrap || !btn || !menu) return;
+    wrap.classList.add('dropdown-ready');
+    var items = Array.prototype.slice.call(menu.querySelectorAll('a'));
+    function isOpen() { return btn.getAttribute('aria-expanded') === 'true'; }
+    function openMenu() {
+      menu.hidden = false;
+      btn.setAttribute('aria-expanded', 'true');
+    }
+    function closeMenu(returnFocus) {
+      menu.hidden = true;
+      btn.setAttribute('aria-expanded', 'false');
+      if (returnFocus) btn.focus();
+    }
+    btn.addEventListener('click', function () {
+      if (isOpen()) { closeMenu(false); } else { openMenu(); }
+    });
+    btn.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        openMenu();
+        if (items.length) items[0].focus();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        openMenu();
+        if (items.length) items[items.length - 1].focus();
+      }
+    });
+    menu.addEventListener('keydown', function (e) {
+      var idx = items.indexOf(document.activeElement);
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeMenu(true);
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        items[(idx + 1) % items.length].focus();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        items[(idx - 1 + items.length) % items.length].focus();
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        items[0].focus();
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        items[items.length - 1].focus();
+      } else if (e.key === 'Tab') {
+        closeMenu(false);
+      }
+    });
+    items.forEach(function (link) {
+      link.addEventListener('click', function () { closeMenu(false); });
+    });
+    document.addEventListener('click', function (e) {
+      if (isOpen() && !wrap.contains(e.target)) closeMenu(false);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && isOpen()) closeMenu(true);
+    });
+    wrap.addEventListener('focusout', function (e) {
+      if (isOpen() && !wrap.contains(e.relatedTarget)) closeMenu(false);
+    });
+  })();
+</script>
 </body>
 </html>

@@ -13,20 +13,21 @@
       :root{
         color-scheme:light dark;
         --bg:#faf8f2;
-        --panel:#fffdf7;
-        --panel-soft:#fbf7ec;
-        --ink:#1e2a21;
-        --ink-soft:#4c5a4e;
+        --panel:#ffffff;
+        --panel-soft:#f1ede1;
+        --ink:#1e2b23;
+        --ink-soft:#48584e;
         --ink-faint:#71806f;
-        --line:#ded3ba;
+        --line:#ddd6c4;
         --line-strong:#c8b98d;
         --green:#1f6f4a;
-        --green-dark:#175738;
-        --green-soft:#e2efe4;
+        --green-strong:#17573a;
+        --green-soft:#e3efe6;
         --red:#b23a2e;
-        --red-soft:#faeae6;
+        --red-soft:#f7e3df;
         --gold:#a97b16;
-        --gold-soft:#f6ecd0;
+        --gold-soft:#fbf0cd;
+        --radius:14px;
         --handle:#b23a2e;
         --shadow:0 1px 2px rgba(30,42,33,.06),0 10px 30px rgba(30,42,33,.07);
       }
@@ -41,7 +42,7 @@
           --line:#33443a;
           --line-strong:#4c6152;
           --green:#5fbf92;
-          --green-dark:#8ad8b8;
+          --green-strong:#8ad8b8;
           --green-soft:#22392d;
           --red:#ff9a8f;
           --red-soft:#3d2320;
@@ -97,11 +98,11 @@
       }
       @media (prefers-color-scheme: dark){ .stepno{color:#10231a;} }
       .help-link{color:var(--green);font-weight:600;font-size:15px;text-decoration:none;border-bottom:1px dotted var(--green);}
-      .help-link:hover{color:var(--green-dark);}
+      .help-link:hover{color:var(--green-strong);}
       .sec-intro{color:var(--ink-soft);margin:0 0 16px;max-width:46em;}
 
       .card{
-        background:var(--panel);border:1px solid var(--line);border-radius:14px;
+        background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
         box-shadow:var(--shadow);padding:18px;margin-bottom:18px;
       }
 
@@ -163,7 +164,7 @@
         text-decoration:none;
       }
       @media (prefers-color-scheme: dark){ .btn{color:#0f2117;} }
-      .btn:active{background:var(--green-dark);}
+      .btn:active{background:var(--green-strong);}
       .btn.secondary{background:transparent;color:var(--green);}
       .btn.secondary:active{background:var(--green-soft);}
       .btn.confirmed{background:var(--green-soft);color:var(--green);border-color:var(--green);}
@@ -229,7 +230,7 @@
 
       .piece-card{
         display:grid;grid-template-columns:minmax(0,1.1fr) minmax(230px,0.9fr);gap:20px;
-        background:var(--panel);border:1px solid var(--line);border-radius:14px;
+        background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
         box-shadow:var(--shadow);padding:16px;margin-bottom:14px;align-items:start;
       }
       @media (max-width:560px){ .piece-card{gap:12px;padding:12px;} }
@@ -383,7 +384,7 @@
         </div>
         <p class="eyebrow">Match loose pieces to the map</p>
         <h1>Jigsaw Piece Finder</h1>
-        <p class="lede">Photograph the finished puzzle and lay a grid over it. Then photograph a sheet of loose pieces and drag the grid lines until every piece sits in its own box — the grid lines you drag are what define each piece, and the app cuts each piece out of its box and matches it against every box on the map, trying it four ways round. Sheet after sheet adds up, and every piece you place is remembered on the board in step 4.</p>
+        <p class="lede">Photograph the finished puzzle and a sheet of loose pieces, and the app finds where each piece goes — so you can place each one with confidence.</p>
       </header>
 
       <!-- ============ STEP 1: THE MAP ============ -->
@@ -601,10 +602,6 @@
           <p class="confirm-note" id="progressNote">A progress file holds the whole sitting: the map photo and its grid, and every piece cut so far — each with its match and whether it is placed. Save at the end of a sitting, then load the file at the next one to pick up exactly where you left off. On a desktop browser you choose the file once and later saves update that same file; on iPhone the save downloads the file, and loading means choosing it again.</p>
         </div>
 
-        <div class="card">
-          <h3 style="font-family:'Newsreader',Georgia,serif;font-size:22px;margin:0;font-weight:600;">A word of caution</h3>
-          <p style="color:var(--ink-soft);margin:8px 0 0;">Matching from photos is a first pass, not gospel — plain and dark pieces are genuinely hard, because several boxes look alike. That is why every score travels with its word, why plain pieces show their other possible fits as gray squares on the map instead of one answer, and why a SOFT or CONFLICT card always asks for a human glance before the piece goes in.</p>
-        </div>
       </section>
 
       <!-- ============ HELP ============ -->
@@ -647,6 +644,7 @@
             <li>On each card the piece photo sits in the left column. Above the gold info box, every possible box for the piece is listed, best first — for example &ldquo;B7 - SOFT Fit 6/10 &#9733;&rdquo; for the best fit, then &ldquo;A7 - SOFT Fit 5/10&rdquo; — the box, its word, the Fit score, and a gold star at the end of the best fit line only. Just above the gold info box, on the right, is a <strong>Placed</strong> checkbox — tick it when the piece is in. The comments sit in the gold box under that checkbox. The small map sits right-justified in the right column; the piece&rsquo;s other possible fits appear on that map as gray squares with the piece number in gray inside — square, so they can&rsquo;t be mistaken for the round best-fit pin. CONFLICT pieces are pinned on the map too, at the box they wanted — their next-best box shows as a gray square.</li>
             <li>Above the cards, one dropdown filter picks which pieces the cards show: open it and tick any mix of LOCKED, SOFT, CONFLICT, UNPLACED and Placed — or All pieces to see everything again.</li>
             <li>When you physically put a piece in, tick the <strong>Placed</strong> checkbox above the gold info box on its card. It is remembered on the board in step 4, in its box, and stays there while you add more sheets.</li>
+            <li>Before placing a piece, check its card: SOFT means probably right — have a quick look first — and CONFLICT means another piece wants the same box, so settle it by eye before placing either one. Plain and dark pieces are the hardest to tell apart, because several boxes look alike.</li>
           </ol>
         </div>
 
@@ -662,7 +660,7 @@
       </div>
 
       <footer>
-        Jigsaw Piece Finder is a work in progress at <a href="https://exponology.com/">Exponology</a>. Sheets add up, placed pieces are remembered on the board, and a progress file carries them to your next sitting; scores are a first pass — check SOFT and CONFLICT cards before placing.
+        Jigsaw Piece Finder is one of the learning apps at Exponology — <a href="https://exponology.com/">exponology.com</a>.
       </footer>
 
     </div>

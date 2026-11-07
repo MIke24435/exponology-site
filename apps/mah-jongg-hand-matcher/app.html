@@ -7,28 +7,29 @@
 <link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,700;6..72,800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,700;6..72,800&family=Public+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <title>Mah Jongg Hand Matcher</title>
 <style>
   :root{
     color-scheme: light dark;
-    --bg:#f6f1e6;
-    --surface:#fffdf7;
-    --surface-2:#fbf7ec;
-    --ink:#1c2b22;
-    --ink-soft:#4a5a50;
-    --ink-faint:#6b7a6f;
-    --line:#ddd2b8;
+    --bg:#faf8f2;
+    --surface:#ffffff;
+    --surface-soft:#f1ede1;
+    --surface-2:#f1ede1;
+    --ink:#1e2b23;
+    --ink-soft:#48584e;
+    --ink-faint:#71806f;
+    --line:#ddd6c4;
     --line-strong:#c9b98f;
     --jade:#145c43;
     --jade-strong:#0e4a35;
     --jade-soft:#e2ede6;
     --red:#a61e14;
-    --red-soft:#fbe9e6;
+    --red-soft:#f7e3df;
     --gold:#8a6d1b;
-    --gold-soft:#f7ecd0;
+    --gold-soft:#fbf0cd;
     --shadow:0 1px 2px rgba(28,43,34,.06), 0 10px 30px rgba(28,43,34,.07);
-    --radius:16px;
+    --radius:14px;
     --tile-face:#fffdf4;
     --tile-edge:#d8cdb2;
     --tile-side:#e9e0c8;
@@ -43,6 +44,7 @@
     :root{
       --bg:#121a15;
       --surface:#1a241e;
+      --surface-soft:#1f2b23;
       --surface-2:#1f2b23;
       --ink:#eef2ec;
       --ink-soft:#b9c6bb;
@@ -68,7 +70,7 @@
     margin:0;
     background:var(--bg);
     color:var(--ink);
-    font-family: ui-sans-system, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family:'Public Sans', ui-sans-system, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     font-size:17px;
     line-height:1.45;
   }
@@ -393,6 +395,7 @@
   .empty p{color:var(--ink-soft);margin:0}
   footer{margin-top:28px;color:var(--ink-faint);font-size:.88rem;line-height:1.5}
   footer strong{color:var(--ink-soft)}
+  footer a{color:var(--jade);font-weight:700;text-decoration:underline;text-underline-offset:3px}
   :focus-visible{outline:3px solid var(--jade-soft);outline-offset:2px}
   @media (prefers-reduced-motion: reduce){ *{scroll-behavior:auto !important} }
 </style>
@@ -526,7 +529,7 @@
   </section>
 
   <footer>
-    <p>Hands and points are from the 2026 National Mah Jongg League card — notation only. <strong>Jokers count only in a group of three or more</strong> — never for a single tile or a pair. A White Dragon is also the <strong>Soap</strong>, and counts as the <strong>0</strong> in hands that use one. In the notation, brackets show suits and letters are placeholders for numbers you choose; <strong>NNNN</strong> is four North Wind tiles, not any wind.</p>
+    <p>Hands and points are from the 2026 National Mah Jongg League card — notation only. <a href="https://exponology.com/apps/mah-jongg-hand-finder/#key">Notation key</a> · <a href="#help-read">Joker rule in Help</a></p>
   </footer>
 </div>
 
