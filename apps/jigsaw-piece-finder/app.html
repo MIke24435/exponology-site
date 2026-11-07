@@ -170,12 +170,14 @@
 
       .btn{
         display:inline-flex;align-items:center;justify-content:center;gap:8px;
+        touch-action:manipulation;
         min-height:54px;padding:12px 22px;border-radius:10px;border:2px solid var(--green);
         background:var(--green);color:#fff;font-size:17px;font-weight:700;cursor:pointer;
         text-decoration:none;
       }
       @media (prefers-color-scheme: dark){ .btn{color:#0f2117;} }
       .btn:active{background:var(--green-strong);}
+      .btn:disabled{opacity:.72;cursor:wait;}
       .btn.secondary{background:transparent;color:var(--green);}
       .btn.secondary:active{background:var(--green-soft);}
       .btn.confirmed{background:var(--green-soft);color:var(--green);border-color:var(--green);}
@@ -516,11 +518,16 @@
           </div>
 
           <p class="status-line" id="sheetStatus"></p>
-          <p class="status-line" id="poolStatus"></p>
 
           <div class="btn-row">
             <button type="button" class="btn" id="sheetCut">Cut out the pieces in the grid</button>
           </div>
+          <!-- The running total sits BELOW the button on purpose: above
+               it, its appearing after the first cut pushed the button
+               down, so the button was never where a returning tap
+               expected it. Below, it can come and go without moving
+               anything. -->
+          <p class="status-line" id="poolStatus"></p>
         </div>
 
         <div class="card" id="cutCard" hidden>
@@ -716,10 +723,19 @@
         return [r,g,b];
       }
       function imgToSrc(img){
+        // Work on a copy no more than 3200px on its long side. A full
+        // camera photo can be tens of megapixels, and copying one whole
+        // into a canvas is where a phone can run out of memory mid-cut
+        // and the tap dies without a trace. Everything downstream —
+        // grid boxes, the 48x48 sampling, the cut-outs — works in this
+        // copy's own pixel space, so the smaller copy changes nothing
+        // else, and 3200px is far more than the sampling ever reads.
+        var nw=img.naturalWidth, nh=img.naturalHeight;
+        var s=Math.min(1,3200/Math.max(nw,nh));
         var cv=document.createElement("canvas");
-        cv.width=img.naturalWidth; cv.height=img.naturalHeight;
+        cv.width=Math.max(1,Math.round(nw*s)); cv.height=Math.max(1,Math.round(nh*s));
         var ctx=cv.getContext("2d",{willReadFrequently:true});
-        ctx.drawImage(img,0,0);
+        ctx.drawImage(img,0,0,cv.width,cv.height);
         var id=ctx.getImageData(0,0,cv.width,cv.height);
         return { data:id.data, w:cv.width, h:cv.height, canvas:cv, ctx:ctx };
       }
@@ -1092,6 +1108,11 @@
 
       $("sheetFile").addEventListener("change",function(){
         var f=this.files && this.files[0]; if(!f) return;
+        // Clear the input once the file is in hand: picking the same
+        // photo again for a later sheet must count as a fresh pick, and
+        // a file input left holding its last value stays silent then —
+        // the new sheet never registers, and Cut has nothing to cut.
+        this.value="";
         var rd=new FileReader();
         rd.onload=function(){ sheetImg.src=rd.result; sheetFresh=true; sheet.vlines=null; sheet.hlines=null; sheetChanged(); };
         rd.readAsDataURL(f);
@@ -1282,14 +1303,36 @@
         $("cutCard").hidden=false;
       }
 
-      $("sheetCut").addEventListener("click",function(){
-        if(!sheetFresh){
-          $("sheetStatus").innerHTML="Load the next sheet photo first — tap <strong>Load Puzzle Pieces</strong>, above the photo.";
-          $("sheet-section").scrollIntoView({behavior:"smooth",block:"start"});
-          return;
-        }
-        var W=sheetImg.naturalWidth, H=sheetImg.naturalHeight;
-        if(!W||!H) return;
+      /* ---- Cutting the sheet, driven by the button ----
+         The button must answer every tap. Three things used to make it
+         look dead: (1) tapped before the sheet photo had finished
+         loading, its naturalWidth was still 0 and the old handler
+         returned without a word; (2) any error while reading the photo
+         was thrown away silently; (3) the cut is heavy work on a
+         full-size photo, done with no sign of life, so a tap looked
+         ignored and got tapped again. Now the button shows "Cutting…"
+         at once and locks until the cut ends, a still-loading photo is
+         waited for and then cut on its own, and any failure is
+         reported in the status line instead of vanishing.
+         A later fix, for taps on return visits landing "above" the
+         button: after the first cut the running-total line above the
+         button gained text and pushed the button down; the tap itself
+         rewrote the status line and shifted the button again mid-tap;
+         the smooth scroll to the cut-outs left the phone's tap
+         positions trailing the picture; and one branch scrolled the
+         page to the top of the step instead of cutting. Now the total
+         sits below the button, the status line is left alone until
+         the cut finishes, the scrolls in this step jump instead of
+         gliding, and the no-photo branch explains itself in place. */
+      var cutting=false;
+      function cutButtonReset(){
+        cutting=false;
+        var btn=$("sheetCut");
+        btn.disabled=false;
+        btn.textContent="Cut out the pieces in the grid";
+      }
+      function doCut(){
+        try{
         var src=imgToSrc(sheetImg);
         sheet.pieces=detectPieces(src);
         // Number this sheet's pieces on from the saved sheets, and put them
@@ -1325,7 +1368,64 @@
         mn.textContent="The sheet is cut — tap Match the pieces (step 3) when you are ready.";
         mn.classList.remove("done");
         drawSheet();
-        $("cutCard").scrollIntoView({behavior:"smooth",block:"start"});
+        $("cutCard").scrollIntoView({behavior:"auto",block:"start"});
+        }catch(err){
+          $("sheetStatus").innerHTML="The pieces could not be cut — something went wrong reading the sheet photo. Load the photo again with <strong>Load Puzzle Pieces</strong>, above the photo, then tap Cut once more.";
+        }
+        cutButtonReset();
+      }
+
+      $("sheetCut").addEventListener("click",function(){
+        if(cutting) return; // a cut is already running, or waiting on the photo
+        if(!sheetFresh){
+          // No scroll here: jumping to the top of the step made the tap
+          // feel like a link to somewhere above the button, and left
+          // this explanation behind, out of sight. The message sits in
+          // the status line right above the button, where he is looking.
+          $("sheetStatus").innerHTML="Load the next sheet photo first — tap <strong>Load Puzzle Pieces</strong>, above the photo.";
+          return;
+        }
+        cutting=true;
+        this.disabled=true;
+        this.textContent="Cutting\u2026";
+        if(sheetImg.complete && sheetImg.naturalWidth>0){
+          // The button itself shows "Cutting…" — the status line above
+          // it is deliberately NOT rewritten here. Changing its text
+          // changed its height and moved the button while the tap was
+          // still landing, so a return-visit tap could miss the button
+          // it was aimed at. drawSheet() updates the line when the
+          // cut ends.
+          setTimeout(doCut,30); // let the "Cutting…" state show before the heavy work starts
+          return;
+        }
+        if(sheetImg.complete){
+          // Loading finished but the photo cannot be read — a picture
+          // format this browser cannot open. Say so; do not sit silent.
+          $("sheetStatus").innerHTML="That sheet photo could not be read — it may be a kind of picture this browser cannot open. Load it again with <strong>Load Puzzle Pieces</strong> (a JPEG or PNG photo works best), then tap Cut.";
+          cutButtonReset();
+          return;
+        }
+        // The photo is still loading: say so, and cut as soon as it lands.
+        $("sheetStatus").innerHTML="The sheet photo is still loading — cutting will start by itself as soon as it is ready.";
+        var waitTimer=null;
+        function stopWaiting(){
+          sheetImg.removeEventListener("load",onSheetReady);
+          sheetImg.removeEventListener("error",onSheetError);
+          if(waitTimer) clearTimeout(waitTimer);
+        }
+        function onSheetReady(){ stopWaiting(); setTimeout(doCut,30); }
+        function onSheetError(){
+          stopWaiting();
+          $("sheetStatus").innerHTML="That sheet photo could not be loaded. Load it again with <strong>Load Puzzle Pieces</strong>, above the photo, then tap Cut.";
+          cutButtonReset();
+        }
+        waitTimer=setTimeout(function(){
+          stopWaiting();
+          $("sheetStatus").innerHTML="The sheet photo is taking a long time to load. Give it a few more seconds, then tap <strong>Cut out the pieces in the grid</strong> again.";
+          cutButtonReset();
+        },20000);
+        sheetImg.addEventListener("load",onSheetReady);
+        sheetImg.addEventListener("error",onSheetError);
       });
 
       $("sheetConfirm").addEventListener("click",function(){
@@ -1350,7 +1450,7 @@
         $("sheetConfirmNote").classList.remove("done");
         clearMatch();
         drawSheet();
-        $("sheet-section").scrollIntoView({behavior:"smooth",block:"start"});
+        $("sheet-section").scrollIntoView({behavior:"auto",block:"start"});
       });
 
       sheetImg.addEventListener("load",drawSheet);
@@ -1859,7 +1959,7 @@
         if(!pool.length){
           note.textContent="Cut a sheet in step 2 first — matching works on the cut-out pieces.";
           note.classList.remove("done");
-          $("sheet-section").scrollIntoView({behavior:"smooth",block:"start"});
+          $("sheet-section").scrollIntoView({behavior:"auto",block:"start"});
           return;
         }
         if(!mapImg.naturalWidth) return;
@@ -1886,7 +1986,7 @@
             note.textContent="Done. "+c.LOCKED+" LOCKED, "+c.SOFT+" SOFT, "+c.CONFLICT+" CONFLICT, "+c.UNPLACED+" UNPLACED \u2014 the counts are in the state boxes above, and the filter dropdown above the cards can show one group or several at once.";
             note.classList.add("done");
             btn.disabled=false;
-            $("matchResults").scrollIntoView({behavior:"smooth",block:"start"});
+            $("matchResults").scrollIntoView({behavior:"auto",block:"start"});
           }
           step();
         },30);
@@ -2200,7 +2300,7 @@
           "Progress loaded — the map is back, with "+pool.length+" pieces and their matches, and "+Object.keys(board).length+" pieces on the board. Photograph the next sheet of pieces whenever you are ready.":
           "Progress loaded — "+Object.keys(board).length+" placed pieces are back on the board, on the grid they were placed on. (That was an older progress file: it held the board only, so the cut pieces start fresh.) Photograph the next sheet of pieces whenever you are ready.";
         note.classList.add("done");
-        $("boardCard").scrollIntoView({behavior:"smooth",block:"start"});
+        $("boardCard").scrollIntoView({behavior:"auto",block:"start"});
       }
 
       function loadProgressText(text){
