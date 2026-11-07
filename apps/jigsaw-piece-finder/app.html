@@ -260,7 +260,7 @@
       .word.placed{color:var(--green);}
 
       /* Candidate list on a piece card, above the gold info box: every
-         possible grid location, best first, "<Grid> - <STATE> [★] Fit n/10" */
+         possible grid location, best first, "<Grid> - <STATE> Fit n/10 [★]" — star at the end, best fit only */
       .candidates{margin:10px 0 4px;display:grid;gap:3px;}
       .cand-line{font-size:17px;margin:0;line-height:1.35;}
       .cand-line .cellid{font-family:"Newsreader",Georgia,serif;font-weight:700;font-size:19px;}
@@ -328,12 +328,23 @@
       /* Retake / human-look note on a piece's own card, beside its state word */
       .look-note{
         border:1px solid var(--gold);background:var(--gold-soft);border-radius:8px;
-        padding:8px 10px;font-size:15px;margin:10px 0 0;color:var(--ink);
+        padding:8px 10px;font-size:15px;margin:6px 0 0;color:var(--ink);
+      }
+
+      /* Placed checkbox: sits above the gold info box, right-justified
+         with it — its right edge aligns with the note box's right edge. */
+      .placed-row{display:flex;justify-content:flex-end;margin:10px 0 0;}
+      .placed-check{
+        display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:15.5px;
+        cursor:pointer;padding:6px 0 6px 10px;min-height:36px;color:var(--ink);
+      }
+      .placed-check input{
+        width:22px;height:22px;margin:0;flex:none;cursor:pointer;
+        accent-color:var(--green);
       }
 
       /* Step 3 cards: two columns — piece photo and text on the left, the
-         map right-justified in its column on the right, placed button
-         under the map, aligned with it. */
+         map right-justified in its column on the right. */
       .piece-card .mapcol{min-width:0;}
       .piece-card .mapcol .minimap{max-width:440px;width:100%;margin-left:auto;}
       .piece-card .mapcol .piece-note{max-width:440px;width:100%;margin-left:auto;}
@@ -628,16 +639,16 @@
             <li>Plain or dark pieces look like many boxes at once. Their other possible fits appear on the card&rsquo;s map as gray squares, so a person can judge between them.</li>
             <li>Changing the map grid or re-cutting the sheet clears the matching — run it again afterwards.</li>
             <li>The piece photo on each card is turned the way the piece will sit in the puzzle — the rotation that gave its best fit — so what you see is the piece as it goes in, not as it lay on the sheet.</li>
-            <li>On each card the piece photo sits in the left column. Above the gold info box, every possible box for the piece is listed, best first — for example &ldquo;B7 - SOFT &#9733; Fit 6/10&rdquo; for the best fit, then &ldquo;A7 - SOFT Fit 5/10&rdquo; — the box, its word, a gold star on the best fit only, and the Fit score. The comments sit in the gold box under that list. The small map sits right-justified in the right column; the piece&rsquo;s other possible fits appear on that map as gray squares with the piece number in gray inside — square, so they can&rsquo;t be mistaken for the round best-fit pin — and <strong>Mark as placed</strong> sits under the map. CONFLICT pieces are pinned on the map too, at the box they wanted — their next-best box shows as a gray square.</li>
+            <li>On each card the piece photo sits in the left column. Above the gold info box, every possible box for the piece is listed, best first — for example &ldquo;B7 - SOFT Fit 6/10 &#9733;&rdquo; for the best fit, then &ldquo;A7 - SOFT Fit 5/10&rdquo; — the box, its word, the Fit score, and a gold star at the end of the best fit line only. Just above the gold info box, on the right, is a <strong>Placed</strong> checkbox — tick it when the piece is in. The comments sit in the gold box under that checkbox. The small map sits right-justified in the right column; the piece&rsquo;s other possible fits appear on that map as gray squares with the piece number in gray inside — square, so they can&rsquo;t be mistaken for the round best-fit pin. CONFLICT pieces are pinned on the map too, at the box they wanted — their next-best box shows as a gray square.</li>
             <li>Above the cards, one dropdown filter picks which pieces the cards show: open it and tick any mix of LOCKED, SOFT, CONFLICT, UNPLACED and Placed — or All pieces to see everything again.</li>
-            <li>When you physically put a piece in, tap <strong>Mark as placed</strong> on its card. It is remembered on the board in step 4, in its box, and stays there while you add more sheets.</li>
+            <li>When you physically put a piece in, tick the <strong>Placed</strong> checkbox above the gold info box on its card. It is remembered on the board in step 4, in its box, and stays there while you add more sheets.</li>
           </ol>
         </div>
 
         <div class="help-block" id="help-board">
           <h3>The board and the progress file</h3>
           <ol>
-            <li>Tap <strong>Mark as placed</strong> on a piece&rsquo;s card in step 3 once the piece is physically in the puzzle. The piece appears on the board in step 4, in its box, turned the way it fits best, with its Fit score in the list under the board.</li>
+            <li>Tick the <strong>Placed</strong> checkbox on a piece&rsquo;s card in step 3 once the piece is physically in the puzzle. The piece appears on the board in step 4, in its box, turned the way it fits best, with its Fit score in the list under the board.</li>
             <li>The board is the app&rsquo;s memory of what is placed, box by box. Adding more sheets does not disturb it. Changing the map grid does — the boxes move, so the board clears; a progress file saved beforehand brings the placements back with the grid they belong to.</li>
             <li><strong>Save Progress File</strong> writes the whole sitting to one file on your computer: the map photo and grid, and every piece cut so far — each with a small picture, its match and Fit score, and whether it is placed. Keep the file with the puzzle. On a desktop browser the first save lets you choose where the file lives, and later saves update that same file; on iPhone the save downloads the file instead.</li>
             <li><strong>Load Progress File</strong> at your next sitting puts everything back — the map and its grid, every piece with its match, and the board exactly as it was — then photograph the next sheet of pieces and carry on.</li>
@@ -1424,8 +1435,8 @@
             // fit gets a pin; none is silently left off the map.
             loser.pinCand=loser.fallback||loser.best;
             // Plotted on the maps at its BEST box — the box it wanted —
-            // even though that box is taken. (Mark as placed still uses
-            // pinCand, the next-best box, which is the box to try.)
+            // even though that box is taken. (The Placed checkbox still
+            // uses pinCand, the next-best box, which is the box to try.)
             loser.mapCand=loser.best;
           }
         }
@@ -1626,8 +1637,9 @@
 
           // The candidate list, ABOVE the gold info box: every possible
           // grid location for this piece, best first, each line in the
-          // form "<Grid> - <STATE> [★ if best] Fit <n>/10" — e.g.
-          // "B7 - SOFT ★ Fit 6/10", then "A7 - SOFT Fit 5/10". This
+          // form "<Grid> - <STATE> Fit <n>/10 [★ if best]" — e.g.
+          // "B7 - SOFT Fit 6/10 ★", then "A7 - SOFT Fit 5/10". The
+          // star sits at the END of the best fit line only. This
           // list replaces the old separate state line.
           var cands=document.createElement("div"); cands.className="candidates";
           if(!hasFit){
@@ -1647,13 +1659,13 @@
               stSpan.className="st word "+stateClass(stWord);
               stSpan.textContent=stWord;
               line.appendChild(stSpan);
+              line.appendChild(document.createTextNode(" Fit "+cand.fit+"/10"));
               if(isBest){
                 line.appendChild(document.createTextNode(" "));
                 var star=document.createElement("span"); star.className="star";
                 star.setAttribute("aria-hidden","true"); star.textContent="\u2605";
                 line.appendChild(star);
               }
-              line.appendChild(document.createTextNode(" Fit "+cand.fit+"/10"));
               cands.appendChild(line);
             });
           }
@@ -1673,6 +1685,33 @@
           else if(r.state==="CONFLICT") boxLines.push("Human look: two pieces want the same box. Settle it by eye before placing either one.");
           else if(r.state==="SOFT") boxLines.push("Human look: probably right, but check it by eye before placing.");
           if(p.feat && p.feat.plain) boxLines.push("Human look: this piece is mostly one plain colour, so several boxes look alike \u2014 judge between the candidates rather than trusting the top one.");
+          // Placed checkbox — ABOVE the gold info box, right-justified
+          // with it (its right edge aligns with the note box's right
+          // edge). Ticking it marks the piece as placed and remembers
+          // it on the board in step 4; unticking takes it back off.
+          var placedRow=document.createElement("div"); placedRow.className="placed-row";
+          var placedLabel=document.createElement("label"); placedLabel.className="placed-check";
+          var placedBox=document.createElement("input"); placedBox.type="checkbox";
+          placedBox.checked=!!r.placed;
+          placedBox.setAttribute("aria-label","Placed \u2014 piece "+r.n);
+          placedLabel.appendChild(placedBox);
+          placedLabel.appendChild(document.createTextNode("Placed"));
+          placedBox.addEventListener("change",function(){
+            r.placed=placedBox.checked;
+            if(r.pinCand){
+              var blabelPlaced="Piece "+r.n+" \u00B7 Sheet "+(p.sheetNo||1);
+              if(r.placed){
+                board[r.pinCand.id]={ id:r.pinCand.id, ci:r.pinCand.ci, rj:r.pinCand.rj, rot:r.pinCand.rot,
+                  thumb:p.cropURL, label:blabelPlaced, fit:r.pinCand.fit, state:r.state, shape:p.shape||null };
+              } else if(board[r.pinCand.id] && board[r.pinCand.id].label===blabelPlaced){
+                delete board[r.pinCand.id];
+              }
+            }
+            renderBoard();
+            renderSummary(); renderPins(); renderCards();
+          });
+          placedRow.appendChild(placedLabel);
+          left.appendChild(placedRow);
           var hn=document.createElement("div"); hn.className="look-note";
           boxLines.forEach(function(line,li2){
             var lp=document.createElement("p");
@@ -1694,7 +1733,8 @@
           var top=r.ranked.slice(0,3);
           card.appendChild(left);
 
-          /* RIGHT: the map, with Mark as Placed under it */
+          /* RIGHT: the map (no button under it — the Placed checkbox
+             sits above the gold info box in the left column) */
           var right=document.createElement("div"); right.className="mapcol";
           var mm=document.createElement("div"); mm.className="minimap";
           var mimg=document.createElement("img"); mimg.src=mapImg.src;
@@ -1736,34 +1776,6 @@
             np.textContent="No pin: no box scored well enough to point at.";
             right.appendChild(np);
           }
-          // Placed action — under the map
-          var row=document.createElement("div"); row.className="btn-row";
-          var pb=document.createElement("button"); pb.type="button";
-          pb.className="btn"+(r.placed?" confirmed":"");
-          pb.textContent=r.placed?"Placed \u2713 \u2014 tap to undo":"Mark as placed";
-          pb.addEventListener("click",function(){
-            r.placed=!r.placed;
-            // Remember it on the board in step 4, in its box.
-            if(r.pinCand){
-              var blabel="Piece "+r.n+" \u00B7 Sheet "+(p.sheetNo||1);
-              if(r.placed){
-                board[r.pinCand.id]={ id:r.pinCand.id, ci:r.pinCand.ci, rj:r.pinCand.rj, rot:r.pinCand.rot,
-                  thumb:p.cropURL, label:blabel, fit:r.pinCand.fit, state:r.state, shape:p.shape||null };
-              } else if(board[r.pinCand.id] && board[r.pinCand.id].label===blabel){
-                delete board[r.pinCand.id];
-              }
-            }
-            renderBoard();
-            renderSummary(); renderPins(); renderCards();
-          });
-          row.appendChild(pb);
-          if(r.placed){
-            var dn=document.createElement("span"); dn.className="confirm-note done";
-            dn.textContent="In the puzzle.";
-            row.appendChild(dn);
-          }
-          right.appendChild(row);
-
           card.appendChild(right);
           wrap.appendChild(card);
         });
@@ -1771,7 +1783,7 @@
         if(!shown){
           var none=document.createElement("p");
           none.className="confirm-note";
-          none.textContent= (match.filters.length===1 && match.filters[0]==="placed") ? "No pieces marked as placed yet \u2014 place a LOCKED piece, then tap Mark as placed on its card." : "No pieces match the states picked in the filter \u2014 open the dropdown and pick more states, or All pieces.";
+          none.textContent= (match.filters.length===1 && match.filters[0]==="placed") ? "No pieces marked as placed yet \u2014 place a LOCKED piece, then tick the Placed checkbox on its card." : "No pieces match the states picked in the filter \u2014 open the dropdown and pick more states, or All pieces.";
           wrap.appendChild(none);
         }
       }
@@ -1874,7 +1886,7 @@
         });
         var total=map.cols*map.rows;
         if(!keys.length){
-          listEl.innerHTML='<p class="confirm-note">No pieces marked as placed yet. When you put a piece in, tap <strong>Mark as placed</strong> on its card in step 3 — it will appear here, in its box.</p>';
+          listEl.innerHTML='<p class="confirm-note">No pieces marked as placed yet. When you put a piece in, tick the <strong>Placed</strong> checkbox on its card in step 3 — it will appear here, in its box.</p>';
         } else {
           // Built with DOM nodes and text nodes, never string interpolation:
           // board entries can come from a loaded progress file, whose text
