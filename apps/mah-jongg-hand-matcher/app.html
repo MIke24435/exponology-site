@@ -124,6 +124,21 @@
   .rack-empty{color:var(--ink-faint);font-size:.98rem;padding:8px 4px}
   .rack-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center}
   .rack-actions .section-filter{margin-left:auto}
+  /* Replacement mode */
+  .replace-bar{margin-top:14px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px}
+  .replace-copy{min-width:220px;flex:1 1 260px}
+  .replace-copy strong{display:block;font-size:1rem}
+  .replace-copy span{display:block;color:var(--ink-soft);font-size:.92rem;margin-top:2px;line-height:1.4}
+  .seg{display:inline-flex;background:var(--surface);border:1.5px solid var(--line-strong);border-radius:999px;padding:3px;gap:3px;flex:0 0 auto}
+  .seg-btn{min-height:44px;padding:9px 16px;border-radius:999px;border:0;background:transparent;color:var(--ink);font-weight:800;font-size:.95rem;cursor:pointer;white-space:nowrap}
+  .seg-btn.is-on{background:var(--jade);color:#fff}
+  @media (prefers-color-scheme: dark){ .seg-btn.is-on{color:#0e1a13} }
+  .wall-line{margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:var(--ink-soft);font-size:.92rem;font-weight:600}
+  .wall-line .wall-pill{background:var(--jade-soft);border:1px solid var(--line);padding:4px 10px;border-radius:999px;font-weight:800;color:var(--jade)}
+  .tile.is-new{outline:3px solid var(--jade);outline-offset:2px;box-shadow:0 0 0 5px var(--jade-soft)}
+  .tile .t-new{position:absolute;top:-9px;left:50%;transform:translateX(-50%);z-index:2;background:var(--jade);color:#fff;font-family:ui-sans-system,-apple-system,sans-serif;font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:999px;border:2px solid var(--surface);white-space:nowrap}
+  @media (prefers-color-scheme: dark){ .tile .t-new{color:#0e1a13} }
+  @media(max-width:560px){ .replace-bar{align-items:flex-start} .seg{width:100%} .seg-btn{flex:1} }
   .btn{
     border-radius:999px;
     min-height:50px;
@@ -408,7 +423,7 @@
     </div>
     <div class="eyebrow">2026 Card &bull; 79 Hands</div>
     <h1>Mah Jongg Hand Matcher</h1>
-    <p class="lede"><strong>What hand are my tiles closest to?</strong> Tap the tiles on your rack into the page, and it ranks the 2026 card hands by <strong>how few tiles you still need</strong>. Tap a tile on your rack to take it back off, or drag it sideways to move it. Or tap <strong>Random hand</strong> at the top of the Add tiles box to deal yourself a fresh hand to try — 13 tiles, or 14 if you are East.</p>
+    <p class="lede"><strong>What hand are my tiles closest to?</strong> Tap the tiles on your rack into the page, and it ranks the 2026 card hands by <strong>how few tiles you still need</strong>. When you want to swap a tile out, pick <strong>Manual</strong> to choose its replacement yourself, or <strong>Random draw</strong> to discard it and have a new tile drawn from the remaining wall for you. Or tap <strong>Random hand</strong> at the top of the Add tiles box to deal yourself a fresh hand to try — 13 tiles, or 14 if you are East.</p>
   </header>
 
   <section class="panel" aria-label="Add tiles">
@@ -443,10 +458,22 @@
       <h2>Your rack</h2>
       <div class="count-line" id="rackCount">0 tiles entered</div>
     </div>
-    <p class="hint">Drag a tile sideways to move it. A plain tap takes a tile off.</p>
+    <p class="hint" id="rackHint">Drag a tile sideways to move it. A plain tap takes a tile off.</p>
+    <div class="replace-bar" aria-label="Tile replacement mode">
+      <div class="replace-copy">
+        <strong>Tile replacement</strong>
+        <span id="replaceHint">Manual: tap a tile to discard it, then tap tiles above to add its replacement yourself.</span>
+      </div>
+      <div class="seg" role="group" aria-label="Choose replacement mode">
+        <button type="button" class="seg-btn is-on" id="modeManualBtn" aria-pressed="true">Manual</button>
+        <button type="button" class="seg-btn" id="modeRandomBtn" aria-pressed="false">Random draw</button>
+      </div>
+    </div>
+    <div class="wall-line" id="wallLine" aria-live="polite"></div>
     <div class="rack" id="rack"></div>
     <div class="rack-actions">
       <button type="button" class="btn btn-ghost" id="arrangeBtn" disabled>Arrange</button>
+      <button type="button" class="btn" id="drawRandomBtn" disabled>Draw random tile</button>
       <button type="button" class="btn btn-ghost" id="clearBtn" disabled>Clear</button>
       <div class="section-filter" id="sectionFilter">
         <button type="button" class="btn btn-ghost" id="sectionBtn" aria-haspopup="true" aria-expanded="false">Sections: All ▾</button>
@@ -509,7 +536,10 @@
       <li><strong>Add tiles:</strong> tap a kind — Bams, Craks, Dots, Winds or Dragons — then tap the tile. Flowers and Jokers go on with a single tap.</li>
       <li><strong>East:</strong> your rack holds 13 tiles, or 14 if you are East. Tick <strong>East</strong>, at the top of the Add tiles box next to Random hand, to allow 14. Unticking it with 14 tiles on the rack takes the extra tile off the end.</li>
       <li><strong>Random hand</strong> deals a fresh hand drawn from a full set, replacing whatever is on your rack — 13 tiles, or 14 if East is ticked.</li>
-      <li><strong>Your rack:</strong> tap a tile to take it back off, or drag it sideways to move it. <strong>Arrange</strong> sorts the rack; <strong>Clear</strong> empties it.</li>
+      <li><strong>Tile replacement — Manual:</strong> tap a tile on your rack to discard it, then add its replacement yourself from the Add tiles box above. The picker still stops you at the set limit — 4 of any suit, wind or dragon tile, 8 Flowers and 8 Jokers.</li>
+      <li><strong>Tile replacement — Random draw:</strong> switch to <strong>Random draw</strong> in the Your rack box, then tap the tile you want to discard. It is replaced in the same spot by a tile drawn at random from the remaining wall — the full 152-tile set minus every tile currently on your rack, including the one you just discarded, so the discarded tile itself can’t come straight back and no tile can ever appear more times than a real set holds. The new tile is marked <strong>NEW</strong>, and the line above the rack shows how many tiles were left in the wall to draw from.</li>
+      <li><strong>Draw random tile:</strong> if your rack isn’t full, this button fills one open slot with a random tile from that same remaining wall.</li>
+      <li><strong>Your rack:</strong> tap a tile to discard it (what happens next depends on the replacement mode above), or drag it sideways to move it. <strong>Arrange</strong> sorts the rack; <strong>Clear</strong> empties it.</li>
       <li><strong>Sections</strong> (next to Clear) limits the results to the card sections you pick. <strong>Matching tiles</strong> sets how many of your tiles a hand must use before it is listed.</li>
       <li><strong>Sort all</strong>, next to the hand count above the results, ranks every hand together in one list. With it off, hands blocked by a single or a pair you don’t hold are listed separately, below the main list.</li>
       <li>The list sharpens as you add tiles — with fewer than 8 entered, treat it as a broad guide.</li>
@@ -787,6 +817,9 @@ var rack = [];           // tile keys, in the order entered
 var openGroup = null;    // picker group currently highlighted: bam/crak/dot/wind/dragon (grid open), or flower/joker (highlight only, no grid)
 var showingMore = false;
 var msgTimer = null;
+var replaceMode = 'manual'; // 'manual' | 'random'
+var lastNewIndex = -1;      // rack index of the tile most recently drawn at random
+var lastNewKey = null;
 
 /* Card sections, in card order A–I, for the section multi-select */
 var SECTIONS = [
@@ -881,21 +914,117 @@ function tileButtonHTML(key, badge, useImg){
     (badge ? '<span class="t-badge">' + badge + '</span>' : '');
 }
 var suppressRackClick = false;
+/* Remaining wall: a full 152-tile set minus every tile on the rack.
+   Drawing only from this pool is what guarantees the tile
+   distribution — the rack can never end up with a 5th copy of a
+   suit/wind/dragon tile, or a 9th Flower or Joker. buildWall() is
+   declared below (hoisted). */
+function remainingPool(){
+  var pool = buildWall();
+  rack.forEach(function(k){
+    var pi = pool.indexOf(k);
+    if(pi !== -1) pool.splice(pi, 1);
+  });
+  return pool;
+}
+function pickFromPool(pool){
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+function discardAndDraw(idx){
+  if(idx < 0 || idx >= rack.length) return;
+  var discarded = rack[idx];
+  // Pool is worked out BEFORE the discard leaves the rack, so the
+  // discarded tile is still counted as held and cannot be drawn
+  // straight back; only its other copies (if any remain) can appear.
+  var pool = remainingPool();
+  if(!pool.length){
+    showMsg('No tiles are left in the wall to draw — the rack already holds the whole set.');
+    return;
+  }
+  var drawn = pickFromPool(pool);
+  rack[idx] = drawn;
+  lastNewIndex = idx;
+  lastNewKey = drawn;
+  showingMore = false;
+  refresh();
+  showMsg('Discarded ' + tileName(discarded) + ' — drew ' + tileName(drawn) + ' from the wall (' + pool.length + ' tiles were left to draw from).', true);
+}
+function drawRandomTile(){
+  if(rack.length >= rackLimit()){
+    showMsg('Your rack is full (' + rackLimit() + ' tiles) — discard a tile first.');
+    return;
+  }
+  var pool = remainingPool();
+  if(!pool.length){
+    showMsg('No tiles are left in the wall to draw.');
+    return;
+  }
+  var drawn = pickFromPool(pool);
+  rack.push(drawn);
+  lastNewIndex = rack.length - 1;
+  lastNewKey = drawn;
+  showingMore = false;
+  refresh();
+  showMsg('Drew ' + tileName(drawn) + ' from the wall (' + pool.length + ' tiles were left to draw from).', true);
+}
+function updateReplaceUI(){
+  var isRandom = replaceMode === 'random';
+  var man = document.getElementById('modeManualBtn');
+  var ran = document.getElementById('modeRandomBtn');
+  if(man){ man.classList.toggle('is-on', !isRandom); man.setAttribute('aria-pressed', !isRandom ? 'true' : 'false'); }
+  if(ran){ ran.classList.toggle('is-on', isRandom); ran.setAttribute('aria-pressed', isRandom ? 'true' : 'false'); }
+  var hint = document.getElementById('replaceHint');
+  if(hint) hint.textContent = isRandom
+    ? 'Random draw: tap a tile to discard it — a new tile is drawn from the remaining wall and placed in the same spot.'
+    : 'Manual: tap a tile to discard it, then tap tiles above to add its replacement yourself.';
+  var rackHint = document.getElementById('rackHint');
+  if(rackHint) rackHint.textContent = isRandom
+    ? 'Drag a tile sideways to move it. Tap a tile to discard it and draw a random replacement.'
+    : 'Drag a tile sideways to move it. A plain tap takes a tile off.';
+  var wallEl = document.getElementById('wallLine');
+  if(wallEl){
+    if(!rack.length){
+      wallEl.innerHTML = '<span class="wall-pill">Wall: 152 tiles</span><span>Full set — 4 of each suit, wind and dragon tile, 8 Flowers, 8 Jokers.</span>';
+    } else {
+      var left = remainingPool().length;
+      wallEl.innerHTML = '<span class="wall-pill">Wall: ' + left + ' tiles left</span><span>Random draws come only from this remaining pool, so your rack can never hold more copies of a tile than a real set contains.</span>';
+    }
+  }
+}
+function setReplaceMode(mode){
+  replaceMode = mode === 'random' ? 'random' : 'manual';
+  updateReplaceUI();
+  showMsg(replaceMode === 'random'
+    ? 'Random draw on — tap a tile on your rack to discard it and draw its replacement.'
+    : 'Manual on — tap a tile to discard it, then pick its replacement above.', true);
+  // Re-render so tile labels describe the current tap action.
+  renderRack();
+}
 function renderRack(){
   var el = document.getElementById('rack');
   if(!rack.length){
-    el.innerHTML = '<span class="rack-empty">Your rack is empty — add tiles above.</span>';
+    el.innerHTML = '<span class="rack-empty">Your rack is empty — add tiles above, or use Draw random tile below.</span>';
   } else {
     el.innerHTML = rack.map(function(key, i){
       var imgCls = TILE_IMG[key] ? ' has-img' : '';
-      return '<button type="button" class="tile ' + tileFace(key).cls + imgCls + '" data-rack-idx="' + i + '" aria-label="' + esc(tileName(key)) + ' — tap to remove, drag to move">' + tileButtonHTML(key, 0, true) + '</button>';
+      var isNew = (i === lastNewIndex && key === lastNewKey);
+      var newCls = isNew ? ' is-new' : '';
+      var newBadge = isNew ? '<span class="t-new">New</span>' : '';
+      var action = replaceMode === 'random' ? 'tap to discard and draw a random replacement' : 'tap to remove';
+      return '<button type="button" class="tile ' + tileFace(key).cls + imgCls + newCls + '" data-rack-idx="' + i + '" aria-label="' + esc(tileName(key)) + ' — ' + action + ', drag to move">' + newBadge + tileButtonHTML(key, 0, true) + '</button>';
     }).join('');
     var btns = el.querySelectorAll('[data-rack-idx]');
     for(var i = 0; i < btns.length; i++){
       btns[i].addEventListener('click', function(){
         if(suppressRackClick){ suppressRackClick = false; return; }
         var idx = parseInt(this.getAttribute('data-rack-idx'), 10);
+        if(replaceMode === 'random'){
+          discardAndDraw(idx);
+          return;
+        }
         rack.splice(idx, 1);
+        if(lastNewIndex === idx){ lastNewIndex = -1; lastNewKey = null; }
+        else if(lastNewIndex > idx){ lastNewIndex--; }
         showingMore = false;
         refresh();
       });
@@ -909,6 +1038,9 @@ function renderRack(){
   document.getElementById('rackCount').textContent = label;
   document.getElementById('arrangeBtn').disabled = n < 2;
   document.getElementById('clearBtn').disabled = n === 0;
+  var drawBtn = document.getElementById('drawRandomBtn');
+  if(drawBtn) drawBtn.disabled = n >= limit;
+  updateReplaceUI();
 }
 function attachRackDrag(btn){
   var startX = 0, startY = 0, active = false, dragging = false, dropIndex = null, indicated = null;
@@ -951,6 +1083,7 @@ function attachRackDrag(btn){
         var item = rack.splice(from, 1)[0];
         var ins = dropIndex > from ? dropIndex - 1 : dropIndex;
         rack.splice(ins, 0, item);
+        lastNewIndex = -1; lastNewKey = null;
         suppressRackClick = true;
         setTimeout(function(){ suppressRackClick = false; }, 350);
         showingMore = false;
@@ -1283,15 +1416,20 @@ document.getElementById('subDone').addEventListener('click', function(){
 });
 document.getElementById('arrangeBtn').addEventListener('click', function(){
   rack.sort(function(a, b){ return arrangeKey(a) - arrangeKey(b); });
+  lastNewIndex = -1; lastNewKey = null;
   refresh();
   showMsg('Arranged — Bams, Craks, Dots, Winds, Dragons, Flowers, Jokers.', true);
 });
 document.getElementById('clearBtn').addEventListener('click', function(){
   rack = [];
+  lastNewIndex = -1; lastNewKey = null;
   showingMore = false;
   showMsg('');
   refresh();
 });
+document.getElementById('modeManualBtn').addEventListener('click', function(){ setReplaceMode('manual'); });
+document.getElementById('modeRandomBtn').addEventListener('click', function(){ setReplaceMode('random'); });
+document.getElementById('drawRandomBtn').addEventListener('click', drawRandomTile);
 /* Random hand: deal rackLimit() tiles — 13, or 14 if East is checked —
    drawn without replacement from a full 152-tile American Mah Jongg
    set — 4 of every suit tile (1–9 in Bams, Craks and Dots), wind and
@@ -1324,6 +1462,7 @@ function dealRandomHand(){
   var limit = rackLimit();
   rack = wall.slice(0, limit);
   rack.sort(function(a, b){ return arrangeKey(a) - arrangeKey(b); });
+  lastNewIndex = -1; lastNewKey = null;
   showingMore = false;
   refresh();
   showMsg('Random hand dealt — ' + limit + ' tiles drawn from a full set' + (isEast ? ' (East)' : '') + '. Tap Random hand again for a new one.', true);
