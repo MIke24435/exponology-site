@@ -106,7 +106,8 @@
   }
   .panel-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
   .add-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-  .add-tools{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .add-tools{display:flex;align-items:center;gap:12px 20px;flex-wrap:wrap}
+  .add-tools .match-select{min-height:44px;padding-top:8px;padding-bottom:8px}
   .btn-compact{min-height:44px;padding:8px 16px;font-size:.95rem}
   .panel h2{font-size:1.05rem;margin:0}
   .count-line{color:var(--ink-soft);font-weight:600;font-size:.98rem}
@@ -122,8 +123,10 @@
     padding:10px;
   }
   .rack-empty{color:var(--ink-faint);font-size:.98rem;padding:8px 4px}
-  .rack-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center}
-  .rack-actions .section-filter{margin-left:auto}
+  .rack-spacer{width:52px;height:70px;flex:0 0 52px}
+  .rack-break{width:14px;height:70px;flex:0 0 14px}
+  .hint:empty{display:none}
+  .turn-bar[hidden]{display:none}
   /* Replacement mode */
   .replace-bar{margin-top:14px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px}
   .replace-copy{min-width:220px;flex:1 1 260px}
@@ -133,8 +136,149 @@
   .seg-btn{min-height:44px;padding:9px 16px;border-radius:999px;border:0;background:transparent;color:var(--ink);font-weight:800;font-size:.95rem;cursor:pointer;white-space:nowrap}
   .seg-btn.is-on{background:var(--jade);color:#fff}
   @media (prefers-color-scheme: dark){ .seg-btn.is-on{color:#0e1a13} }
-  .wall-line{margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:var(--ink-soft);font-size:.92rem;font-weight:600}
-  .wall-line .wall-pill{background:var(--jade-soft);border:1px solid var(--line);padding:4px 10px;border-radius:999px;font-weight:800;color:var(--jade)}
+  .draw-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:0 1 auto}
+  .draw-controls .match-select{max-width:100%}
+  @media(max-width:560px){ .draw-controls{width:100%} .draw-controls .match-select{flex:1 1 160px} }
+  /* Wall count — a pill in the exposed tiles box, nothing more */
+  .wall-pill{background:var(--jade-soft);border:1px solid var(--line);padding:4px 10px;border-radius:999px;font-weight:800;color:var(--jade);font-size:.92rem;white-space:nowrap}
+  .mj-banner{margin-top:14px;padding:16px;border-radius:12px;background:var(--jade);color:#fff;text-align:center;border:2px solid var(--gold)}
+  @media (prefers-color-scheme: dark){ .mj-banner{color:#0e1a13} }
+  .mj-banner strong{display:block;font-family:Georgia,serif;font-size:1.7rem;line-height:1.1;letter-spacing:-.01em}
+  .mj-banner span{display:block;margin-top:4px;font-size:.98rem;font-weight:600;line-height:1.4}
+  .mj-banner .mj-btn{margin-top:10px;background:#fff;color:var(--jade-strong);border-color:#fff}
+  @media (prefers-color-scheme: dark){ .mj-banner .mj-btn{background:#0e1a13;color:var(--jade-strong)} }
+  .turn-bar{margin-top:12px;padding:11px 12px;border-radius:10px;background:var(--gold-soft);border:1px solid var(--line);font-size:.96rem;line-height:1.45}
+  .turn-bar strong{color:var(--ink)}
+  .turn-bar .turn-step{font-weight:800}
+  /* Game speed: how fast the other players move, or Manual advance */
+  .speed-bar{margin-top:12px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px}
+  .speed-copy{min-width:200px;flex:1 1 240px}
+  .speed-copy strong{display:block;font-size:1rem}
+  .speed-copy span{display:block;color:var(--ink-soft);font-size:.92rem;margin-top:2px;line-height:1.4}
+  .speed-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:0 1 auto}
+  @media(max-width:560px){ .speed-controls{width:100%} .speed-controls .seg{width:100%} .speed-controls .seg-btn{flex:1;padding-left:8px;padding-right:8px} #nextPlayerBtn{width:100%} }
+  .rack.is-discard .tile{outline:2px dashed var(--red);outline-offset:1px}
+  /* Compact game controls: one row under the rack — Charleston
+     (Swap), Draw and Clear, with the tile count at the end of the
+     row. Speed and Random live at the top of the form, to the left
+     of the Charleston and East boxes. */
+  .game-controls{margin-top:12px;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+  .ctl-group{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .ctl-count{margin-left:auto;font-weight:800;color:var(--ink-soft);font-size:.95rem;white-space:nowrap}
+  .ctl-group .match-select{min-height:44px;padding-top:8px;padding-bottom:8px}
+  /* Round "?" help links: details live in Help, not in the game area */
+  .help-q{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;flex:0 0 auto;border-radius:50%;border:1.5px solid var(--jade);color:var(--jade);font-weight:800;font-size:.92rem;line-height:1;text-decoration:none;-webkit-tap-highlight-color:transparent}
+  .help-q:hover,.help-q:focus-visible{background:var(--jade-soft)}
+  .panel-head .help-q{margin-left:2px}
+  .draw-one-note{font-size:.88rem;color:var(--ink-faint);font-weight:600}
+  /* Charleston — no box: the Swap button just says Swap (the rack
+     count line names the current pass), and greys out when the
+     Charleston is off or done. The Charleston buttons (Start /
+     Swap) live in the controls row under the rack, so they take
+     no row of their own. */
+  .ctl-group[hidden]{display:none}
+  .tile.is-pass{outline:3px solid var(--gold);outline-offset:2px;box-shadow:0 0 0 5px var(--gold-soft)}
+  .tile .t-pass{position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);z-index:2;background:var(--red);color:#fff;font-family:ui-sans-system,-apple-system,sans-serif;font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:999px;border:2px solid var(--surface);white-space:nowrap}
+  /* Charleston option (checkbox greys out once the Charleston is over) */
+  .sort-all-filter.is-disabled{opacity:.45;cursor:default}
+  .sort-all-filter.is-disabled input,.sort-all-filter.is-disabled .sort-all-label{cursor:default}
+  .sort-all-filter input[disabled]{cursor:default}
+  /* Opponents */
+  .opp-grid{display:grid;gap:10px;margin-top:14px}
+  @media(min-width:700px){ .opp-grid{grid-template-columns:repeat(3,1fr)} }
+  .opp-card{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--surface-2)}
+  .opp-card.is-turn{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft)}
+  .opp-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
+  .opp-name{font-weight:800;font-size:1.02rem}
+  .opp-seat{color:var(--ink-faint);font-size:.82rem;font-weight:700}
+  .opp-backs{display:flex;flex-wrap:wrap;gap:3px;margin-top:9px;min-height:26px}
+  .tile-back{width:17px;height:24px;border-radius:3px;background:var(--jade);border:1px solid var(--jade-strong);border-bottom:3px solid var(--jade-strong)}
+  .opp-status{margin-top:9px;color:var(--ink-soft);font-size:.92rem;line-height:1.4;min-height:1.3em}
+  .opp-melds{display:flex;flex-wrap:wrap;gap:10px;margin-top:9px}
+  .opp-melds .meld-tiles .tile{width:30px;height:40px;border-bottom-width:3px}
+  .opp-melds .meld-tiles .tile .t-main{font-size:.82rem}
+  .opp-melds .meld-tiles .tile .t-num{width:20px;height:20px;font-size:.78rem}
+  .opp-melds .meld-tiles .tile .t-sub{display:none}
+  .opp-melds .meld-label{font-size:.68rem}
+  .opp-none{color:var(--ink-faint);font-size:.85rem;margin-top:9px}
+  /* Winning hand reveal */
+  .reveal-panel{border-color:var(--gold)}
+  .reveal-groups{display:flex;flex-wrap:wrap;gap:16px;margin-top:14px;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:14px 12px}
+  .reveal-groups .meld-tiles .tile{cursor:default}
+  /* Call / Pass — no box either: just the tile, a short label and
+     the buttons, in the action row under the rack. */
+  .call-bar{margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;max-width:100%}
+  .call-bar[hidden]{display:none}
+  .call-bar .tile{cursor:default;flex:0 0 auto;width:40px;height:54px}
+  .call-bar .tile .t-main{font-size:1.1rem}
+  .call-bar .tile .t-num{width:27px;height:27px;font-size:1.02rem}
+  .call-label{font-weight:700;font-size:.98rem}
+  /* Joker exchange — a bar like the Call bar, under the rack:
+     one button per exposed Joker the user can swap for. */
+  .exchange-bar{margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;max-width:100%}
+  .exchange-bar[hidden]{display:none}
+  .exchange-bar .btn{border-color:var(--joker-purple);color:var(--joker-purple)}
+  @media (prefers-color-scheme: dark){ .exchange-bar .btn{color:#d3a6e8} }
+  /* Exposed tiles — the box sitting above Other
+     players: your called sets, the wall count, and a switch that
+     turns the exposed tiles face-up or face-down */
+  .exposed-area[hidden]{display:none}
+  .exposed-head{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap}
+  .exposed-head .melds-label{font-size:1.05rem;white-space:nowrap}
+  .exposed-toggle{margin-left:auto}
+  .exposed-melds{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px}
+  .exposed-melds:empty{display:none}
+  .meld-backs{gap:4px}
+  .meld-backs .tile-back{width:30px;height:40px;border-radius:4px;border-bottom-width:3px}
+  .melds-none{color:var(--ink-faint);font-size:.92rem}
+  /* Chosen hand — the selected card shown as a wide, flat strip
+     right under the rack: full card detail across the screen in
+     as little vertical space as possible. */
+  .chosen-strip{margin-top:10px;display:flex;align-items:center;gap:8px 16px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--jade);border-radius:10px;padding:8px 12px 9px}
+  .chosen-strip[hidden]{display:none}
+  .chosen-id{display:flex;align-items:baseline;gap:8px;white-space:nowrap;flex:0 0 auto}
+  .chosen-id .chosen-label{font-size:.72rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-faint)}
+  .chosen-id strong{font-family:Georgia,serif;font-size:1.35rem;line-height:1;white-space:nowrap}
+  .chosen-id .chosen-sec{color:var(--jade);font-weight:700;font-size:.92rem;white-space:nowrap}
+  .chosen-head{display:flex;align-items:center;gap:8px 16px;flex-wrap:wrap;flex:1 1 100%}
+  .chosen-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:0 1 auto;margin-left:auto;justify-content:flex-end}
+  .chosen-meta .badge{font-size:.78rem;padding:4px 7px}
+  .chosen-meta .select-hand{font-size:.95rem;min-height:40px;margin-right:2px}
+  .chosen-counts{display:flex;gap:5px;align-items:center}
+  .chosen-counts .count-circle{width:30px;height:30px;font-size:.88rem}
+  .chosen-main{display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap;flex:1 1 320px;min-width:0}
+  .chosen-notation{font-weight:700;font-size:1.3rem;line-height:1.25;white-space:normal}
+  .chosen-notation .chosen-note{display:block;font-weight:400;font-size:.82rem;color:var(--ink-faint);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:normal}
+  .chosen-align{display:flex;align-items:center;gap:6px;flex:1 1 auto;min-width:0}
+  .chosen-align .align-view{margin-top:0;gap:4px 12px}
+  .chosen-align .acell{width:17px}
+  .chosen-align .acell .a-let{font-size:.94rem}
+  .chosen-align .acell .a-num{font-size:.72rem}
+  .chosen-unused{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:.84rem;color:var(--ink-soft)}
+  .chosen-unused .unused-label{font-size:.84rem;padding-top:0}
+  .chosen-unused .unused-cells .acell{width:17px}
+  .chosen-unused .unused-cells .acell .a-let{font-size:.94rem}
+  .chosen-unused .unused-cells .acell .a-num{font-size:.72rem;height:.95em}
+  @media(max-width:640px){ .chosen-strip{gap:6px 10px;padding:8px 10px} .chosen-main{flex-basis:100%} }
+  .meld{display:flex;flex-direction:column;gap:5px}
+  .meld-tiles{display:flex;gap:4px}
+  .meld-tiles .tile{cursor:default;width:40px;height:54px}
+  .meld-tiles .tile .t-main{font-size:1.1rem}
+  .meld-tiles .tile .t-num{width:27px;height:27px;font-size:1.02rem}
+  .meld-label{font-size:.78rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--jade)}
+  .end-banner{margin-top:14px;padding:16px;border-radius:12px;background:var(--red-soft);border:2px solid var(--red);text-align:center}
+  .end-banner strong{display:block;font-family:Georgia,serif;font-size:1.5rem;line-height:1.15}
+  .end-banner span{display:block;margin-top:4px;font-size:.98rem;font-weight:600;line-height:1.4}
+  .end-banner .btn{margin-top:10px}
+  /* Discards area (opens on its own at the first discard, above
+     the exposed tiles box; its header carries the wall count, the
+     discard count and a Show tiles switch like the exposed box) */
+  .discards-panel{border-color:var(--line-strong)}
+  .discards-grid .tile-back{width:52px;height:70px;border-radius:8px;border-bottom-width:4px}
+  .discards-grid{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px;min-height:86px;align-items:flex-start}
+  .discards-grid .tile{cursor:default}
+  .discards-summary{margin-top:12px;color:var(--ink-soft);font-size:.95rem;line-height:1.5}
+  .discards-summary strong{color:var(--ink)}
   .tile.is-new{outline:3px solid var(--jade);outline-offset:2px;box-shadow:0 0 0 5px var(--jade-soft)}
   .tile .t-new{position:absolute;top:-9px;left:50%;transform:translateX(-50%);z-index:2;background:var(--jade);color:#fff;font-family:ui-sans-system,-apple-system,sans-serif;font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:999px;border:2px solid var(--surface);white-space:nowrap}
   @media (prefers-color-scheme: dark){ .tile .t-new{color:#0e1a13} }
@@ -285,11 +429,12 @@
   .help-link{color:var(--jade);font-weight:700;font-size:1rem;text-decoration:underline;text-underline-offset:3px;white-space:nowrap;padding:6px 2px}
   .sp-star{color:#d9a400;font-size:1.25rem;line-height:1;margin-left:3px}
   /* Help panel */
-  #help,#help-use,#help-read{scroll-margin-top:14px}
+  #help,#help-use,#help-read,#help-charleston,#help-discards,#help-opponents,#help-speed,#help-call,#help-draw,#help-joker-exchange{scroll-margin-top:14px}
   .help-panel h2{font-size:1.3rem;margin:0}
   .help-panel h3{font-size:1.08rem;margin:20px 0 6px}
+  .help-panel h4{font-size:1rem;margin:16px 0 5px;color:var(--jade)}
   .help-panel ul{margin:0;padding-left:20px}
-  .help-panel li{margin:5px 0}
+  .help-panel li{margin:4px 0}
   .blocker-head{
     font-family:Georgia,serif;font-size:1.35rem;letter-spacing:-.01em;
     margin:30px 2px 12px;padding-top:18px;border-top:1.5px solid var(--line-strong);
@@ -316,7 +461,8 @@
   .hand-id{font-family:Georgia,serif;font-size:1.45rem;font-weight:700;line-height:1.1}
   .section-name{color:var(--jade);font-size:.98rem;font-weight:700;margin-top:4px;line-height:1.25}
   .section-name .section-label{color:var(--ink-faint);font-weight:600;text-transform:uppercase;letter-spacing:.05em;font-size:.78rem;margin-right:4px}
-  .badges{display:flex;gap:6px;flex:0 1 auto;min-width:0;max-width:100%;flex-wrap:wrap;justify-content:flex-end}
+  .badges{display:flex;gap:6px;flex:0 1 auto;min-width:0;max-width:100%;flex-wrap:wrap;justify-content:flex-end;align-items:center}
+  .badges .select-hand{font-size:.95rem;margin-right:2px}
   .badge{
     font-size:.82rem;font-weight:800;letter-spacing:.02em;
     padding:5px 8px;border-radius:999px;border:1px solid var(--line);
@@ -342,11 +488,28 @@
   .match-filter{display:flex;align-items:center;gap:8px;min-height:50px}
   .match-label{font-weight:700;font-size:1rem;color:var(--ink);white-space:nowrap}
   .match-select{min-height:50px;padding:11px 36px 11px 16px;border-radius:999px;border:1.5px solid var(--line-strong);background:var(--surface);color:var(--ink);font-size:1rem;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  /* Singles & pairs (star) filter, next to the hand count above the results */
+  .sp-filter{display:flex;align-items:center;gap:8px;min-height:50px;flex-wrap:wrap;max-width:100%}
+  .sp-filter .match-select{min-height:50px;max-width:100%}
   /* Sort all checkbox (to the right of the hand count, above the results) */
   .sort-all-filter{display:flex;align-items:center;gap:8px;min-height:50px;cursor:pointer;-webkit-tap-highlight-color:transparent}
   .sort-all-filter input{width:24px;height:24px;flex:0 0 auto;margin:0;accent-color:var(--jade);cursor:pointer}
   .sort-all-label{font-weight:700;font-size:1rem;color:var(--ink);white-space:nowrap}
-  /* Section filter (multi-select next to Clear) */
+  /* Select / chosen hand */
+  .select-hand{display:flex;align-items:center;gap:9px;min-height:44px;cursor:pointer;font-weight:800;font-size:1rem;color:var(--ink);-webkit-tap-highlight-color:transparent}
+  .select-hand input{width:24px;height:24px;flex:0 0 auto;margin:0;accent-color:var(--jade);cursor:pointer}
+  /* No separate Chosen mark on the card: the ticked Play hand box
+     says it, so a chosen card stays the same size as every other. */
+  .selected-wrap{margin-top:20px}
+  .selected-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 2px 10px}
+  .selected-head h2{font-family:Georgia,serif;font-size:1.55rem;margin:0;letter-spacing:-.01em}
+  .selected-head p{color:var(--ink-soft);font-weight:600;margin:0;font-size:.95rem}
+  /* (The old pinned chosen-hand picker was removed — hands are chosen
+     with the Play hand tick on their cards in the list below.) */
+  .hand-switch{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:12px 14px;margin-bottom:12px}
+  .hand-switch .match-select{flex:1 1 230px;max-width:100%}
+  .hand-switch .hint{flex:1 1 100%;margin:0}
+  /* Section filter (multi-select, above the hands list) */
   .section-filter{position:relative}
   .section-menu{position:absolute;top:calc(100% + 8px);right:0;left:auto;z-index:40;width:308px;max-width:calc(100vw - 40px);background:var(--surface);border:1px solid var(--line-strong);border-radius:12px;box-shadow:var(--shadow);padding:12px}
   .section-menu-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
@@ -373,7 +536,6 @@
   }
   .card-line{font-size:1.32rem;font-weight:700;line-height:1.4}
   .card-note{color:var(--ink-faint);font-size:.86rem;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;margin:6px 0 0;word-break:break-word;font-weight:400}
-  .blocker-note{margin:7px 0 0;font-size:.95rem;font-weight:700;color:var(--red)}
   .my-hand-box{
     background:var(--surface-2);
     border:1px solid var(--line);
@@ -395,6 +557,9 @@
   .acell.s-dragg .a-num,.acell.s-dragg .a-let{color:var(--jade)}
   .acell.s-dragr .a-num,.acell.s-dragr .a-let{color:var(--crak)}
   .acell.s-dragw .a-num,.acell.s-dragw .a-let{color:var(--dot-num)}
+  .acell.is-needed{opacity:.65}
+  .acell.is-held{opacity:1}
+  .acell.is-held .a-num,.acell.is-held .a-let{font-weight:900}
   .align-legend{color:var(--ink-faint);font-size:.9rem;margin:0 2px 12px}
   .unused-row{display:flex;align-items:flex-start;gap:6px 10px;flex-wrap:wrap;margin-top:10px}
   .unused-label{font-weight:800;font-size:.95rem;padding-top:1.15em}
@@ -423,21 +588,44 @@
     </div>
     <div class="eyebrow">2026 Card &bull; 79 Hands</div>
     <h1>Mah Jongg Hand Matcher</h1>
-    <p class="lede"><strong>What hand are my tiles closest to?</strong> Tap the tiles on your rack into the page, and it ranks the 2026 card hands by <strong>how few tiles you still need</strong>. When you want to swap a tile out, pick <strong>Manual</strong> to choose its replacement yourself, or <strong>Random draw</strong> to discard it and have a new tile drawn from the remaining wall for you. Or tap <strong>Random hand</strong> at the top of the Add tiles box to deal yourself a fresh hand to try — 13 tiles, or 14 if you are East.</p>
+    <p class="lede"><strong>What hand are my tiles closest to?</strong> Tap your tiles in, see the 2026 card hands ranked by how few tiles you still need — then play a full teaching game against three simulated opponents, with the Charleston, calls, Joker exchanges, and Mah Jongg. Wherever you see a <strong>?</strong>, tap it for the details in Help.</p>
   </header>
 
   <section class="panel" aria-label="Add tiles">
     <div class="add-head">
       <h2>Add tiles</h2>
       <div class="add-tools">
+        <div class="ctl-group">
+          <label class="match-label" for="speedSelect">Speed</label>
+          <select id="speedSelect" class="match-select" aria-label="Game speed — seconds between the other players' moves, or Manual">
+            <option value="10">10 sec</option>
+            <option value="15" selected>15 sec</option>
+            <option value="20">20 sec</option>
+            <option value="25">25 sec</option>
+            <option value="30">30 sec</option>
+            <option value="manual">Manual</option>
+          </select>
+          <button type="button" class="btn btn-compact" id="nextPlayerBtn" hidden>Next player →</button>
+          <a class="help-q" href="#help-speed" aria-label="Help: game speed">?</a>
+        </div>
+        <div class="ctl-group">
+          <label class="sort-all-filter" for="randomCheck" title="Tick to deal a new hand to all four players and start the game — ticking the box is the deal. Untick for Manual: build your rack by hand in Add tiles. Clear follows the box: ticked deals a fresh hand, unticked empties the rack.">
+            <input type="checkbox" id="randomCheck">
+            <span class="sort-all-label">Random</span>
+          </label>
+          <a class="help-q" href="#help-draw" aria-label="Help: drawing tiles, Random and Manual">?</a>
+        </div>
+        <label class="sort-all-filter" for="charlestonCheck" id="charlestonCheckWrap" title="Tick to play the Charleston after the deal. Leave it off to treat a random rack as the beginning of the game. The box greys out once the Charleston is completed.">
+          <input type="checkbox" id="charlestonCheck" checked>
+          <span class="sort-all-label">Charleston</span>
+        </label>
         <label class="sort-all-filter" for="eastCheck">
-          <input type="checkbox" id="eastCheck">
+          <input type="checkbox" id="eastCheck" checked>
           <span class="sort-all-label">East</span>
         </label>
-        <button type="button" class="btn btn-compact" id="randomBtn">Random hand</button>
       </div>
     </div>
-    <p class="hint">Flowers and Jokers go on with one tap. For the rest, tap the kind first, then tap the tile. <a class="help-link" href="#help-use">Help</a></p>
+    <p class="hint">Tap the kind first, then the tile. Flowers and Jokers go on with one tap. <a class="help-q" href="#help-use" aria-label="Help: adding tiles, East and the Charleston">?</a></p>
     <div class="picker-groups" id="pickerGroups" role="group" aria-label="Tile kinds">
       <button type="button" class="group-btn" data-group="bam">Bams<span class="g-sub">tap, then 1–9</span></button>
       <button type="button" class="group-btn" data-group="crak">Craks<span class="g-sub">tap, then 1–9</span></button>
@@ -455,49 +643,98 @@
 
   <section class="panel" aria-label="Your rack">
     <div class="panel-head">
-      <h2>Your rack</h2>
+      <h2>Your rack <a class="help-q" href="#help-use" aria-label="Help: your rack, turns and drawing">?</a></h2>
       <div class="count-line" id="rackCount">0 tiles entered</div>
     </div>
-    <p class="hint" id="rackHint">Drag a tile sideways to move it. A plain tap takes a tile off.</p>
-    <div class="replace-bar" aria-label="Tile replacement mode">
-      <div class="replace-copy">
-        <strong>Tile replacement</strong>
-        <span id="replaceHint">Manual: tap a tile to discard it, then tap tiles above to add its replacement yourself.</span>
-      </div>
-      <div class="seg" role="group" aria-label="Choose replacement mode">
-        <button type="button" class="seg-btn is-on" id="modeManualBtn" aria-pressed="true">Manual</button>
-        <button type="button" class="seg-btn" id="modeRandomBtn" aria-pressed="false">Random draw</button>
-      </div>
+    <p class="hint" id="rackHint">Drag a tile sideways to move it.</p>
+    <div class="mj-banner" id="mjBanner" hidden role="alert">
+      <strong>🀄 Mah Jongg!</strong>
+      <span id="mjBannerText">Your rack matches your chosen hand.</span>
+      <button type="button" class="btn mj-btn" id="mjNewHandBtn">Deal a new hand</button>
     </div>
-    <div class="wall-line" id="wallLine" aria-live="polite"></div>
+    <div class="end-banner" id="endBanner" hidden role="alert">
+      <strong id="endBannerTitle">Game over</strong>
+      <span id="endBannerText"></span>
+      <button type="button" class="btn" id="endNewHandBtn">Deal a new hand</button>
+    </div>
+    <div class="turn-bar" id="turnBar" aria-live="polite"></div>
     <div class="rack" id="rack"></div>
-    <div class="rack-actions">
-      <button type="button" class="btn btn-ghost" id="arrangeBtn" disabled>Arrange</button>
-      <button type="button" class="btn" id="drawRandomBtn" disabled>Draw random tile</button>
-      <button type="button" class="btn btn-ghost" id="clearBtn" disabled>Clear</button>
-      <div class="section-filter" id="sectionFilter">
-        <button type="button" class="btn btn-ghost" id="sectionBtn" aria-haspopup="true" aria-expanded="false">Sections: All ▾</button>
-        <div class="section-menu" id="sectionMenu" hidden role="group" aria-label="Choose which card sections to show">
-          <div class="section-menu-head"><strong>Show sections</strong><span class="section-menu-tools"><button type="button" class="mini-btn" id="sectionAll">All</button><button type="button" class="mini-btn" id="sectionNone">None</button></span></div>
-          <div id="sectionOpts"></div>
-          <button type="button" class="btn section-menu-done" id="sectionDone">Done</button>
-        </div>
+    <div class="call-bar" id="callBar" hidden>
+      <span id="callTile"></span>
+      <span class="call-label" id="callLabel"></span>
+      <button type="button" class="btn btn-compact" id="callGroupBtn">Call</button>
+      <button type="button" class="btn btn-compact" id="callMjBtn" hidden>Call Mah Jongg</button>
+      <button type="button" class="btn btn-ghost btn-compact" id="passCallBtn">Pass</button>
+      <a class="help-q" href="#help-call" aria-label="Help: calling a discard">?</a>
+    </div>
+    <div class="exchange-bar" id="exchangeBar" hidden>
+      <span class="call-label">Joker exchange:</span>
+      <span id="exchangeBtns" style="display:contents"></span>
+      <a class="help-q" href="#help-joker-exchange" aria-label="Help: Joker exchange">?</a>
+    </div>
+    <div class="chosen-strip" id="chosenStrip" hidden></div>
+    <div class="game-controls">
+      <div class="ctl-group" id="charlestonCtl" hidden>
+        <button type="button" class="btn btn-ghost btn-compact" id="startCharlestonBtn" hidden>Start Charleston</button>
+        <button type="button" class="btn btn-compact" id="swapBtn" disabled>Swap</button>
+        <a class="help-q" href="#help-charleston" aria-label="Help: the Charleston">?</a>
       </div>
-      <div class="match-filter">
-        <label class="match-label" for="matchSelect">Matching tiles</label>
-        <select id="matchSelect" class="match-select" aria-label="Minimum matching tiles">
-          <option value="1" selected>1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4">4</option>
-          <option value="5">5</option>
-          <option value="6">6</option>
-          <option value="7">7</option>
-          <option value="8">8+</option>
-        </select>
+      <div class="ctl-group">
+        <button type="button" class="btn btn-ghost btn-compact" id="drawOneBtn">Draw</button>
       </div>
+      <div class="ctl-group">
+        <button type="button" class="btn btn-ghost btn-compact" id="clearBtn" disabled>Clear</button>
+      </div>
+      <div class="ctl-count" id="rackCountCtl" aria-live="polite"></div>
     </div>
     <p class="msg" id="rackMsg" role="alert"></p>
+  </section>
+
+  <section class="panel discards-panel" id="discardsView" hidden aria-label="Discarded tiles">
+    <div class="exposed-head">
+      <strong class="melds-label">Discarded tiles</strong>
+      <span class="wall-pill" id="wallPillDiscards" aria-live="polite"></span>
+      <span class="count-line" id="discardsCount">0 discarded</span>
+      <label class="sort-all-filter exposed-toggle" for="discardsShowCheck" title="Tick to show the discarded tiles face-up; untick to turn them face-down.">
+        <input type="checkbox" id="discardsShowCheck" checked>
+        <span class="sort-all-label">Show tiles</span>
+      </label>
+      <a class="help-q" href="#help-discards" aria-label="Help: the discard pile">?</a>
+    </div>
+    <p class="hint">Every tile discarded in this game, in the order it was discarded.</p>
+    <div class="discards-grid" id="discardsGrid"></div>
+    <p class="discards-summary" id="discardsSummary"></p>
+  </section>
+
+  <section class="panel exposed-area" id="exposedArea" hidden aria-label="Your exposed tiles">
+    <div class="exposed-head">
+      <strong class="melds-label">Exposed tiles</strong>
+      <span class="wall-pill" id="wallPill" aria-live="polite"></span>
+      <label class="sort-all-filter exposed-toggle" for="exposedShowCheck" title="Tick to show your exposed tiles face-up; untick to turn them face-down.">
+        <input type="checkbox" id="exposedShowCheck" checked>
+        <span class="sort-all-label">Show tiles</span>
+      </label>
+      <a class="help-q" href="#help-call" aria-label="Help: exposed sets and calling">?</a>
+    </div>
+    <div class="exposed-melds" id="exposedMelds"></div>
+  </section>
+
+  <section class="panel" aria-label="Other players">
+    <div class="panel-head">
+      <h2>Other players <a class="help-q" href="#help-opponents" aria-label="Help: the other players">?</a></h2>
+      <div class="count-line" id="oppCount">Not dealt yet</div>
+    </div>
+    <p class="hint">Right, Opposite and Left. Their exposed sets show face-up on their cards.</p>
+    <div class="opp-grid" id="oppGrid"></div>
+  </section>
+
+  <section class="panel reveal-panel" id="revealPanel" hidden aria-label="Winning hand">
+    <div class="panel-head">
+      <h2 id="revealTitle">Winning hand</h2>
+      <div class="count-line" id="revealMeta"></div>
+    </div>
+    <p class="hint" id="revealText">The winning tiles, grouped into the sets that make the hand — pairs, pungs, kongs and singles — so you can see how it fits together.</p>
+    <div class="reveal-groups" id="revealGroups"></div>
   </section>
 
   <section aria-live="polite">
@@ -505,6 +742,35 @@
       <h2 id="resultsTitle">Hands you could make</h2>
       <div class="results-side">
         <div class="results-count" id="resultsCount"></div>
+        <div class="section-filter" id="sectionFilter">
+          <button type="button" class="btn btn-ghost" id="sectionBtn" aria-haspopup="true" aria-expanded="false">Sections: All ▾</button>
+          <div class="section-menu" id="sectionMenu" hidden role="group" aria-label="Choose which card sections to show">
+            <div class="section-menu-head"><strong>Show sections</strong><span class="section-menu-tools"><button type="button" class="mini-btn" id="sectionAll">All</button><button type="button" class="mini-btn" id="sectionNone">None</button></span></div>
+            <div id="sectionOpts"></div>
+            <button type="button" class="btn section-menu-done" id="sectionDone">Done</button>
+          </div>
+        </div>
+        <div class="match-filter">
+          <label class="match-label" for="matchSelect">Matching tiles</label>
+          <select id="matchSelect" class="match-select" aria-label="Minimum matching tiles">
+            <option value="1" selected>1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8+</option>
+          </select>
+        </div>
+        <div class="sp-filter">
+          <label class="match-label" for="spFilterSelect">Singles &amp; pairs</label>
+          <select id="spFilterSelect" class="match-select" aria-label="Show hands with or without singles and pairs">
+            <option value="all">All hands</option>
+            <option value="with">★ With single / pair</option>
+            <option value="without" selected>Without single / pair</option>
+          </select>
+        </div>
         <label class="sort-all-filter" for="sortAllCheck">
           <input type="checkbox" id="sortAllCheck">
           <span class="sort-all-label">Sort all</span>
@@ -513,7 +779,7 @@
       </div>
     </div>
     <p class="early-note" id="earlyNote" hidden><strong>Early hand:</strong> with fewer than 8 tiles entered, treat this list as a broad guide — it will sharpen as you add tiles.</p>
-    <p class="align-legend" id="alignLegend" hidden>On each card, the hand is shown with the number over its suit letter — <strong>B</strong> Bam, <strong>C</strong> Crak, <strong>D</strong> Dot; Winds are <strong>NEWS</strong>, Dragons <strong>RGW</strong>, Flower <strong>F</strong>, Joker <strong>J</strong>. Underneath, <strong>X</strong> means you have that tile, <strong>J</strong> means a Joker fills it, and a blank means you still need it. Under the points on each card, the three circles are, in order, the tiles you hold toward that hand not counting Jokers (brown), the Jokers used (purple), and the tiles you still need for that hand (red).</p>
+    <p class="align-legend" id="alignLegend" hidden>Number over suit letter — <strong>B</strong> Bam, <strong>C</strong> Crak, <strong>D</strong> Dot; Winds <strong>NEWS</strong>, Dragons <strong>RGW</strong>, Flower <strong>F</strong>, Joker <strong>J</strong>. Full strength = you hold it, dimmed = still needed; <strong>X</strong> = held, <strong>J</strong> = a Joker fills it. The three circles under the points: tiles held (brown), Jokers used (purple), still needed (red). <a class="help-q" href="#help-read" aria-label="Help: reading the hand cards">?</a></p>
     <div class="list" id="results"></div>
     <div class="empty" id="emptyState">
       <h3>Your rack is empty</h3>
@@ -532,29 +798,221 @@
   <section class="panel help-panel" id="help" aria-label="Help">
     <h2>Help</h2>
     <h3 id="help-use">How to use Mah Jongg hand matcher</h3>
+    <h4>Getting started</h4>
     <ul>
-      <li><strong>Add tiles:</strong> tap a kind — Bams, Craks, Dots, Winds or Dragons — then tap the tile. Flowers and Jokers go on with a single tap.</li>
-      <li><strong>East:</strong> your rack holds 13 tiles, or 14 if you are East. Tick <strong>East</strong>, at the top of the Add tiles box next to Random hand, to allow 14. Unticking it with 14 tiles on the rack takes the extra tile off the end.</li>
-      <li><strong>Random hand</strong> deals a fresh hand drawn from a full set, replacing whatever is on your rack — 13 tiles, or 14 if East is ticked.</li>
-      <li><strong>Tile replacement — Manual:</strong> tap a tile on your rack to discard it, then add its replacement yourself from the Add tiles box above. The picker still stops you at the set limit — 4 of any suit, wind or dragon tile, 8 Flowers and 8 Jokers.</li>
-      <li><strong>Tile replacement — Random draw:</strong> switch to <strong>Random draw</strong> in the Your rack box, then tap the tile you want to discard. It is replaced in the same spot by a tile drawn at random from the remaining wall — the full 152-tile set minus every tile currently on your rack, including the one you just discarded, so the discarded tile itself can’t come straight back and no tile can ever appear more times than a real set holds. The new tile is marked <strong>NEW</strong>, and the line above the rack shows how many tiles were left in the wall to draw from.</li>
-      <li><strong>Draw random tile:</strong> if your rack isn’t full, this button fills one open slot with a random tile from that same remaining wall.</li>
-      <li><strong>Your rack:</strong> tap a tile to discard it (what happens next depends on the replacement mode above), or drag it sideways to move it. <strong>Arrange</strong> sorts the rack; <strong>Clear</strong> empties it.</li>
-      <li><strong>Sections</strong> (next to Clear) limits the results to the card sections you pick. <strong>Matching tiles</strong> sets how many of your tiles a hand must use before it is listed.</li>
-      <li><strong>Sort all</strong>, next to the hand count above the results, ranks every hand together in one list. With it off, hands blocked by a single or a pair you don’t hold are listed separately, below the main list.</li>
+      <li><strong>Add tiles:</strong> tap a kind — Bams, Craks, Dots, Winds or Dragons — then tap the tile.</li>
+      <li>Flowers and Jokers go on with a single tap.</li>
+      <li>You can’t add more of a tile than a real set holds.</li>
+    </ul>
+    <h4>East</h4>
+    <ul>
+      <li><strong>East</strong> starts ticked.</li>
+      <li>East is dealt 14 and, after the Charleston, just discards one to 13 to start.</li>
+      <li>Everyone else is dealt 13.</li>
+      <li>After that everyone plays the same way: draw to 14, discard to 13.</li>
+      <li>East only sets the size of the next deal when you tick <strong>Random</strong>.</li>
+      <li>Changing it never takes a tile off a rack already in play — anyone can be holding 14 on their turn.</li>
+    </ul>
+    <h4 id="help-charleston">The Charleston (optional)</h4>
+    <ul>
+      <li>The <strong>Charleston</strong> box next to East starts ticked.</li>
+      <li>Ticked, seven passes come before play:</li>
+      <li><strong>First Right, First Opposite, First Left</strong> — then <strong>Second Left, Second Opposite, Second Right</strong> — and an <strong>Optional</strong> last pass.</li>
+      <li>Dealing a hand — tick <strong>Random</strong> — starts it at once.</li>
+      <li>With a hand-built rack, tap <strong>Start Charleston</strong> under your rack once your rack is full.</li>
+      <li>The <strong>Swap</strong> button under your rack just says <strong>Swap</strong> — the count line above your rack names the pass (First Right, and so on). It greys out when the Charleston box is unticked, and again when the Charleston is done.</li>
+      <li>Pick 3 tiles on your rack, then tap Swap.</li>
+      <li>Nothing is final until you tap Swap: <strong>tap a tile you picked again to unpick it</strong>, then pick a different one.</li>
+      <li>Inside the swap, your picked tiles go out first — to the player named in the round.</li>
+      <li>Then the tiles passed to you arrive, from the player on the other side.</li>
+      <li>The other players pass at the same time, so the tiles move round the table together.</li>
+      <li><strong>Jokers are never passed</strong> in the Charleston.</li>
+      <li>The Optional pass is a courtesy swap with the player across from you: 0 to 3 tiles, or none.</li>
+      <li>When the Charleston is done, the game begins — the opposite order: draw first, discard second.</li>
+    </ul>
+    <h4>Skipping the Charleston</h4>
+    <ul>
+      <li>Untick the Charleston box at any time to skip the Charleston, or the rest of it.</li>
+      <li><strong>Unticked, there is no Charleston at all:</strong> a random rack counts as the beginning of the game, and play starts with draw and discard straight away.</li>
+      <li>Once the Charleston is completed, the box <strong>greys out</strong> for the rest of that hand.</li>
+      <li>It also greys out once play has begun without one.</li>
+      <li>Your tick is remembered for the next deal; tap <strong>Clear</strong> to change it before the next hand.</li>
+    </ul>
+    <h4>Turns — draw, then discard</h4>
+    <ul>
+      <li>At <strong>13</strong> tiles, draw one to make <strong>14</strong>:</li>
+      <li>Tap <strong>Draw</strong> in Random, or pick a tile in Add tiles in Manual.</li>
+      <li>At <strong>14</strong>, tap the tile you want to discard — it leaves the rack, back to 13.</li>
+      <li>East’s first turn is the exception: no draw, just the discard.</li>
+      <li>Keep alternating 13 → 14 → 13.</li>
+      <li>After your discard, <strong>Right, Opposite and Left take their turns in order</strong> — watch their cards under <strong>Other players</strong>.</li>
+      <li>Then it comes back to you.</li>
+    </ul>
+    <h4 id="help-discards">Discards</h4>
+    <ul>
+      <li>Every tile discarded in the game is kept — yours and the other players’.</li>
+      <li>There is no Discards button: the <strong>Discarded tiles</strong> box sits above the <strong>Exposed tiles</strong> box and opens on its own when the first tile is discarded, and stays open for the rest of the game.</li>
+      <li>Its header shows how many tiles have been discarded, alongside the <strong>Wall</strong> count — how many tiles are left to draw from.</li>
+      <li>Its <strong>Show tiles</strong> switch turns the discarded tiles face-up or face-down, as you prefer — the counts stay either way.</li>
+      <li>Tiles show in the order they were discarded, with a tally of what is gone — useful when you are choosing which hand to play.</li>
+      <li>A tile that gets called leaves the pile and joins the caller’s exposed sets.</li>
+      <li>Tiles passed in the Charleston are swaps, not discards, so they are not listed.</li>
+      <li>A new deal or Clear starts the pile empty — and the area closes again until the next first discard.</li>
+    </ul>
+    <h4 id="help-opponents">The other players</h4>
+    <ul>
+      <li>Three simulated opponents play real racks from the same wall.</li>
+      <li>Each works toward the card hand their tiles are closest to.</li>
+      <li>Their hidden tiles show as green tile backs; the number is how many they hold.</li>
+      <li>Their exposed sets show face-up on their cards.</li>
+      <li>Yours sit in the <strong>Exposed tiles</strong> box, above the other players.</li>
+      <li>That box also carries the <strong>Wall</strong> count — how many tiles are left to draw from.</li>
+      <li>Its <strong>Show tiles</strong> switch turns your exposed sets face-up or face-down, as you prefer.</li>
+      <li>They are beginners’ teachers, not sharks: they throw the tiles their hand doesn’t need.</li>
+      <li>On their turns they also make <strong>Joker exchanges</strong> — swapping a tile they hold into any exposed set whose Joker it matches, theirs or yours, and taking the Joker. See <strong>Joker exchange</strong> under Calling a discard.</li>
+      <li>Everything they do is written on their card.</li>
+    </ul>
+    <h4 id="help-speed">Game speed</h4>
+    <ul>
+      <li>This is a teaching game, so you choose how fast the other players discard and call.</li>
+      <li>Use the <strong>Speed</strong> dropdown at the top of the form, to the left of Charleston and East: <strong>10, 15, 20, 25 or 30 seconds</strong> between their moves.</li>
+      <li>Pick the pace that gives you time to follow each discard, check the discard pile, and think about your hand.</li>
+      <li><strong>Manual</strong> turns the timer off completely:</li>
+      <li>No opponent moves until you tap <strong>Next player</strong> at the top of the form (the button names who plays next).</li>
+      <li>Each tap lets exactly one player take their turn — draw and discard, or discard after a call.</li>
+      <li>So you can study the table for as long as you like between moves.</li>
+      <li>You can change speed at any time, even while an opponent is waiting — the new pace applies to that wait at once.</li>
+      <li>Speed only times the other players:</li>
+      <li><strong>Your own turn is never timed.</strong></li>
+      <li>A <strong>Call</strong> decision waits for you however long you take.</li>
+      <li>The Charleston is never timed — its passes happen when you tap Swap.</li>
+    </ul>
+    <h4 id="help-call">Calling a discard</h4>
+    <ul>
+      <li>A discard is not dead until everyone has passed on it.</li>
+      <li>If a tile another player throws is one you can use, play pauses and the <strong>Call / Pass</strong> buttons appear under your rack.</li>
+      <li>You can call it two ways:</li>
+      <li><strong>For Mah Jongg</strong> — if it is the last tile you need.</li>
+      <li><strong>For a pung or kong</strong> — if you already hold 2 (or 3) more of that tile.</li>
+      <li>Calling for a set puts those tiles <strong>face-up in the Exposed tiles box above the other players</strong>.</li>
+      <li>The turn jumps to you, and you discard one tile.</li>
+      <li>A Joker can stand in for tiles in a set of 3 or more. To call, you must hold at least one real tile of the kind — Jokers on your rack fill the rest of the set, and the <strong>Call</strong> button says how many Jokers it will use.</li>
+      <li>An exposed Joker is not stuck there: anyone holding the tile it stands for can swap it back out — see <strong>Joker exchange</strong> below.</li>
+      <li>Once you expose a set, a <strong>Concealed</strong> hand can no longer be won.</li>
+      <li><strong>Pass</strong> lets the tile go.</li>
+    </ul>
+    <h4>They call too</h4>
+    <ul>
+      <li>The other players call your discards — and each other’s — the same way.</li>
+      <li>A Mah Jongg call beats any other call.</li>
+      <li>Otherwise calls are taken in turn order, from the player after the discarder.</li>
+      <li>When an opponent calls for a set, it appears <strong>face-up on their card</strong>, labelled Pung or Kong.</li>
+      <li>So you can see what they are building — and steer your own hand, and your discards, away from feeding it.</li>
+      <li>If you pass on a tile, an opponent may still call it.</li>
+    </ul>
+    <h4 id="help-joker-exchange">Joker exchange</h4>
+    <ul>
+      <li>A Joker in an exposed set — a pung, kong or quint — <strong>stands for that set’s tile</strong>.</li>
+      <li>If you hold that tile, you can swap it in: <strong>your tile takes the Joker’s place in the set, and the Joker comes onto your rack</strong>, free to stand in anywhere a Joker can.</li>
+      <li>It works on <strong>any</strong> exposed set — your own, or any other player’s. The set itself does not change: it still counts as the same pung or kong for its owner.</li>
+      <li>When a swap is open to you, a <strong>Joker exchange</strong> bar appears under your rack, with one button per set — tap it to make that swap.</li>
+      <li>You can make more than one exchange in the same turn, as long as you hold the matching tiles — the bar stays while swaps remain.</li>
+      <li>Exchanges are made on your own turn: not during the Charleston, not while a Call decision is waiting, and not while the other players are moving.</li>
+      <li><strong>They exchange too:</strong> on their turns, the other players swap for any exposed Joker they hold the tile for — including Jokers in <strong>your</strong> exposed sets. Their card and the message line say when it happens.</li>
+      <li>A Joker in a set can only be swapped out with the real tile — a Joker can never be exchanged for another Joker, and singles and pairs never hold Jokers to exchange.</li>
+    </ul>
+    <h4>Mah Jongg</h4>
+    <ul>
+      <li>Every hand on the card is 14 tiles, so you can only win holding 14.</li>
+      <li>When your 14 tiles exactly match the hand you chose with <strong>Play hand</strong> — nothing still needed — the page calls it for you, with a big <strong>Mah Jongg!</strong> banner over your rack.</li>
+      <li>At 13 you are never Mah Jongg, even if the 13 all fit: you still need the draw that makes 14.</li>
+      <li>The same goes for the other players:</li>
+      <li>If one of them completes a hand — on their draw, or by calling a discard (even yours) — the game ends.</li>
+      <li>They score the hand’s points.</li>
+      <li><strong>Their whole hand is revealed</strong> under the other players, grouped into its sets, so you can study how it fits together.</li>
+      <li>Your wins are revealed the same way.</li>
+      <li>If the wall runs out first, the hand is a draw and nobody scores.</li>
+    </ul>
+    <h4 id="help-draw">Draw tiles — Random and Manual</h4>
+    <ul>
+      <li><strong>Random</strong> starts unticked. Unticked is <strong>Manual</strong>:</li>
+      <li>You add tiles yourself in Add tiles, and tapping a tile on your rack takes it off.</li>
+      <li><strong>Tick Random to deal</strong> — ticking the box deals a whole new hand to all four players at once and starts the game. There is no separate deal button; the tick is the deal.</li>
+      <li>Once a dealt game has started, there is <strong>no editing it by hand</strong> — Add tiles is closed, and tiles move only by <strong>Draw</strong>, discarding, calling and the Charleston.</li>
+      <li>In a dealt game at 13, tap <strong>Draw</strong> for a random tile from the wall; at 14, tap a tile to discard it.</li>
+      <li><strong>Clear</strong> follows the box: Random ticked, Clear deals a fresh hand; unticked, Clear empties the rack.</li>
+      <li>Unticking Random leaves the dealt game behind and starts over with an empty rack to build by hand.</li>
+    </ul>
+    <h4>Your rack</h4>
+    <ul>
+      <li>Below 14 in Manual, tap a tile to take it off. In a dealt (Random) game the rack is not edited by hand — tiles move only by Draw, discard, calls and the Charleston.</li>
+      <li>At 14, tapping always discards (see Turns above).</li>
+      <li>Either way, drag a tile sideways to move it without discarding.</li>
+      <li><strong>Clear</strong> follows the Random box: ticked, it deals a fresh hand; unticked, it empties the rack.</li>
+    </ul>
+    <h4>Your chosen hand</h4>
+    <ul>
+      <li>Tick <strong>Play hand</strong> on any hand card to choose that hand.</li>
+      <li>The ticked box is the mark — the card itself stays the same as every other.</li>
+      <li>The <strong>Chosen</strong> card sits right under your rack as a wide, flat strip across the panel — same card detail (notation, lined-up tiles, counts, tiles not used) in as little height as possible.</li>
+      <li>On the strip’s top row, the badges, count circles and progress sit at the <strong>right</strong>, with the same <strong>Play hand</strong> box at the left of that group — untick it there to clear the choice without scrolling down to the card.</li>
+      <li>Your rack sorts itself for the hand right away — tiles that fit on the left, the rest on the right past a gap, sorted by suit.</li>
+      <li><strong>You can change your chosen hand at any time</strong> — while you build your rack, during the Charleston, or in the middle of play:</li>
+      <li>Just tick a different hand, and the rack re-sorts for the new hand at once, with no tiles added or taken away.</li>
+      <li>Mid-Charleston, changing hands unpicks any tiles you had picked to swap, since the rack moves.</li>
+      <li>Only one hand at a time — untick to clear the choice, and your rack goes back to sorting by suit until you choose another hand.</li>
+    </ul>
+    <h4>Arranging</h4>
+    <ul>
+      <li>Your rack arranges itself automatically.</li>
+      <li>With no hand chosen, tiles sort by suit: Bams, Craks, Dots, Winds, Dragons, Flowers, Jokers.</li>
+      <li>With a hand chosen, the rack lines up for that hand instead.</li>
+      <li>It re-sorts that way each time you pick a new tile — whether you tap one in above or draw one with <strong>Draw</strong>.</li>
+      <li>Each part of the hand — each pair, pung or kong — sits behind a <strong>small space</strong>, so you can see the sets you are building and how far each has got.</li>
+      <li>The tiles that don’t fit sit off to the right, behind a wider, tile-wide space, sorted by suit — Bams, Craks, Dots, Winds, Dragons, Flowers, Jokers.</li>
+    </ul>
+    <h4>Filtering the hands list</h4>
+    <ul>
+      <li><strong>Sections</strong> (above the hands list) limits the results to the card sections you pick.</li>
+      <li><strong>Matching tiles</strong> sets how many of your tiles a hand must use to be listed.</li>
+      <li><strong>Singles &amp; pairs</strong> shows all hands, only hands with a single or pair (★), or only hands without one.</li>
+      <li><strong>Sort all</strong> ranks every hand together in one list.</li>
+      <li>With it off, hands blocked by a single or a pair you don’t hold are listed separately, below the main list.</li>
       <li>The list sharpens as you add tiles — with fewer than 8 entered, treat it as a broad guide.</li>
     </ul>
     <h3 id="help-read">How to read the Hands you could make</h3>
+    <h4>Ranking and badges</h4>
     <ul>
       <li>Hands are ranked by how many of your tiles count toward the hand, most first, then by points.</li>
       <li>The big code, like <strong>E2.2</strong>, is the hand’s place on the 2026 card, with its section named underneath.</li>
-      <li>A gold <span class="sp-star" aria-hidden="true">★</span> next to the hand ID means the hand includes <strong>singles and/or pairs</strong>. A Joker can never fill a single or a pair, so those tiles have to be on your rack as themselves.</li>
+      <li>A gold <span class="sp-star" aria-hidden="true">★</span> next to the hand ID means the hand includes <strong>singles and/or pairs</strong>.</li>
+      <li>A Joker can never fill a single or a pair, so those tiles have to be on your rack as themselves.</li>
       <li>The badges show <strong>X · Exposed</strong> or <strong>C · Concealed</strong>, and the hand’s points.</li>
-      <li>The three circles under the points are, in order: the tiles you hold toward that hand, not counting Jokers (brown); the Jokers used (purple); and the tiles you still need for that hand (red).</li>
-      <li>In the lined-up hand, the number sits over its suit letter — <strong>B</strong> Bam, <strong>C</strong> Crak, <strong>D</strong> Dot; Winds are <strong>NEWS</strong>, Dragons <strong>RGW</strong>, Flower <strong>F</strong>, Joker <strong>J</strong>. Underneath, <strong>X</strong> means you hold that tile, <strong>J</strong> means a Joker fills it, and a blank means you still need it.</li>
-      <li>Below the line are the tiles on your rack that don’t fit this hand. If it says “None”, every tile on your rack fits.</li>
-      <li>A red <strong>“Needs a … you don’t hold”</strong> note names the single or pair tile the hand is stuck on.</li>
-      <li>Jokers count only in a group of three or more — never for a single tile or a pair. The White Dragon is also the <strong>Soap</strong>, and counts as the <strong>0</strong> in hands that use one.</li>
+      <li>The three circles under the points are, in order:</li>
+      <li>The tiles you hold toward that hand, not counting Jokers (brown).</li>
+      <li>The Jokers used (purple).</li>
+      <li>The tiles you still need for that hand (red).</li>
+    </ul>
+    <h4>The lined-up hand</h4>
+    <ul>
+      <li>In the lined-up hand, the number sits over its suit letter:</li>
+      <li><strong>B</strong> Bam, <strong>C</strong> Crak, <strong>D</strong> Dot.</li>
+      <li>Winds are <strong>NEWS</strong>, Dragons <strong>RGW</strong>, Flower <strong>F</strong>, Joker <strong>J</strong>.</li>
+      <li>Tiles you hold are at full strength; tiles you still need are dimmed.</li>
+      <li>Underneath: <strong>X</strong> means you hold that tile.</li>
+      <li><strong>J</strong> means a Joker fills it.</li>
+      <li>A blank means you still need it.</li>
+      <li>Below the line are the tiles on your rack that don’t fit this hand.</li>
+      <li>If it says “None”, every tile on your rack fits.</li>
+    </ul>
+    <h4>Filters and Jokers</h4>
+    <ul>
+      <li><strong>Singles &amp; pairs</strong>, next to the hand count above the results, filters the list by the gold star:</li>
+      <li><strong>All hands</strong> shows starred and unstarred hands together.</li>
+      <li><strong>★ With single / pair</strong> shows only hands that include a single or a pair.</li>
+      <li><strong>Without single / pair</strong> shows only hands with none.</li>
+      <li>Jokers count only in a group of three or more — never for a single tile or a pair.</li>
+      <li>The White Dragon is also the <strong>Soap</strong>, and counts as the <strong>0</strong> in hands that use one.</li>
     </ul>
   </section>
 
@@ -814,12 +1272,159 @@ function esc(s){
   });
 }
 var rack = [];           // tile keys, in the order entered
+var rackGapAfter = -1;   // after Arrange for a chosen hand: number of used tiles before the one-tile gap; -1 = no gap
+var rackBreaks = [];     // rack indices where a new part (group) of the chosen hand begins — a small space is shown before each, so the sets being built can be seen at a glance
+var rackArrangedForSelected = false; // true while the rack sits in the arranged-for-the-chosen-hand layout (set automatically when a hand is chosen and each time a new tile is picked while a hand is chosen; cleared by dragging a tile — the next tile picked re-arranges the rack)
 var openGroup = null;    // picker group currently highlighted: bam/crak/dot/wind/dragon (grid open), or flower/joker (highlight only, no grid)
 var showingMore = false;
 var msgTimer = null;
-var replaceMode = 'manual'; // 'manual' | 'random'
+var randomMode = false; // Random checkbox (unticked by default = Manual): off = tiles are added by hand in Add tiles and tapping a rack tile takes it off. Ticking it on IS the deal — it deals a fresh hand to all four players at once (there is no separate Random hand button), and a dealt game can't be edited by hand: its tiles move only by Draw, discard, calls and the Charleston. Unticking leaves the dealt game behind for an empty hand-built rack. Clear follows the box: ticked deals a fresh hand, unticked empties the rack.
 var lastNewIndex = -1;      // rack index of the tile most recently drawn at random
 var lastNewKey = null;
+var drawsMade = 0;          // single-tile draws this game (13 -> 14 steps)
+var discardsMade = 0;       // discards this game (14 -> 13 steps)
+/* Game phases: 'setup' (rack being built, Charleston not yet run),
+   'charleston' (the seven passes are under way), 'play' (the
+   Charleston is done or skipped — draw to 14, discard to 13). */
+var gamePhase = 'setup';
+var charlestonRound = 0;    // 0..6, index into CHARLESTON_ROUNDS
+var charlestonSel = [];     // rack indices picked to swap this round
+/* The Charleston is an option, set by the Charleston checkbox
+   (ticked by default). Ticked: the seven passes run after the deal,
+   before play. Unticked: no Charleston at all — a dealt or built
+   rack is treated as the beginning of the game, and play starts
+   with draw/discard at once. Once the Charleston is completed (or
+   the game has begun without it), the checkbox is greyed out for
+   the rest of that hand; dealing a new hand makes it live again. */
+var charlestonWanted = true;
+var charlestonCompleted = false;
+/* Every tile discarded in the game (the 14 -> 13 taps), in the
+   order discarded. Charleston passes are swaps, not discards, so
+   they never land here. Shown in the Discards area. */
+var discardPile = [];
+/* ================= Simulated opponents =================
+   Three simulated players — Right, Opposite, Left — each with their
+   own rack dealt from the same wall. They pass in the Charleston,
+   take turns in seat order (You → Right → Opposite → Left), play
+   toward the card hand their tiles are closest to, and call
+   discards: for Mah Jongg first (a Mah Jongg call beats any other
+   call), then for a pung or kong that moves their hand forward.
+   A set an opponent calls is exposed face-up on their card. The
+   user gets the same chances: when an opponent discards a tile the
+   user can use, play pauses on Call / Pass buttons. Opponents never call a
+   pung on a discard when the user has passed on it only if an
+   earlier seat could — teaching simplification: after the user
+   passes, the first opponent who can use the tile calls it. */
+var PLAY_ORDER = ['you', 'right', 'opposite', 'left'];
+var opponents = [];        // {id, name, label, rack:[], melds:[{key,tiles,kind}], status}
+var opponentsDealt = false;
+var exposedMelds = [];     // the user's called sets: {key, tiles:[keys], kind:'Pung'|'Kong'}
+var exposedVisible = true; // the Show tiles switch in the exposed tiles box: face-up or face-down
+var discardsVisible = true; // the Show tiles switch in the discarded tiles box: face-up or face-down
+var discardLog = [];       // parallel to discardPile: {key, by: seat id}
+var pendingCall = null;    // {key, by, pung, kong, mj, mjHand} — play is paused for the user's call decision
+var opponentsRunning = false;
+var gameOver = false;
+var gameResult = null;     // {type:'user-mj'|'opp-mj'|'wall', opp, hand, viaCall}
+var scores = {you: 0, right: 0, opposite: 0, left: 0};
+var scoredThisGame = false;
+var turnSeq = 0;           // bumped on every new game to cancel pending opponent timers
+var lastDiscarder = null;  // seat id of whoever discarded most recently
+var resolveChain = 0;      // guards against endless call chains on one discard sequence
+/* Game speed — a teaching control for how fast the other players
+   discard and call, set with the Speed dropdown at the top of
+   the form:
+   10, 15, 20, 25 or 30 seconds between opponent moves, or Manual —
+   the next opponent waits until the user taps "Next player". The
+   user's own turn and any Call decision are never timed, and the
+   Charleston is not timed either — its passes happen when the user
+   taps Swap. Changing speed while an opponent is waiting applies
+   to that wait at once. */
+var gameSpeed = 15;        // seconds between opponent moves, or 'manual' — starts at 15 seconds, the teaching pace
+var opponentTimer = null;  // id of the pending auto-advance timer, if any
+var pendingStep = null;    // the opponent move waiting to happen: {kind:'turn', seat} or {kind:'discard', oppId}
+function speedDelayMs(){ return gameSpeed === 'manual' ? null : gameSpeed * 1000; }
+function clearOpponentTimer(){
+  if(opponentTimer !== null){ clearTimeout(opponentTimer); opponentTimer = null; }
+}
+function armPendingTimer(){
+  clearOpponentTimer();
+  if(!pendingStep || gameOver || gameSpeed === 'manual') return;
+  var token = turnSeq;
+  var step = pendingStep;
+  opponentTimer = setTimeout(function(){
+    opponentTimer = null;
+    if(token !== turnSeq || gameOver) return;
+    if(pendingStep !== step) return;
+    pendingStep = null;
+    runPendingStep(step);
+  }, speedDelayMs());
+}
+function runPendingStep(step){
+  if(!step) return;
+  if(step.kind === 'turn'){ opponentTurn(step.seat); return; }
+  if(step.kind === 'discard'){
+    var opp = opponentById(step.oppId);
+    if(opp) opponentDiscardNow(opp);
+    else { opponentsRunning = false; refresh(); }
+    return;
+  }
+  if(step.kind === 'oppCallMj'){
+    var oppM = opponentById(step.oppId);
+    if(!oppM){ opponentsRunning = false; refresh(); return; }
+    takeLastDiscard();
+    oppM.rack.push(step.key);
+    endOpponentWin(oppM, step.hand, true, step.by, step.key);
+    return;
+  }
+  if(step.kind === 'oppCallPung'){ executeOpponentPungCall(step.oppId, step.by, step.key); return; }
+}
+/* Queue an opponent's call of a discard as a paced step, so calls —
+   like discards — happen at the chosen Game speed, or only when the
+   user taps Next player in Manual. */
+function queueOpponentCall(step, opp){
+  opponentsRunning = true;
+  currentTurnSeat = opp.id;
+  opp.status = 'Looking at the discard…';
+  pendingStep = step;
+  refresh();
+  armPendingTimer();
+}
+function advanceNextPlayer(){
+  if(!pendingStep || gameOver) return;
+  var step = pendingStep;
+  pendingStep = null;
+  clearOpponentTimer();
+  runPendingStep(step);
+}
+function setGameSpeed(v){
+  var val = (v === 'manual') ? 'manual' : parseInt(v, 10);
+  if(val !== 'manual' && [10, 15, 20, 25, 30].indexOf(val) === -1) return;
+  gameSpeed = val;
+  if(pendingStep) armPendingTimer(); // the new pace applies to the player already waiting
+  updateSpeedUI();
+  if(gamePhase === 'play') updateTurnUI();
+  showMsg(gameSpeed === 'manual'
+    ? 'Game speed: Manual — the other players will not move on their own. When one is waiting, tap “Next player” at the top of the form to let them take their turn, one player at a time.'
+    : 'Game speed: ' + gameSpeed + ' seconds — the other players take their turns on their own, about ' + gameSpeed + ' seconds apart.', true);
+}
+function updateSpeedUI(){
+  var sel = document.getElementById('speedSelect');
+  if(sel) sel.value = gameSpeed === 'manual' ? 'manual' : String(gameSpeed);
+  var nextBtn = document.getElementById('nextPlayerBtn');
+  if(nextBtn){
+    var waiting = gameSpeed === 'manual' && !!pendingStep && !gameOver;
+    nextBtn.hidden = !waiting;
+    if(waiting){
+      var seat = pendingStep.kind === 'turn' ? pendingStep.seat : pendingStep.oppId;
+      nextBtn.textContent = 'Next player: ' + seatName(seat) + ' →';
+    }
+  }
+}
+/* The seven Charleston passes, in order: R O L L O R, plus the
+   optional courtesy pass. */
+var CHARLESTON_ROUNDS = ['First Right', 'First Opposite', 'First Left', 'Second Left', 'Second Opposite', 'Second Right', 'Optional'];
+var CHARLESTON_DIR = ['to the player on your right', 'across to the player opposite you', 'to the player on your left', 'to the player on your left', 'across to the player opposite you', 'to the player on your right', ''];
 
 /* Card sections, in card order A–I, for the section multi-select */
 var SECTIONS = [
@@ -837,8 +1442,36 @@ var selectedSections = {};
 SECTIONS.forEach(function(s){ selectedSections[s.letter] = true; });
 var minMatched = 1;
 var sortAll = false;
-var isEast = false;
-function rackLimit(){ return isEast ? 14 : 13; }
+var spFilter = 'without'; // 'all' | 'with' | 'without' — singles & pairs (★) filter
+var selectedHandId = null; // hand id chosen with "Play hand" on a hand card
+function hasSinglesOrPairs(r){ return r.groups.some(function(g){ return g.n < 3; }); }
+var isEast = true;
+/* Every hand on the card is 14 tiles, so 14 is always the most anyone
+   can hold — that is the Mah Jongg size, and every player reaches it
+   on their turn by drawing. East only changes the deal: East starts
+   with 14 (and discards first after the Charleston), everyone else
+   starts with 13 and draws up to 14. */
+function rackLimit(){ return 14; }
+function dealSize(){ return isEast ? 14 : 13; }
+function selectedMatch(){
+  if(!selectedHandId || !totalTiles()) return null;
+  var hand = null;
+  for(var i = 0; i < HANDS.length; i++){ if(HANDS[i].id === selectedHandId){ hand = HANDS[i]; break; } }
+  if(!hand) return null;
+  var b = bestForHand(hand, allCounts());
+  return {hand: hand, matched: b.matched, neededCount: 14 - b.matched, jokersUsed: b.jokersUsed};
+}
+function isMahJongg(){
+  var m = selectedMatch();
+  if(!m || totalTiles() !== 14 || m.neededCount !== 0) return false;
+  // With a set exposed, a Concealed hand can no longer be won.
+  if(exposedMelds.length && m.hand.xc === 'C') return false;
+  return true;
+}
+function anyMahJonggHand(){
+  if(totalTiles() !== 14) return null;
+  return handMatchingCounts(allCounts(), true);
+}
 function sectionLetter(h){ return h.section.charAt(0); }
 function selectedSectionCount(){
   return SECTIONS.filter(function(s){ return selectedSections[s.letter]; }).length;
@@ -921,110 +1554,1223 @@ var suppressRackClick = false;
    declared below (hoisted). */
 function remainingPool(){
   var pool = buildWall();
-  rack.forEach(function(k){
+  function take(k){
     var pi = pool.indexOf(k);
     if(pi !== -1) pool.splice(pi, 1);
+  }
+  rack.forEach(take);
+  exposedMelds.forEach(function(m){ m.tiles.forEach(take); });
+  if(opponentsDealt) opponents.forEach(function(o){
+    o.rack.forEach(take);
+    o.melds.forEach(function(m){ m.tiles.forEach(take); });
   });
+  discardPile.forEach(take);
   return pool;
+}
+function countsOf(tiles){
+  var counts = {};
+  tiles.forEach(function(k){ counts[k] = (counts[k] || 0) + 1; });
+  return counts;
+}
+function meldTiles(melds){
+  var out = [];
+  melds.forEach(function(m){ m.tiles.forEach(function(k){ out.push(k); }); });
+  return out;
+}
+function allTiles(){ return rack.concat(meldTiles(exposedMelds)); }
+function allCounts(){ return countsOf(allTiles()); }
+function totalTiles(){ return rack.length + meldTiles(exposedMelds).length; }
+function oppTotal(o){ return o.rack.length + meldTiles(o.melds).length; }
+function oppAllCounts(o){ return countsOf(o.rack.concat(meldTiles(o.melds))); }
+function opponentById(id){
+  for(var i = 0; i < opponents.length; i++){ if(opponents[i].id === id) return opponents[i]; }
+  return null;
+}
+function nextSeat(seat){
+  var i = PLAY_ORDER.indexOf(seat);
+  return PLAY_ORDER[(i + 1) % PLAY_ORDER.length];
+}
+function seatName(seat){
+  if(seat === 'you') return 'You';
+  var o = opponentById(seat);
+  return o ? o.name : seat;
+}
+/* A complete 14-tile match in a counts object, or null. When the
+   user has exposed sets, Concealed hands no longer count for them. */
+function handMatchingCounts(counts, forUser){
+  var total = 0;
+  for(var k in counts) total += counts[k];
+  if(total !== 14) return null;
+  for(var i = 0; i < HANDS.length; i++){
+    if(forUser && exposedMelds.length && HANDS[i].xc === 'C') continue;
+    var b = bestForHand(HANDS[i], counts);
+    if(b.matched === 14) return HANDS[i];
+  }
+  return null;
+}
+/* Tiles in `tiles` that a match result does not use — the natural
+   discards. Generic version of unusedKeysFor for any tile list. */
+function unusedFor(r, tiles){
+  var consume = {};
+  r.groups.forEach(function(g){ if(g.got) consume[g.k] = (consume[g.k] || 0) + g.got; });
+  if(r.jokersUsed) consume['joker'] = (consume['joker'] || 0) + r.jokersUsed;
+  var out = [];
+  tiles.forEach(function(k){
+    if(consume[k] > 0) consume[k]--;
+    else out.push(k);
+  });
+  return out;
 }
 function pickFromPool(pool){
   return pool[Math.floor(Math.random() * pool.length)];
 }
-function discardAndDraw(idx){
+function replaceTileWithRandom(idx){
   if(idx < 0 || idx >= rack.length) return;
-  var discarded = rack[idx];
-  // Pool is worked out BEFORE the discard leaves the rack, so the
-  // discarded tile is still counted as held and cannot be drawn
-  // straight back; only its other copies (if any remain) can appear.
   var pool = remainingPool();
   if(!pool.length){
-    showMsg('No tiles are left in the wall to draw — the rack already holds the whole set.');
+    showMsg('No tiles are left in the wall to draw a replacement from.');
     return;
   }
+  var oldKey = rack[idx];
   var drawn = pickFromPool(pool);
   rack[idx] = drawn;
-  lastNewIndex = idx;
   lastNewKey = drawn;
   showingMore = false;
+  // If a hand is chosen, re-sort the rack for that hand after the
+  // swap, so the split between the tiles that fit and the tiles that
+  // don't stays in place — this happens automatically on every new
+  // tile picked while a hand is chosen.
+  var hand = selectedHandId ? applyArrangeForSelected() : null;
+  if(!hand){ rackGapAfter = -1; rackArrangedForSelected = false; sortRackBySuit(); }
+  lastNewIndex = rack.indexOf(drawn);
   refresh();
-  showMsg('Discarded ' + tileName(discarded) + ' — drew ' + tileName(drawn) + ' from the wall (' + pool.length + ' tiles were left to draw from).', true);
+  showMsg('Replaced ' + tileName(oldKey) + ' with ' + tileName(drawn) + ' from the wall (' + pool.length + ' tiles were left to draw from).' +
+    (hand ? ' Your rack re-sorted itself for ' + hand.id + ' — tiles that fit are on the left, the rest on the right.' : ''), true);
 }
-function drawRandomTile(){
-  if(rack.length >= rackLimit()){
-    showMsg('Your rack is full (' + rackLimit() + ' tiles) — discard a tile first.');
-    return;
+function discardTile(idx){
+  if(idx < 0 || idx >= rack.length) return;
+  var key = rack[idx];
+  discardPile.push(key); // kept for the Discards area
+  discardLog.push({key: key, by: 'you'});
+  rack.splice(idx, 1);
+  discardsMade++;
+  if(gamePhase === 'setup') gamePhase = 'play'; // discarding without the Charleston = play has begun
+  if(lastNewIndex === idx){ lastNewIndex = -1; lastNewKey = null; }
+  else if(lastNewIndex > idx){ lastNewIndex--; }
+  if(selectedHandId){ applyArrangeForSelected(); if(lastNewKey) lastNewIndex = rack.indexOf(lastNewKey); }
+  else { rackGapAfter = -1; rackArrangedForSelected = false; sortRackBySuit(); if(lastNewKey) lastNewIndex = rack.indexOf(lastNewKey); }
+  showingMore = false;
+  lastDiscarder = 'you';
+  resolveChain = 0;
+  if(gamePhase === 'play' && !opponentsDealt) dealOpponents(); // a hand-built game gets its other players at the first discard
+  refresh();
+  if(gameOver) return;
+  if(opponentsDealt){
+    // Your discard is live: another player may call it — for Mah
+    // Jongg, or for a set — before the next player draws.
+    resolveAfterDiscard('you');
+    if(!gameOver && !pendingCall && !opponentsRunning){
+      showMsg('Discarded ' + tileName(key) + ' — nobody called it. The other players take their turns now.', true);
+    }
+  } else {
+    showMsg('Discarded ' + tileName(key) + ' — you are back to 13 tiles, and it is in the Discards area (' + discardPile.length + ' discarded so far). Draw on your next turn to make 14 again.', true);
   }
+}
+function drawOneTile(){
+  if(gamePhase === 'charleston'){ showMsg('The Charleston is on — finish it (or untick the Charleston box to end it) before drawing tiles.'); return; }
+  if(gameOver){ showMsg('This game is over — deal a new hand to play again.'); return; }
+  if(pendingCall){ showMsg('Decide on the call first — tap Call or Pass under your rack.'); return; }
+  if(opponentsRunning){ showMsg('The other players are taking their turns — wait for your turn to draw.'); return; }
+  if(totalTiles() >= 14){ showMsg('You already hold 14 tiles — discard one first, unless those 14 are Mah Jongg.'); return; }
+  if(!randomMode){ showMsg('Manual mode — pick your drawn tile yourself in Add tiles above to make ' + (totalTiles() + 1) + ' tiles.'); return; }
   var pool = remainingPool();
   if(!pool.length){
-    showMsg('No tiles are left in the wall to draw.');
+    if(gamePhase === 'play' && opponentsDealt){ endWallGame(); }
+    else showMsg('No tiles are left in the wall to draw from.');
     return;
   }
   var drawn = pickFromPool(pool);
   rack.push(drawn);
-  lastNewIndex = rack.length - 1;
+  drawsMade++;
+  if(gamePhase === 'setup') gamePhase = 'play'; // drawing without the Charleston = play has begun
+  if(gamePhase === 'play' && !opponentsDealt) dealOpponents();
   lastNewKey = drawn;
+  if(selectedHandId){ applyArrangeForSelected(); } else { rackGapAfter = -1; rackArrangedForSelected = false; sortRackBySuit(); }
+  lastNewIndex = rack.indexOf(drawn);
   showingMore = false;
   refresh();
-  showMsg('Drew ' + tileName(drawn) + ' from the wall (' + pool.length + ' tiles were left to draw from).', true);
-}
-function updateReplaceUI(){
-  var isRandom = replaceMode === 'random';
-  var man = document.getElementById('modeManualBtn');
-  var ran = document.getElementById('modeRandomBtn');
-  if(man){ man.classList.toggle('is-on', !isRandom); man.setAttribute('aria-pressed', !isRandom ? 'true' : 'false'); }
-  if(ran){ ran.classList.toggle('is-on', isRandom); ran.setAttribute('aria-pressed', isRandom ? 'true' : 'false'); }
-  var hint = document.getElementById('replaceHint');
-  if(hint) hint.textContent = isRandom
-    ? 'Random draw: tap a tile to discard it — a new tile is drawn from the remaining wall and placed in the same spot.'
-    : 'Manual: tap a tile to discard it, then tap tiles above to add its replacement yourself.';
-  var rackHint = document.getElementById('rackHint');
-  if(rackHint) rackHint.textContent = isRandom
-    ? 'Drag a tile sideways to move it. Tap a tile to discard it and draw a random replacement.'
-    : 'Drag a tile sideways to move it. A plain tap takes a tile off.';
-  var wallEl = document.getElementById('wallLine');
-  if(wallEl){
-    if(!rack.length){
-      wallEl.innerHTML = '<span class="wall-pill">Wall: 152 tiles</span><span>Full set — 4 of each suit, wind and dragon tile, 8 Flowers, 8 Jokers.</span>';
-    } else {
-      var left = remainingPool().length;
-      wallEl.innerHTML = '<span class="wall-pill">Wall: ' + left + ' tiles left</span><span>Random draws come only from this remaining pool, so your rack can never hold more copies of a tile than a real set contains.</span>';
-    }
+  if(isMahJongg()){
+    showMsg('You drew ' + tileName(drawn) + ' — that makes 14 and completes your hand. Mah Jongg!', true);
+  } else {
+    showMsg('Drew ' + tileName(drawn) + ' from the wall — you now hold 14. Tap the tile you want to discard to go back to 13.', true);
   }
 }
-function setReplaceMode(mode){
-  replaceMode = mode === 'random' ? 'random' : 'manual';
-  updateReplaceUI();
-  showMsg(replaceMode === 'random'
-    ? 'Random draw on — tap a tile on your rack to discard it and draw its replacement.'
-    : 'Manual on — tap a tile to discard it, then pick its replacement above.', true);
-  // Re-render so tile labels describe the current tap action.
-  renderRack();
+/* ================= Opponent engine ================= */
+var currentTurnSeat = null;
+function shuffleCopy(arr){
+  var a = arr.slice();
+  for(var i = a.length - 1; i > 0; i--){
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+function makeOpponents(){
+  return [
+    {id:'right', name:'Right', label:'Player on your right', rack:[], melds:[], status:'Waiting.', target:null},
+    {id:'opposite', name:'Opposite', label:'Player across from you', rack:[], melds:[], status:'Waiting.', target:null},
+    {id:'left', name:'Left', label:'Player on your left', rack:[], melds:[], status:'Waiting.', target:null}
+  ];
+}
+/* Each opponent plays toward one card hand — the one their tiles are
+   closest to — and sticks with it, only switching when another hand
+   is clearly closer (2 or more tiles). That is how a beginner is
+   taught to play, and their card shows the hand they are going for. */
+function oppTargetResult(opp){
+  var counts = oppAllCounts(opp);
+  var ranked = rankHands(counts);
+  if(!ranked.length) return null;
+  var best = ranked[0];
+  if(!opp.target){ opp.target = best.h.id; return best; }
+  for(var i = 0; i < ranked.length; i++){
+    if(ranked[i].h.id === opp.target){
+      if(best.h.id !== opp.target && best.neededCount + 2 < ranked[i].neededCount){
+        opp.target = best.h.id;
+        return best;
+      }
+      return ranked[i];
+    }
+  }
+  opp.target = best.h.id;
+  return best;
+}
+function dealOpponents(){
+  if(opponentsDealt) return;
+  var pool = shuffleCopy(remainingPool());
+  opponents = makeOpponents();
+  opponents.forEach(function(o){
+    var n = (!isEast && o.id === 'right') ? 14 : 13;
+    o.rack = pool.splice(0, n);
+    o.status = n === 14 ? 'East — discards first when play begins.' : 'Waiting.';
+  });
+  opponentsDealt = true;
+}
+function resetTable(){
+  turnSeq++; // cancels any pending opponent timers
+  clearOpponentTimer();
+  pendingStep = null;
+  opponents = []; opponentsDealt = false;
+  exposedMelds = []; discardLog = [];
+  pendingCall = null; opponentsRunning = false;
+  gameOver = false; gameResult = null; scoredThisGame = false;
+  lastDiscarder = null; resolveChain = 0; currentTurnSeat = null;
+  var rp = document.getElementById('revealPanel');
+  if(rp) rp.hidden = true;
+}
+function revealTileHTML(key){
+  var imgCls = TILE_IMG[key] ? ' has-img' : '';
+  return '<span class="tile ' + tileFace(key).cls + imgCls + '" role="img" aria-label="' + esc(tileName(key)) + '">' + tileButtonHTML(key, 0, true) + '</span>';
+}
+function takeLastDiscard(){
+  discardPile.pop();
+  return discardLog.pop();
+}
+function canUserCall(key){
+  var out = {pung: false, kong: false, mj: false, mjHand: null, pungJokers: 0, kongJokers: 0};
+  if(gamePhase !== 'play' || gameOver || totalTiles() !== 13) return out;
+  var counts = rackCounts();
+  var inRack = counts[key] || 0;
+  if(key === 'joker'){
+    // A Joker in the rack is not a tile a set can be built from —
+    // keep the plain count rule for a discarded Joker.
+    if(inRack >= 2){ out.pung = true; out.kong = inRack >= 3; }
+  } else {
+    // A called set needs at least one real tile from the rack;
+    // Jokers on the rack fill the rest of a pung or kong, so an
+    // exposed set can hold a Joker — which a later Joker exchange
+    // can swap back out (see the exchange functions below).
+    var jokers = counts['joker'] || 0;
+    if(inRack >= 1 && inRack + jokers >= 2){ out.pung = true; out.pungJokers = Math.max(0, 2 - inRack); }
+    if(inRack >= 1 && inRack + jokers >= 3){ out.kong = true; out.kongJokers = Math.max(0, 3 - inRack); }
+  }
+  var sim = allCounts();
+  sim[key] = (sim[key] || 0) + 1;
+  var h = handMatchingCounts(sim, true);
+  if(h){ out.mj = true; out.mjHand = h; }
+  return out;
+}
+function oppCanCallMahJongg(opp, key){
+  if(oppTotal(opp) !== 13) return null;
+  var sim = oppAllCounts(opp);
+  sim[key] = (sim[key] || 0) + 1;
+  return handMatchingCounts(sim, false);
+}
+/* An opponent calls a discard for a set only when it moves the hand
+   they are playing toward forward: they must hold at least 2 more of
+   the tile, and their best hand must still need that group of 3+. */
+function oppCallInfo(opp, key){
+  if(oppTotal(opp) !== 13) return null;
+  var rc = countsOf(opp.rack);
+  var inRack = rc[key] || 0;
+  if(inRack < 1) return null;
+  var jokers = rc['joker'] || 0;
+  var best = oppTargetResult(opp);
+  if(!best) return null;
+  for(var i = 0; i < best.groups.length; i++){
+    var g = best.groups[i];
+    if(g.k === key && g.n >= 3 && (g.got + g.jok) < g.n && g.got >= 1){
+      // The biggest set this call can make (pung, or kong when the
+      // hand needs 4): real tiles from the rack first, Jokers fill
+      // the shortfall — so an exposed set can hold a Joker.
+      var need = Math.min(g.n, 4) - 1;
+      if(inRack + jokers < need) continue;
+      var natUse = Math.min(inRack, need);
+      return {use: need, naturals: natUse, jokers: need - natUse};
+    }
+  }
+  return null;
+}
+function chooseOpponentDiscard(opp){
+  if(!opp.rack.length) return null;
+  var counts = oppAllCounts(opp);
+  var best = oppTargetResult(opp);
+  var match = bestForHand(best.h, counts);
+  var unused = unusedFor(match, opp.rack.concat(meldTiles(opp.melds))).filter(function(k){ return opp.rack.indexOf(k) !== -1; });
+  var nonJoker = unused.filter(function(k){ return k !== 'joker'; });
+  var pickFrom = nonJoker.length ? nonJoker : unused;
+  if(pickFrom.length) return pickFrom[Math.floor(Math.random() * pickFrom.length)];
+  var rc = countsOf(opp.rack);
+  var keys = Object.keys(rc).filter(function(k){ return k !== 'joker'; });
+  if(!keys.length) keys = Object.keys(rc);
+  keys.sort(function(a, b){ return rc[a] - rc[b]; });
+  return keys[0];
+}
+function scheduleOpponentStep(seat){
+  if(gameOver) return;
+  if(seat === 'you'){
+    pendingStep = null;
+    clearOpponentTimer();
+    opponentsRunning = false;
+    currentTurnSeat = 'you';
+    refresh();
+    showMsg('Your turn — Draw to make 14, then tap a tile to discard back to 13.', true);
+    return;
+  }
+  opponentsRunning = true;
+  currentTurnSeat = seat;
+  var opp0 = opponentById(seat);
+  if(opp0) opp0.status = gameSpeed === 'manual' ? 'Waiting for you to tap Next player…' : 'Their turn…';
+  pendingStep = {kind: 'turn', seat: seat};
+  refresh();
+  armPendingTimer();
+}
+function opponentTurn(seat){
+  var opp = opponentById(seat);
+  if(!opp){ opponentsRunning = false; return; }
+  if(oppTotal(opp) === 13){
+    var pool = remainingPool();
+    if(!pool.length){ endWallGame(); return; }
+    opp.rack.push(pickFromPool(pool));
+  }
+  var winHand = handMatchingCounts(oppAllCounts(opp), false);
+  if(winHand && oppTotal(opp) === 14){ endOpponentWin(opp, winHand, false, null); return; }
+  opponentDiscardNow(opp);
+}
+function opponentDiscardNow(opp){
+  // Joker exchanges come first: holding the tile an exposed Joker
+  // stands for — in any set at the table, their own included —
+  // they swap it in and take the Joker before discarding.
+  var exNotes = opponentDoExchanges(opp);
+  if(exNotes.length && oppTotal(opp) === 14){
+    var exWin = handMatchingCounts(oppAllCounts(opp), false);
+    if(exWin){ endOpponentWin(opp, exWin, false, null); return; }
+  }
+  var key = chooseOpponentDiscard(opp);
+  if(key == null){ endWallGame(); return; }
+  var ix = opp.rack.indexOf(key);
+  if(ix !== -1) opp.rack.splice(ix, 1);
+  discardPile.push(key);
+  discardLog.push({key: key, by: opp.id});
+  var exText = exNotes.map(function(n){
+    return 'exchanged a Joker out of ' + (n.owner === 'you' ? 'your' : (n.owner === opp.id ? 'their own' : seatName(n.owner) + '’s')) + ' ' + n.meld.kind + ' of ' + tileName(n.meld.key) + 's';
+  }).join('; ');
+  opp.status = (exText ? 'Joker exchange — ' + exText + '. ' : '') + 'Discarded ' + tileName(key) + '.';
+  lastDiscarder = opp.id;
+  opponentsRunning = false;
+  currentTurnSeat = null;
+  refresh();
+  if(exText){
+    showMsg(opp.name + ' made a Joker exchange before discarding — they ' + exText + ', and the Joker is on their rack now. Watch your own exposed sets: a Joker in one of them can be swapped out the same way, by anyone holding the tile it stands for.', true);
+  }
+  resolveAfterDiscard(opp.id);
+}
+/* After any discard, the tile is live until everyone has had their
+   chance: Mah Jongg calls first, in seat order starting with the
+   player after the discarder (a Mah Jongg call beats any other
+   call); then the user's pung/kong window; then opponents call for
+   a set in seat order. If nobody calls, the next player draws. */
+function resolveAfterDiscard(discarder){
+  if(gameOver) return;
+  var entry = discardLog[discardLog.length - 1];
+  if(!entry || entry.by !== discarder){ scheduleOpponentStep(nextSeat(discarder)); return; }
+  var key = entry.key;
+  resolveChain++;
+  if(resolveChain > 8){ scheduleOpponentStep(nextSeat(discarder)); return; }
+  var order = [];
+  var s = nextSeat(discarder);
+  while(s !== discarder){ order.push(s); s = nextSeat(s); }
+  for(var i = 0; i < order.length; i++){
+    var seat = order[i];
+    if(seat === 'you'){
+      var uc = canUserCall(key);
+      if(uc.mj){
+        pendingCall = {key: key, by: discarder, pung: uc.pung, kong: uc.kong, mj: true, mjHand: uc.mjHand, pungJokers: uc.pungJokers, kongJokers: uc.kongJokers};
+        refresh();
+        var cb = document.getElementById('callBar');
+        if(cb) cb.scrollIntoView({behavior: 'smooth', block: 'center'});
+        showMsg(seatName(discarder) + ' discarded ' + tileName(key) + ' — it completes your hand! Call Mah Jongg under your rack, or Pass.', true);
+        return;
+      }
+    } else {
+      var opp = opponentById(seat);
+      var mh = opp ? oppCanCallMahJongg(opp, key) : null;
+      if(mh){
+        queueOpponentCall({kind: 'oppCallMj', oppId: opp.id, by: discarder, key: key, hand: mh}, opp);
+        return;
+      }
+    }
+  }
+  var uc2 = discarder !== 'you' ? canUserCall(key) : {pung: false, kong: false, pungJokers: 0, kongJokers: 0};
+  if(uc2.pung){
+    pendingCall = {key: key, by: discarder, pung: true, kong: uc2.kong, mj: false, mjHand: null, pungJokers: uc2.pungJokers, kongJokers: uc2.kongJokers};
+    refresh();
+    var cb2 = document.getElementById('callBar');
+    if(cb2) cb2.scrollIntoView({behavior: 'smooth', block: 'center'});
+    showMsg(seatName(discarder) + ' discarded ' + tileName(key) + ' — you can call it. Decide with the Call / Pass buttons under your rack, or Pass.', true);
+    return;
+  }
+  if(opponentPungCall(discarder, key)) return;
+  scheduleOpponentStep(nextSeat(discarder));
+}
+/* Find the first opponent, in seat order after the discarder, who
+   can call this discard for a pung or kong — or null. */
+function findOpponentPungCaller(discarder, key){
+  var s = nextSeat(discarder);
+  while(s !== discarder){
+    if(s !== 'you'){
+      var opp = opponentById(s);
+      var info = opp ? oppCallInfo(opp, key) : null;
+      if(info) return {opp: opp, info: info};
+    }
+    s = nextSeat(s);
+  }
+  return null;
+}
+/* Queue that call as a paced step (see queueOpponentCall): the call
+   itself happens at the chosen speed, or on Next player in Manual.
+   Returns true when a caller was found and queued. */
+function opponentPungCall(discarder, key){
+  var found = findOpponentPungCaller(discarder, key);
+  if(!found) return false;
+  queueOpponentCall({kind: 'oppCallPung', oppId: found.opp.id, by: discarder, key: key}, found.opp);
+  return true;
+}
+function executeOpponentPungCall(oppId, discarder, key){
+  var opp = opponentById(oppId);
+  var info = opp ? oppCallInfo(opp, key) : null;
+  if(!opp || !info){ scheduleOpponentStep(nextSeat(discarder)); return; }
+  takeLastDiscard();
+  var tiles = [key];
+  for(var i = 0; i < info.naturals; i++){
+    var ix = opp.rack.indexOf(key);
+    if(ix !== -1){ opp.rack.splice(ix, 1); tiles.push(key); }
+  }
+  for(var j = 0; j < info.jokers; j++){
+    var jx = opp.rack.indexOf('joker');
+    if(jx !== -1){ opp.rack.splice(jx, 1); tiles.push('joker'); }
+  }
+  var kind = tiles.length === 4 ? 'Kong' : 'Pung';
+  opp.melds.push({key: key, tiles: tiles, kind: kind});
+  opp.status = 'Called ' + tileName(key) + ' from ' + seatName(discarder) + ' — exposed a ' + kind + (info.jokers ? ' with ' + info.jokers + (info.jokers === 1 ? ' Joker' : ' Jokers') + ' standing in' : '') + '.';
+  opponentsRunning = true;
+  currentTurnSeat = opp.id;
+  pendingStep = {kind: 'discard', oppId: opp.id};
+  refresh();
+  showMsg(opp.name + ' called the ' + tileName(key) + ' that ' + seatName(discarder) + ' discarded, and exposed a ' + kind + ' of ' + tileName(key) + 's' + (info.jokers ? ' — with ' + info.jokers + (info.jokers === 1 ? ' Joker' : ' Jokers') + ' standing in, which anyone holding a ' + tileName(key) + ' can later swap out in a Joker exchange' : '') + ' — you can see it on their card. Calling jumps the turn to them, and they discard next' + (gameSpeed === 'manual' ? ' — tap “Next player” when you are ready for their discard.' : '.'), true);
+  armPendingTimer();
+}
+function doCallGroup(){
+  if(!pendingCall || !pendingCall.pung) return;
+  var pc = pendingCall;
+  pendingCall = null;
+  takeLastDiscard();
+  var use = pc.kong ? 3 : 2;
+  var jokersUsed = pc.kong ? (pc.kongJokers || 0) : (pc.pungJokers || 0);
+  var tiles = [pc.key];
+  for(var i = 0; i < use - jokersUsed; i++){
+    var ix = rack.indexOf(pc.key);
+    if(ix !== -1){ rack.splice(ix, 1); tiles.push(pc.key); }
+  }
+  for(var j = 0; j < jokersUsed; j++){
+    var jx = rack.indexOf('joker');
+    if(jx !== -1){ rack.splice(jx, 1); tiles.push('joker'); }
+  }
+  var kind = tiles.length === 4 ? 'Kong' : 'Pung';
+  exposedMelds.push({key: pc.key, tiles: tiles, kind: kind});
+  lastNewIndex = -1; lastNewKey = null;
+  if(selectedHandId) applyArrangeForSelected();
+  else { rackGapAfter = -1; rackArrangedForSelected = false; sortRackBySuit(); }
+  refresh();
+  showMsg('You called ' + tileName(pc.key) + ' from ' + seatName(pc.by) + ' and exposed a ' + kind + (jokersUsed ? ' — with ' + jokersUsed + (jokersUsed === 1 ? ' Joker' : ' Jokers') + ' from your rack standing in for ' + tileName(pc.key) + '. Anyone holding a ' + tileName(pc.key) + ' — you included — can later swap it in and take the Joker back in a Joker exchange' : '') + ' — it sits in your exposed tiles box above the other players and counts toward your 14. Now tap a tile on your rack to discard, back to 13 in total.', true);
+}
+function doCallMahJongg(){
+  if(!pendingCall || !pendingCall.mj) return;
+  var pc = pendingCall;
+  pendingCall = null;
+  takeLastDiscard();
+  rack.push(pc.key);
+  if(selectedHandId) applyArrangeForSelected();
+  else { rackGapAfter = -1; rackArrangedForSelected = false; sortRackBySuit(); }
+  refresh();
+  showMsg('You called Mah Jongg on ' + seatName(pc.by) + '’s discarded ' + tileName(pc.key) + ' — the winning hand is revealed below the other players.', true);
+}
+/* ================= Joker exchange =================
+   A Joker sitting in an exposed pung or kong stands for that
+   set's tile (the meld's key). Any player who holds that tile can
+   swap it in: their tile takes the Joker's place in the set, and
+   the Joker goes onto their rack — where it can stand in anywhere
+   a Joker is allowed. It works on any exposed set: your own, or
+   any opponent's. The user exchanges with the buttons in the
+   Joker exchange bar under the rack, on their own turn (not while
+   a call is waiting or the other players are moving). Opponents
+   exchange on their turns, after drawing and before discarding,
+   whenever they hold the matching tile — including taking a Joker
+   out of your exposed sets. */
+function meldsOfSeat(seat){
+  if(seat === 'you') return exposedMelds;
+  var o = opponentById(seat);
+  return o ? o.melds : [];
+}
+function rackOfSeat(seat){
+  if(seat === 'you') return rack;
+  var o = opponentById(seat);
+  return o ? o.rack : [];
+}
+/* One swap: the natural tile leaves `rackArr` for the meld, the
+   Joker leaves the meld for `rackArr`. Returns false when the
+   swap is not possible (no Joker in the meld, or the tile is not
+   held). */
+function performJokerExchange(rackArr, meld){
+  var ji = meld.tiles.indexOf('joker');
+  if(ji === -1) return false;
+  var ti = rackArr.indexOf(meld.key);
+  if(ti === -1) return false;
+  rackArr.splice(ti, 1);
+  meld.tiles[ji] = meld.key;
+  rackArr.push('joker');
+  return true;
+}
+/* Every exposed set, at any seat, whose Joker the holder of
+   `rackArr` could swap for right now — one entry per set. */
+function findExchanges(rackArr){
+  var out = [];
+  PLAY_ORDER.forEach(function(seat){
+    meldsOfSeat(seat).forEach(function(m, mi){
+      if(m.tiles.indexOf('joker') !== -1 && rackArr.indexOf(m.key) !== -1){
+        out.push({owner: seat, meldIndex: mi, meld: m});
+      }
+    });
+  });
+  return out;
+}
+function userExchangeBlocked(){
+  return gamePhase !== 'play' || gameOver || !!pendingCall || opponentsRunning;
+}
+function availableUserExchanges(){
+  if(userExchangeBlocked()) return [];
+  return findExchanges(rack);
+}
+function doUserJokerExchange(owner, meldIndex){
+  if(userExchangeBlocked()) return;
+  var melds = meldsOfSeat(owner);
+  var meld = melds[meldIndex];
+  if(!meld || !performJokerExchange(rack, meld)) { refresh(); return; }
+  var ownerOpp = owner !== 'you' ? opponentById(owner) : null;
+  if(ownerOpp) ownerOpp.status = 'You exchanged a Joker out of their ' + meld.kind + ' — your ' + tileName(meld.key) + ' took its place.';
+  lastNewKey = 'joker';
+  if(selectedHandId) applyArrangeForSelected();
+  else { rackGapAfter = -1; rackArrangedForSelected = false; sortRackBySuit(); }
+  lastNewIndex = rack.indexOf('joker');
+  refresh();
+  showMsg(owner === 'you'
+    ? 'Joker exchange — you swapped your ' + tileName(meld.key) + ' into your own exposed ' + meld.kind + ', and the Joker is back on your rack (marked New), free to stand in anywhere a Joker can. The set itself is unchanged: it still counts as a ' + meld.kind + ' of ' + tileName(meld.key) + 's.'
+    : 'Joker exchange — you swapped your ' + tileName(meld.key) + ' into ' + seatName(owner) + '’s exposed ' + meld.kind + ', and took the Joker onto your rack (marked New), free to stand in anywhere a Joker can. Their set is unchanged: it still counts as a ' + meld.kind + ' of ' + tileName(meld.key) + 's.' + (totalTiles() === 14 ? ' You still hold 14 in total — tap a tile to discard when you are ready.' : ''), true);
+}
+/* An opponent exchanges every Joker they can on their turn and
+   returns a note per swap, for their card and the message line. */
+function opponentDoExchanges(opp){
+  var notes = [];
+  var guard = 0;
+  var found = findExchanges(opp.rack);
+  while(found.length && guard < 12){
+    guard++;
+    var ex = found[0];
+    if(!performJokerExchange(opp.rack, ex.meld)) break;
+    notes.push({owner: ex.owner, meld: ex.meld});
+    found = findExchanges(opp.rack);
+  }
+  return notes;
+}
+function updateExchangeUI(){
+  var bar = document.getElementById('exchangeBar');
+  if(!bar) return;
+  var list = availableUserExchanges();
+  if(!list.length){ bar.hidden = true; return; }
+  bar.hidden = false;
+  var btns = document.getElementById('exchangeBtns');
+  btns.innerHTML = list.map(function(ex, i){
+    var whose = ex.owner === 'you' ? 'your' : seatName(ex.owner) + '’s';
+    return '<button type="button" class="btn btn-ghost btn-compact" data-exchange="' + i + '">Swap ' + esc(tileName(ex.meld.key)) + ' for the Joker in ' + esc(whose) + ' ' + esc(ex.meld.kind) + '</button>';
+  }).join('');
+  var els = btns.querySelectorAll('[data-exchange]');
+  for(var i = 0; i < els.length; i++){
+    els[i].addEventListener('click', function(){
+      var ex = availableUserExchanges()[parseInt(this.getAttribute('data-exchange'), 10)];
+      if(ex) doUserJokerExchange(ex.owner, ex.meldIndex);
+    });
+  }
+}
+function passCall(){
+  if(!pendingCall) return;
+  var pc = pendingCall;
+  pendingCall = null;
+  refresh();
+  showMsg('You passed on the ' + tileName(pc.key) + '.', true);
+  if(resolveChain <= 8 && opponentPungCall(pc.by, pc.key)) return;
+  scheduleOpponentStep(nextSeat(pc.by));
+}
+function endOpponentWin(opp, hand, viaCall, fromSeat, callKey){
+  gameOver = true;
+  opponentsRunning = false;
+  pendingCall = null;
+  pendingStep = null;
+  clearOpponentTimer();
+  currentTurnSeat = null;
+  if(!scoredThisGame){ scoredThisGame = true; scores[opp.id] += hand.pts; }
+  gameResult = {type: 'opp-mj', opp: opp, hand: hand, viaCall: !!viaCall, fromSeat: fromSeat || null, callKey: callKey || null};
+  opp.status = viaCall ? 'Called Mah Jongg!' : 'Drew the winning tile — Mah Jongg!';
+  turnSeq++;
+  refresh();
+  var eb = document.getElementById('endBanner');
+  if(eb) eb.scrollIntoView({behavior: 'smooth', block: 'center'});
+}
+function endWallGame(){
+  if(gameOver) return;
+  gameOver = true;
+  opponentsRunning = false;
+  pendingCall = null;
+  pendingStep = null;
+  clearOpponentTimer();
+  currentTurnSeat = null;
+  gameResult = {type: 'wall'};
+  turnSeq++;
+  refresh();
+  showMsg('Wall game — the wall ran out and nobody made Mah Jongg, so the hand is a draw and nobody scores.', true);
+}
+function maybeStartPlay(){
+  if(gamePhase !== 'play' || !opponentsDealt || gameOver || pendingCall || opponentsRunning) return;
+  if(isEast) return; // East (you) holds 14 and discards first
+  scheduleOpponentStep('right'); // East (Right) opens play
+}
+function renderOpponents(){
+  var grid = document.getElementById('oppGrid');
+  var countEl = document.getElementById('oppCount');
+  if(!grid) return;
+  if(!opponentsDealt){
+    grid.innerHTML = '<p class="opp-none">The other players are dealt in when a game begins — tick Random at the top of the form to deal a hand, or fill your rack and start the Charleston (or untick the Charleston box to play without it).</p>';
+    if(countEl) countEl.textContent = 'Not dealt yet';
+  } else {
+    if(countEl) countEl.textContent = '3 players at the table';
+    grid.innerHTML = opponents.map(function(o){
+      var backs = '';
+      for(var i = 0; i < o.rack.length; i++) backs += '<span class="tile-back" aria-hidden="true"></span>';
+      var melds = o.melds.length
+        ? '<div class="opp-melds">' + o.melds.map(function(m){
+            return '<span class="meld"><span class="meld-tiles">' + m.tiles.map(revealTileHTML).join('') + '</span><span class="meld-label">' + m.kind + ' · ' + esc(tileName(m.key)) + '</span></span>';
+          }).join('') + '</div>'
+        : '<div class="opp-none">No exposed sets yet — their tiles are all hidden.</div>';
+      var eastTag = (!isEast && o.id === 'right') ? ' · East' : '';
+      var targetTag = (gamePhase === 'play' && o.target) ? '<span class="opp-seat">going for ' + esc(o.target) + '</span>' : '';
+      return '<div class="opp-card' + (currentTurnSeat === o.id ? ' is-turn' : '') + '"><div class="opp-head"><span class="opp-name">' + esc(o.name) + eastTag + '</span>' + targetTag + '</div><div class="opp-backs" role="img" aria-label="' + o.rack.length + ' hidden tiles">' + backs + '</div>' + melds + '<div class="opp-status">' + esc(o.status || 'Waiting.') + '</div></div>';
+    }).join('');
+  }
+}
+function renderExposed(){
+  var area = document.getElementById('exposedArea');
+  if(!area) return;
+  // The exposed tiles box sits above Other players once a game is
+  // dealt — an empty "None yet" line until you call your first set.
+  // The Show tiles switch turns the sets face-up or face-down.
+  if(!opponentsDealt && !exposedMelds.length){ area.hidden = true; return; }
+  area.hidden = false;
+  var box = document.getElementById('exposedMelds');
+  if(!exposedMelds.length){ box.innerHTML = '<span class="melds-none">None yet — sets you call appear here.</span>'; return; }
+  box.innerHTML = exposedMelds.map(function(m){
+    if(!exposedVisible){
+      var backs = '';
+      for(var i = 0; i < m.tiles.length; i++) backs += '<span class="tile-back" aria-hidden="true"></span>';
+      return '<span class="meld"><span class="meld-tiles meld-backs" role="img" aria-label="A hidden exposed set of ' + m.tiles.length + ' tiles">' + backs + '</span></span>';
+    }
+    return '<span class="meld"><span class="meld-tiles">' + m.tiles.map(revealTileHTML).join('') + '</span><span class="meld-label">' + m.kind + ' · ' + esc(tileName(m.key)) + '</span></span>';
+  }).join('');
+}
+function updateCallUI(){
+  var bar = document.getElementById('callBar');
+  if(!bar) return;
+  if(!pendingCall){ bar.hidden = true; return; }
+  bar.hidden = false;
+  document.getElementById('callTile').innerHTML = revealTileHTML(pendingCall.key);
+  document.getElementById('callLabel').textContent = seatName(pendingCall.by) + ' discarded ' + tileName(pendingCall.key) + (pendingCall.mj ? ' — Mah Jongg!' : ' — call it?');
+  var gb = document.getElementById('callGroupBtn');
+  gb.hidden = !pendingCall.pung;
+  var callJokers = pendingCall.kong ? (pendingCall.kongJokers || 0) : (pendingCall.pungJokers || 0);
+  gb.textContent = (pendingCall.kong ? 'Call — Kong' : 'Call — Pung') + (callJokers ? ' (' + callJokers + (callJokers === 1 ? ' Joker' : ' Jokers') + ')' : '');
+  document.getElementById('callMjBtn').hidden = !pendingCall.mj;
+}
+function updateEndUI(){
+  var banner = document.getElementById('endBanner');
+  if(!banner) return;
+  if(gameResult && gameResult.type === 'opp-mj'){
+    banner.hidden = false;
+    document.getElementById('endBannerTitle').textContent = gameResult.opp.name + ' calls Mah Jongg!';
+    document.getElementById('endBannerText').textContent = (gameResult.viaCall
+      ? gameResult.opp.name + ' called ' + seatName(gameResult.fromSeat) + '’s discarded ' + tileName(gameResult.callKey) + ' to complete '
+      : gameResult.opp.name + ' drew the winning tile and completed ') +
+      gameResult.hand.id + ' — ' + gameResult.hand.section.replace(' - ', ' — ') + ' (' + gameResult.hand.pts + ' pts), and scores ' + gameResult.hand.pts + ' points. Their whole hand is revealed below the other players, grouped into its sets, so you can study how it fits together.';
+  } else if(gameResult && gameResult.type === 'wall'){
+    banner.hidden = false;
+    document.getElementById('endBannerTitle').textContent = 'Wall game — nobody won';
+    document.getElementById('endBannerText').textContent = 'The wall ran out of tiles before anyone completed a hand, so this hand is a draw and nobody scores. Deal a new hand to play again.';
+  } else {
+    banner.hidden = true;
+  }
+}
+function renderReveal(){
+  var panel = document.getElementById('revealPanel');
+  if(!panel) return;
+  if(!gameResult || gameResult.type === 'wall'){ panel.hidden = true; return; }
+  var hand, counts;
+  if(gameResult.type === 'opp-mj'){ hand = gameResult.hand; counts = oppAllCounts(gameResult.opp); }
+  else { hand = gameResult.hand; counts = allCounts(); }
+  if(!hand){ panel.hidden = true; return; }
+  panel.hidden = false;
+  document.getElementById('revealTitle').textContent = gameResult.type === 'opp-mj' ? gameResult.opp.name + '’s winning hand, revealed' : 'Your winning hand, revealed';
+  document.getElementById('revealMeta').textContent = hand.id + ' · ' + hand.section.replace(' - ', ' — ') + ' · ' + hand.pts + ' pts';
+  document.getElementById('revealText').textContent = 'All 14 winning tiles, grouped into the sets that make the hand — a single, a pair, a pung (3), a kong (4) or a quint (5). A Joker shown in a set of 3 or more is standing in for that tile; Jokers can never fill a single or a pair. Studying a revealed hand like this is the fastest way to learn what a finished hand looks like.';
+  var b = bestForHand(hand, counts);
+  document.getElementById('revealGroups').innerHTML = b.groups.map(function(g){
+    var tilesHtml = '';
+    var i;
+    for(i = 0; i < g.got; i++) tilesHtml += revealTileHTML(g.k);
+    for(i = 0; i < g.jok; i++) tilesHtml += revealTileHTML('joker');
+    var label = g.n === 1 ? 'Single' : g.n === 2 ? 'Pair' : g.n === 3 ? 'Pung' : g.n === 4 ? 'Kong' : g.n === 5 ? 'Quint' : 'Set of ' + g.n;
+    return '<span class="meld"><span class="meld-tiles">' + tilesHtml + '</span><span class="meld-label">' + label + ' · ' + esc(tileName(g.k)) + '</span></span>';
+  }).join('');
+}
+
+/* ================= The Charleston =================
+   Seven passes run between the deal and the first turn: First
+   Right, First Opposite, First Left, then Second Left, Second
+   Opposite, Second Right, and an Optional courtesy pass. The
+   Charleston action is Swap: pick 3 tiles and tap Swap, and inside
+   that one swap the order is pass (discard) FIRST, then receive —
+   the picked tiles go out before the incoming tiles arrive. A turn
+   in the game is the other way round: Draw (select) first, 13 to
+   14, then discard, 14 back to 13. In each of the first six rounds
+   the player swaps 3 tiles; the Optional pass swaps 0 to 3. There
+   is no other player here, so the incoming tiles are drawn from the
+   remaining wall — from a pool taken while the picked tiles are
+   still counted as held, so a tile swapped out can never come
+   straight back in the same swap. */
+function playStartText(){
+  return (isEast && rack.length === 14 && discardsMade === 0 && drawsMade === 0)
+    ? 'East holds 14 while everyone else holds 13, so East discards one tile to 13 to open play. After that it is draw to 14, discard to 13.'
+    : 'draw one tile to make 14, then discard back to 13.';
+}
+function startCharleston(){
+  if(!charlestonWanted){ showMsg('The Charleston box is unticked — this rack is the beginning of the game, so there is no Charleston to start. Tick Charleston (next to East, above) before the next deal if you want one.'); return; }
+  dealOpponents(); // the passes are exchanged with the other players
+  gamePhase = 'charleston';
+  charlestonRound = 0;
+  charlestonSel = [];
+  refresh();
+  showMsg('Charleston started — First Right. Pick 3 tiles on your rack and tap Swap: your 3 go out first, then 3 come in.', true);
+}
+function finishCharleston(passNote){
+  gamePhase = 'play';
+  charlestonCompleted = true; // completed — the Charleston checkbox greys out for this hand
+  charlestonSel = [];
+  refresh();
+  showMsg((passNote ? passNote + ' ' : '') + 'Charleston complete — the game begins: ' + playStartText(), true);
+  maybeStartPlay();
+}
+/* Who passes to whom, per Charleston round. Seats: you, right,
+   opposite, left. Right rounds and Left rounds are a full circle;
+   Opposite rounds are two pair swaps (you ↔ opposite, right ↔ left). */
+var PASS_MAPS = [
+  {you:'right', right:'opposite', opposite:'left', left:'you'},
+  {you:'opposite', opposite:'you', right:'left', left:'right'},
+  {you:'left', left:'opposite', opposite:'right', right:'you'},
+  {you:'left', left:'opposite', opposite:'right', right:'you'},
+  {you:'opposite', opposite:'you', right:'left', left:'right'},
+  {you:'right', right:'opposite', opposite:'left', left:'you'}
+];
+function pickPassTiles(opp, n){
+  // Jokers are never passed in the Charleston.
+  var cand = shuffleCopy(opp.rack.filter(function(k){ return k !== 'joker'; }));
+  return cand.slice(0, Math.min(n, cand.length));
+}
+function removeKey(list, key){
+  var ix = list.indexOf(key);
+  if(ix !== -1) list.splice(ix, 1);
+}
+function swapCharlestonTiles(){
+  // The Charleston action: pick 3, tap Swap. Inside the swap the
+  // order is out first, then in — the picked tiles are passed
+  // (discarded) before the incoming tiles are received. The incoming
+  // tiles are drawn from a pool taken while the picked tiles are
+  // still on the rack, so a tile swapped out cannot come straight
+  // back in the same swap.
+  if(gamePhase !== 'charleston') return;
+  var optional = charlestonRound === 6;
+  if(!optional && charlestonSel.length !== 3){
+    showMsg('Pick 3 tiles to swap first — tap tiles on your rack. You have picked ' + charlestonSel.length + ' of 3.');
+    return;
+  }
+  var label = CHARLESTON_ROUNDS[charlestonRound];
+  var n = charlestonSel.length;
+  if(optional && n === 0){
+    finishCharleston('Swapped no tiles on the Optional pass.');
+    return;
+  }
+  if(opponentsDealt){
+    // A real exchange: your picked tiles go to another player first,
+    // then the tiles passed to you arrive. Jokers are never passed.
+    var selKeys = charlestonSel.map(function(ix){ return rack[ix]; });
+    if(selKeys.indexOf('joker') !== -1){
+      showMsg('Jokers can’t be passed in the Charleston — unpick the Joker and pick another tile.');
+      return;
+    }
+    var received, noteOpp;
+    if(optional){
+      var oppO = opponentById('opposite');
+      var oppPass = pickPassTiles(oppO, n);
+      selKeys.forEach(function(k){ removeKey(rack, k); oppO.rack.push(k); });
+      oppPass.forEach(function(k){ removeKey(oppO.rack, k); rack.push(k); });
+      oppO.status = 'Courtesy pass with you: swapped ' + n + (n === 1 ? ' tile' : ' tiles') + '.';
+      received = oppPass;
+      noteOpp = 'Passed ' + selKeys.map(tileName).join(', ') + ' across to Opposite, and received ' + received.map(tileName).join(', ') + ' back (Optional).';
+      charlestonSel = [];
+      lastNewIndex = -1; lastNewKey = null;
+      if(selectedHandId){ applyArrangeForSelected(); } else { rackGapAfter = -1; rackArrangedForSelected = false; sortRackBySuit(); }
+      finishCharleston(noteOpp);
+      return;
+    }
+    var map = PASS_MAPS[charlestonRound];
+    var passes = {you: selKeys};
+    opponents.forEach(function(o){ passes[o.id] = pickPassTiles(o, 3); });
+    // Everyone's tiles leave first…
+    passes.you.forEach(function(k){ removeKey(rack, k); });
+    opponents.forEach(function(o){
+      passes[o.id].forEach(function(k){ removeKey(o.rack, k); });
+      o.status = 'Passed 3 tiles (' + label + ').';
+    });
+    // …then the incoming tiles arrive.
+    var giver = null;
+    PLAY_ORDER.forEach(function(seat){
+      var recv = map[seat];
+      if(recv === 'you'){ giver = seat; received = passes[seat]; }
+      else if(seat === 'you'){ /* your pass is delivered below with the rest */ }
+      var target = recv === 'you' ? rack : opponentById(recv).rack;
+      passes[seat].forEach(function(k){ target.push(k); });
+    });
+    charlestonSel = [];
+    lastNewIndex = -1; lastNewKey = null;
+    if(selectedHandId){ applyArrangeForSelected(); } else { rackGapAfter = -1; rackArrangedForSelected = false; sortRackBySuit(); }
+    var noteEx = 'Passed ' + selKeys.map(tileName).join(', ') + ' to ' + seatName(map.you) + ' first, then received ' + (received || []).map(tileName).join(', ') + ' from ' + seatName(giver) + ' (' + label + ').';
+    charlestonRound++;
+    refresh();
+    var nextLabelEx = CHARLESTON_ROUNDS[charlestonRound];
+    showMsg(noteEx + ' Next pass — ' + nextLabelEx + (charlestonRound === 6
+      ? ' — the courtesy pass across: pick 0 to 3 tiles and tap Swap, or swap none.'
+      : ' — pick 3 tiles to swap ' + CHARLESTON_DIR[charlestonRound] + '.'), true);
+    return;
+  }
+  var outNames = charlestonSel.map(function(ix){ return tileName(rack[ix]); });
+  var pool = remainingPool();
+  var drawn = [];
+  for(var i = 0; i < n; i++){
+    if(!pool.length) break;
+    var t = pickFromPool(pool);
+    drawn.push(t);
+    pool.splice(pool.indexOf(t), 1);
+  }
+  var selDesc = charlestonSel.slice().sort(function(a, b){ return b - a; });
+  selDesc.forEach(function(ix){ rack.splice(ix, 1); });
+  drawn.forEach(function(t){ rack.push(t); });
+  charlestonSel = [];
+  lastNewIndex = -1; lastNewKey = null;
+  if(selectedHandId){ applyArrangeForSelected(); }
+  else { rackGapAfter = -1; rackArrangedForSelected = false; sortRackBySuit(); }
+  var note = 'Swapped out ' + outNames.join(', ') + ' first, then received ' + drawn.map(tileName).join(', ') + ' (' + label + ').';
+  if(optional){
+    finishCharleston(note);
+    return;
+  }
+  charlestonRound++;
+  refresh();
+  var nextLabel = CHARLESTON_ROUNDS[charlestonRound];
+  showMsg(note + ' Next pass — ' + nextLabel + (charlestonRound === 6
+    ? ' — the courtesy pass: pick 0 to 3 tiles and tap Swap, or swap none.'
+    : ' — pick 3 tiles to swap ' + CHARLESTON_DIR[charlestonRound] + '.'), true);
+}
+/* The chosen hand — the selected card itself, shown as a wide,
+   flat strip right under the rack: across the full width of the
+   panel, with the card's notation, lined-up tiles, counts and
+   unused tiles laid out in a row so it takes up as little
+   vertical space as possible. The top row carries the hand's name
+   on the left and the badge / count / progress group right-
+   justified, with a Play hand box — the same box as on the card
+   below, ticked — at the left of that group. */
+function updateChosenStrip(){
+  var el = document.getElementById('chosenStrip');
+  if(!el) return;
+  var m = selectedMatch();
+  if(!m){ el.hidden = true; el.innerHTML = ''; return; }
+  var hand = m.hand;
+  var b = bestForHand(hand, allCounts());
+  var fakeResult = {groups: b.groups, jokersUsed: b.jokersUsed};
+  var aligned = b.groups.map(alignedGroupHTML).join('');
+  var haveNoJokers = b.matched - b.jokersUsed;
+  var xcClass = hand.xc === 'C' ? 'xc-c' : 'xc-x';
+  var xcLabel = hand.xc === 'C' ? 'C · Concealed' : 'X · Exposed';
+  var starHTML = hasSinglesOrPairs(fakeResult) ? ' <span class="sp-star" aria-hidden="true">★</span>' : '';
+  var unused = unusedKeysFor(fakeResult);
+  var unusedHTML = '';
+  if(!unused.length){
+    unusedHTML = '<span class="chosen-unused"><span>All tiles fit</span></span>';
+  } else {
+    var ucells = unused.map(function(k){
+      var p = cellParts(k);
+      return '<span class="acell ' + p.cls + '"><span class="a-num">' + p.num + '</span><span class="a-let">' + p.let + '</span></span>';
+    }).join('');
+    unusedHTML = '<span class="chosen-unused"><span class="unused-label">Not used:</span><span class="unused-cells">' + ucells + '</span></span>';
+  }
+  el.hidden = false;
+  el.setAttribute('aria-label', 'Chosen hand ' + hand.id + ' — ' + hand.section + ', ' + m.matched + ' of 14, ' + m.neededCount + ' still needed');
+  var playHand = '<label class="select-hand"><input type="checkbox" data-select-hand-strip="' + esc(hand.id) + '" checked><span>Play hand</span></label>';
+  el.innerHTML =
+    '<span class="chosen-head"><span class="chosen-id"><span class="chosen-label">Chosen</span><strong>' + esc(hand.id) + starHTML + '</strong><span class="chosen-sec">' + esc(hand.section.replace(' - ', ' — ')) + '</span></span>' +
+    '<span class="chosen-meta">' + playHand + '<span class="badge ' + xcClass + '">' + esc(xcLabel) + '</span><span class="badge pts">' + esc(hand.pts) + ' pts</span>' +
+    '<span class="chosen-counts" role="img" aria-label="' + haveNoJokers + ' held, ' + b.jokersUsed + ' Jokers used, ' + m.neededCount + ' still needed"><span class="count-circle have">' + haveNoJokers + '</span><span class="count-circle joker">' + b.jokersUsed + '</span><span class="count-circle donthave">' + m.neededCount + '</span></span>' +
+    '</span></span>' +
+    '<span class="chosen-main"><span class="chosen-notation">' + esc(spacedHand(hand.hand)) + (hand.note ? '<span class="chosen-note">' + esc(hand.note) + '</span>' : '') + '</span>' +
+    '<span class="chosen-align"><span class="align-view">' + aligned + '</span></span>' + unusedHTML + '</span>';
+  // The strip's own Play hand box: rendered ticked, since this strip
+  // only shows for the chosen hand; unticking it clears the choice,
+  // exactly like unticking the box on the card below. It is bound
+  // here rather than by attachSelectHandlers because renderRack can
+  // rebuild the strip on paths that never re-run renderResults.
+  var stripBox = el.querySelector('[data-select-hand-strip]');
+  if(stripBox){
+    stripBox.addEventListener('change', function(){
+      if(!this.checked && selectedHandId === hand.id) setSelectedHand(null, false);
+    });
+  }
+}
+/* The Charleston checkbox: live while the Charleston can still be
+   chosen or run (rack being built, or the passes under way); greyed
+   out once the Charleston is completed — and likewise once play has
+   begun without it, since it can no longer be added to this hand.
+   A fresh deal or Clear makes it live again. */
+function updateCharlestonCheckUI(){
+  var box = document.getElementById('charlestonCheck');
+  var wrap = document.getElementById('charlestonCheckWrap');
+  if(!box) return;
+  box.checked = charlestonWanted;
+  var over = charlestonCompleted || gamePhase === 'play';
+  box.disabled = over;
+  if(wrap) wrap.classList.toggle('is-disabled', over);
+}
+/* The Discards area: no button — it opens on its own when the
+   first tile is discarded and stays open while the pile is
+   non-empty, showing every tile discarded this game, in discard
+   order, with a per-tile tally underneath. It sits above the
+   exposed tiles box, and its header carries the wall count, the
+   discard count and a Show tiles switch that turns the discarded
+   tiles face-up or face-down, like the exposed tiles box. An
+   empty pile (a new deal, Clear, or the only discard being
+   called) closes it again. */
+function updateDiscardsUI(){
+  var view = document.getElementById('discardsView');
+  if(!view) return;
+  view.hidden = discardPile.length === 0;
+  if(view.hidden) return;
+  var countEl = document.getElementById('discardsCount');
+  if(countEl) countEl.textContent = discardPile.length + (discardPile.length === 1 ? ' tile discarded' : ' tiles discarded');
+  var grid = document.getElementById('discardsGrid');
+  var summary = document.getElementById('discardsSummary');
+  if(!discardsVisible){
+    grid.innerHTML = discardPile.map(function(){ return '<span class="tile-back" aria-hidden="true"></span>'; }).join('');
+    summary.innerHTML = '';
+    return;
+  }
+  grid.innerHTML = discardPile.map(function(key){
+    var imgCls = TILE_IMG[key] ? ' has-img' : '';
+    return '<span class="tile ' + tileFace(key).cls + imgCls + '" role="img" aria-label="' + esc(tileName(key)) + '">' + tileButtonHTML(key, 0, true) + '</span>';
+  }).join('');
+  var tally = {}, order = [];
+  discardPile.forEach(function(k){ if(tally[k] === undefined){ tally[k] = 0; order.push(k); } tally[k]++; });
+  summary.innerHTML = '<strong>Gone so far:</strong> ' + order.map(function(k){ return esc(tileName(k)) + (tally[k] > 1 ? ' ×' + tally[k] : ''); }).join(', ') + '.';
+}
+function updateCharlestonUI(){
+  // No box and no extra text: the Swap button just says Swap — the
+  // rack count line names the current pass (First Right, and so
+  // on). The button sits in the controls row under the rack (no
+  // row of its own). It is live only when the picked tiles make a
+  // legal swap, and it stays visible but greyed out when the
+  // Charleston box is unticked, before the Charleston starts, and
+  // once the Charleston is done. The whole group hides while the
+  // rack is empty.
+  var ctl = document.getElementById('charlestonCtl');
+  if(!ctl) return;
+  var startBtn = document.getElementById('startCharlestonBtn');
+  var swapBtn = document.getElementById('swapBtn');
+  var fullRack = rack.length === 13 || rack.length === 14;
+  if(!rack.length){ ctl.hidden = true; return; }
+  ctl.hidden = false;
+  startBtn.hidden = !(gamePhase === 'setup' && charlestonWanted && fullRack);
+  swapBtn.textContent = 'Swap';
+  if(!charlestonWanted){
+    swapBtn.disabled = true;
+    return;
+  }
+  if(gamePhase === 'play'){
+    swapBtn.disabled = true;
+    return;
+  }
+  if(gamePhase === 'setup'){
+    swapBtn.disabled = true;
+    return;
+  }
+  var optional = charlestonRound === 6;
+  swapBtn.disabled = !optional && charlestonSel.length !== 3;
+}
+function updateTurnUI(){
+  var bar = document.getElementById('turnBar');
+  var banner = document.getElementById('mjBanner');
+  var bannerText = document.getElementById('mjBannerText');
+  var rackEl = document.getElementById('rack');
+  var drawOneBtn = document.getElementById('drawOneBtn');
+  if(!bar) return;
+  // No Mah Jongg can be called during the Charleston — the game has
+  // not begun yet, even if East's 14 tiles already match a hand.
+  var mj = gamePhase !== 'charleston' && isMahJongg();
+  var anyMj = !mj && gamePhase !== 'charleston' ? anyMahJonggHand() : null;
+  // The user's win ends the game and scores once, however it was
+  // reached — on the draw, or by calling a discard (the called tile
+  // is pushed onto the rack by doCallMahJongg before refresh).
+  if((mj || anyMj) && gamePhase === 'play' && !scoredThisGame){
+    scoredThisGame = true;
+    gameOver = true;
+    opponentsRunning = false;
+    pendingStep = null;
+    clearOpponentTimer();
+    currentTurnSeat = null;
+    var winHand = mj ? selectedMatch().hand : anyMj;
+    scores.you += winHand.pts;
+    gameResult = {type: 'user-mj', hand: winHand};
+  }
+  if(banner){
+    if(mj){
+      var m = selectedMatch();
+      banner.hidden = false;
+      bannerText.textContent = 'Call Mah Jongg! Your 14 tiles exactly match ' + m.hand.id + ' — ' + m.hand.section.replace(' - ', ' — ') + ' (' + m.hand.pts + ' pts). Nothing still needed.';
+    } else if(anyMj){
+      banner.hidden = false;
+      bannerText.textContent = 'Call Mah Jongg! Your 14 tiles exactly match ' + anyMj.id + ' — ' + anyMj.section.replace(' - ', ' — ') + ' (' + anyMj.pts + ' pts). The winning hand is revealed below the other players, grouped into its sets.';
+    } else {
+      banner.hidden = true;
+    }
+  }
+  if(rackEl) rackEl.classList.toggle('is-discard', totalTiles() === 14 && !mj && gamePhase !== 'charleston');
+  if(drawOneBtn) drawOneBtn.disabled = !(randomMode && gamePhase !== 'charleston' && !gameOver && !pendingCall && !opponentsRunning && totalTiles() > 0 && totalTiles() < 14);
+  var n = totalTiles();
+  var html = '';
+  if(gameResult && gameResult.type === 'opp-mj'){
+    html = '<span class="turn-step">' + esc(gameResult.opp.name) + ' won this hand.</span> Their winning hand is revealed below the other players — deal a new hand to play again.';
+  } else if(gameResult && gameResult.type === 'wall'){
+    html = '<span class="turn-step">Wall game.</span> The wall ran out and nobody completed a hand, so nobody scores. Deal a new hand to play again.';
+  } else if(pendingCall){
+    html = '<span class="turn-step">Call?</span> ' + esc(seatName(pendingCall.by)) + ' discarded <strong>' + esc(tileName(pendingCall.key)) + '</strong> — use the <strong>Call / Pass</strong> buttons under your rack.';
+  } else if(opponentsRunning){
+    html = '<span class="turn-step">Other players’ turns:</span> ' + (currentTurnSeat && currentTurnSeat !== 'you' ? esc(seatName(currentTurnSeat)) + ' is next. ' : '') + (gameSpeed === 'manual'
+      ? 'Speed is <strong>Manual</strong> — nobody moves until you tap <strong>Next player</strong> at the top of the form. One tap lets one player draw and discard, so you can study every discard before the next one.'
+      : 'Speed is <strong>' + gameSpeed + ' seconds</strong> — the next player moves in about ' + gameSpeed + ' seconds. Watch their cards below — they draw, discard, and may call a discard and expose a set. Your turn comes after Left.');
+  } else if(gamePhase === 'charleston'){
+    html = ''; // Dropped: the rack count line and the Swap button already say round, pick 3 and Swap.
+  } else if(gamePhase === 'setup' && n >= 13){
+    html = charlestonWanted
+      ? '<span class="turn-step">Before play:</span> run the <strong>Charleston</strong> first (Swap under your rack), or untick its box to skip it — then ' + (isEast && n === 14 ? 'East discards one to 13 to open play.' : 'draw to 14, discard back to 13.')
+      : '<span class="turn-step">Beginning of the game:</span> the Charleston box is unticked, so this rack is where the game starts — ' + (isEast && n === 14 ? 'East discards one to 13 to open play.' : 'draw to 14, discard back to 13.');
+  } else if(mj){
+    html = '<span class="turn-step">Mah Jongg — game won.</span> Your chosen hand is complete at 14 tiles. Deal a new hand to play again.';
+  } else if(anyMj){
+    html = '<span class="turn-step">Mah Jongg.</span> You hold a complete 14-tile hand — call it now.';
+  } else if(n === 0){
+    html = '<span class="turn-step">Start:</span> ' + (isEast ? 'East is dealt <strong>14</strong> tiles.' : 'You are dealt <strong>13</strong> tiles (East gets 14).') + ' Tick <strong>Random</strong> at the top of the form to be dealt a hand, or add tiles above.';
+  } else if(n < 13){
+    html = '<span class="turn-step">Building your hand (' + n + ' tiles):</span> keep adding tiles until you hold 13' + (selectedHandId ? ' for ' + esc(selectedHandId) : '') + '. Play proper starts at 13.';
+  } else if(n === 13){
+    html = '<span class="turn-step">You hold 13 — Draw:</span> pick up one tile to make <strong>14</strong>' + (randomMode ? ' — tap <strong>Draw</strong> for a random draw, or tap <strong>Clear</strong> to start over with a fresh deal.' : ' — pick the tile you drew in <strong>Add tiles</strong> above.') + ' Then discard back to 13 — unless that 14 completes your hand.';
+  } else if(n === 14){
+    if(isEast && discardsMade === 0 && drawsMade === 0){
+      html = '<span class="turn-step">East — first discard:</span> after the Charleston you hold 14 while everyone else holds 13, so there is no draw first. <strong>Tap the tile you want to discard</strong> to go to 13 and open play. After that it is draw to 14, discard to 13.';
+    } else {
+      html = '<span class="turn-step">You hold 14 — discard:</span> <strong>tap the tile you want to discard</strong> to go back to 13' + (selectedHandId ? '. Your rack does not yet match ' + esc(selectedHandId) + ' — check its card in the list below for what is still needed.' : '. Pick a hand with <strong>Play hand</strong> on its card below to see how close you are.') + ' If these 14 exactly matched your chosen hand, the page would call Mah Jongg instead.';
+    }
+  }
+  bar.innerHTML = html;
+  bar.hidden = !html;
+}
+function updateDrawUI(){
+  var rackHint = document.getElementById('rackHint');
+  if(rackHint) rackHint.textContent = gamePhase === 'charleston'
+    ? ''
+    : (rack.length === 14
+    ? 'You hold 14 — tap a tile to discard it back to 13 (unless this is Mah Jongg). Drag still moves a tile without discarding it.'
+    : (randomMode
+    ? 'Drag a tile sideways to move it. A dealt game is not edited by hand: at 13 use Draw to draw to 14, then tap a tile to discard back to 13.'
+    : 'Drag a tile sideways to move it. A plain tap takes a tile off.'));
+  // The wall count lives in the exposed tiles box, and again in
+  // the discarded tiles box header next to the discard count —
+  // just the count, no explanation. Draws come only from what is
+  // left; at zero before anyone wins, the hand is a draw.
+  var wallText = 'Wall: ' + remainingPool().length + ' tiles left';
+  var wallEl = document.getElementById('wallPill');
+  if(wallEl) wallEl.textContent = wallText;
+  var wallElD = document.getElementById('wallPillDiscards');
+  if(wallElD) wallElD.textContent = wallText;
+}
+function setRandomMode(on){
+  if(on){
+    // Ticking Random is the deal: a fresh hand for all four
+    // players, replacing whatever was on the rack.
+    randomMode = true;
+    dealRandomHand();
+    return;
+  }
+  randomMode = false;
+  if(rack.length || opponentsDealt || gamePhase !== 'setup'){
+    // Unticking leaves the dealt game behind: once a game has
+    // started it can't be edited by hand, so Manual starts over
+    // from an empty rack the user builds themselves.
+    clearToSetup();
+    refresh();
+    showMsg('Manual — the dealt game is cleared. Build your rack by hand in Add tiles above; tap a tile on the rack to take it off. Tick Random when you want a dealt game instead.', true);
+    return;
+  }
+  updateDrawUI();
+  showMsg('Manual — tap tiles in Add tiles above to add them yourself, and tap a tile on your rack to take it off.', true);
 }
 function renderRack(){
   var el = document.getElementById('rack');
   if(!rack.length){
-    el.innerHTML = '<span class="rack-empty">Your rack is empty — add tiles above, or use Draw random tile below.</span>';
+    el.innerHTML = '<span class="rack-empty">Your rack is empty — add tiles above, or tick Random at the top of the form to be dealt a full hand.</span>';
   } else {
-    el.innerHTML = rack.map(function(key, i){
+    var showGap = rackGapAfter > 0 && rackGapAfter < rack.length;
+    var showBreaks = rackArrangedForSelected && rackBreaks.length > 0;
+    var tapAction = gamePhase === 'charleston' ? 'tap to pick or unpick this tile to swap' : (isMahJongg() ? 'Mah Jongg tile' : (rack.length === 14 ? 'tap to discard this tile' : (randomMode ? 'tap to discard this tile when you hold 14' : 'tap to remove')));
+    var parts = [];
+    rack.forEach(function(key, i){
+      if(showGap && i === rackGapAfter) parts.push('<span class="rack-spacer" aria-hidden="true"></span>');
+      else if(showBreaks && rackBreaks.indexOf(i) !== -1) parts.push('<span class="rack-break" aria-hidden="true"></span>');
       var imgCls = TILE_IMG[key] ? ' has-img' : '';
       var isNew = (i === lastNewIndex && key === lastNewKey);
       var newCls = isNew ? ' is-new' : '';
       var newBadge = isNew ? '<span class="t-new">New</span>' : '';
-      var action = replaceMode === 'random' ? 'tap to discard and draw a random replacement' : 'tap to remove';
-      return '<button type="button" class="tile ' + tileFace(key).cls + imgCls + newCls + '" data-rack-idx="' + i + '" aria-label="' + esc(tileName(key)) + ' — ' + action + ', drag to move">' + newBadge + tileButtonHTML(key, 0, true) + '</button>';
-    }).join('');
+      var isPass = gamePhase === 'charleston' && charlestonSel.indexOf(i) !== -1;
+      var passCls = isPass ? ' is-pass' : '';
+      var passBadge = isPass ? '<span class="t-pass">Swap</span>' : '';
+      parts.push('<button type="button" class="tile ' + tileFace(key).cls + imgCls + newCls + passCls + '" data-rack-idx="' + i + '" aria-label="' + esc(tileName(key)) + ' — ' + tapAction + ', drag to move">' + newBadge + passBadge + tileButtonHTML(key, 0, true) + '</button>');
+    });
+    el.innerHTML = parts.join('');
     var btns = el.querySelectorAll('[data-rack-idx]');
     for(var i = 0; i < btns.length; i++){
       btns[i].addEventListener('click', function(){
         if(suppressRackClick){ suppressRackClick = false; return; }
         var idx = parseInt(this.getAttribute('data-rack-idx'), 10);
-        if(replaceMode === 'random'){
-          discardAndDraw(idx);
+        // During the Charleston a tap picks (or unpicks) the tile to
+        // swap this round — it never discards or removes.
+        if(gamePhase === 'charleston'){
+          var pi = charlestonSel.indexOf(idx);
+          if(pi !== -1) charlestonSel.splice(pi, 1);
+          else if(charlestonSel.length < 3) charlestonSel.push(idx);
+          else { showMsg('You have already picked 3 tiles to swap — tap a picked tile to unpick it, or tap Swap.'); return; }
+          renderRack();
+          return;
+        }
+        if(gameOver){
+          showMsg('This game is over — deal a new hand to play again.', true);
+          return;
+        }
+        if(pendingCall){
+          showMsg('Decide on the call first — tap Call or Pass under your rack.');
+          return;
+        }
+        if(opponentsRunning){
+          showMsg(gameSpeed === 'manual' ? 'It is the other players’ turn — tap “Next player” at the top of the form to let the next one play. Your tiles stay put until your turn comes round.' : 'The other players are taking their turns — your tiles stay put until your turn comes round.');
+          return;
+        }
+        if(isMahJongg()){
+          showMsg('Mah Jongg! This rack already wins — deal a new hand to play again instead of discarding a tile.', true);
+          return;
+        }
+        // In play, the count that matters is your total — tiles on
+        // the rack plus any exposed sets. At 14 in total, tapping a
+        // rack tile discards it; at 13, you must draw (or call) first.
+        if(gamePhase === 'play'){
+          if(totalTiles() === 14){ discardTile(idx); return; }
+          if(totalTiles() === 13){
+            showMsg('Draw first — tap Draw for a random tile (Random), or pick the tile you drew in Add tiles (Manual). When another player discards a tile you can use, you will be offered the call.');
+            return;
+          }
+        }
+        // At 14 the only legal move is the discard (East's first turn
+        // included): tapping discards in both Random and Manual, so
+        // play always runs draw to 14, discard back to 13.
+        if(rack.length === 14){
+          discardTile(idx);
+          return;
+        }
+        if(randomMode){
+          replaceTileWithRandom(idx);
           return;
         }
         rack.splice(idx, 1);
         if(lastNewIndex === idx){ lastNewIndex = -1; lastNewKey = null; }
         else if(lastNewIndex > idx){ lastNewIndex--; }
+        // Keep the rack arranged after a removal — for the chosen
+        // hand when one is chosen (so the gap stays in the right
+        // place), by suit otherwise.
+        if(selectedHandId){
+          applyArrangeForSelected();
+          if(lastNewKey) lastNewIndex = rack.indexOf(lastNewKey);
+        } else {
+          rackGapAfter = -1; rackArrangedForSelected = false;
+          sortRackBySuit();
+          if(lastNewKey) lastNewIndex = rack.indexOf(lastNewKey);
+        }
         showingMore = false;
         refresh();
       });
@@ -1032,15 +2778,27 @@ function renderRack(){
     }
   }
   var n = rack.length;
-  var limit = rackLimit();
-  var label = n + (n === 1 ? ' tile' : ' tiles') + ' entered — limit ' + limit + (isEast ? ' (East)' : '');
-  if(n === limit) label += ' — full rack';
+  var tot = totalTiles();
+  var label = (exposedMelds.length
+    ? tot + ' tiles in total — ' + n + ' on your rack + ' + (tot - n) + ' exposed'
+    : n + (n === 1 ? ' tile' : ' tiles') + ' entered') + ' — ' + (gamePhase === 'charleston' ? 'Charleston — ' + CHARLESTON_ROUNDS[charlestonRound] + ' — pick 3 and Swap' : (tot === 14 ? (isMahJongg() ? 'Mah Jongg!' : 'discard one to 13') : (tot === 13 ? 'Draw to 14' : 'building toward 13')));
   document.getElementById('rackCount').textContent = label;
-  document.getElementById('arrangeBtn').disabled = n < 2;
+  var ctlCount = document.getElementById('rackCountCtl');
+  if(ctlCount) ctlCount.textContent = tot + (tot === 1 ? ' tile' : ' tiles');
   document.getElementById('clearBtn').disabled = n === 0;
-  var drawBtn = document.getElementById('drawRandomBtn');
-  if(drawBtn) drawBtn.disabled = n >= limit;
-  updateReplaceUI();
+  updateDrawUI();
+  updateTurnUI();
+  updateSpeedUI();
+  updateCharlestonUI();
+  updateCharlestonCheckUI();
+  updateDiscardsUI();
+  updateChosenStrip();
+  renderExposed();
+  renderOpponents();
+  updateCallUI();
+  updateExchangeUI();
+  updateEndUI();
+  renderReveal();
 }
 function attachRackDrag(btn){
   var startX = 0, startY = 0, active = false, dragging = false, dropIndex = null, indicated = null;
@@ -1080,6 +2838,8 @@ function attachRackDrag(btn){
     if(commit && dropIndex !== null){
       var from = parseInt(btn.getAttribute('data-rack-idx'), 10);
       if(dropIndex !== from && dropIndex !== from + 1){
+        rackGapAfter = -1; rackArrangedForSelected = false;
+        charlestonSel = []; // indices moved — any tiles picked to swap are unpicked
         var item = rack.splice(from, 1)[0];
         var ins = dropIndex > from ? dropIndex - 1 : dropIndex;
         rack.splice(ins, 0, item);
@@ -1157,19 +2917,38 @@ function renderSubpicker(){
   }
 }
 function addTile(key){
-  var counts = rackCounts();
-  if(rack.length >= rackLimit()){
-    showMsg('A hand holds at most ' + rackLimit() + ' tiles' + (isEast ? ' as East' : ' — check East if you hold 14') + ' — tap a tile on your rack to take one off first.');
+  if(gamePhase === 'charleston'){
+    showMsg('The Charleston is on — finish it (or untick the Charleston box to end it) before adding tiles. Pick 3 tiles on your rack and tap Swap.');
+    return;
+  }
+  if(gameOver){ showMsg('This game is over — deal a new hand to play again.'); return; }
+  if(pendingCall){ showMsg('Decide on the call first — tap Call or Pass under your rack.'); return; }
+  if(opponentsRunning){ showMsg('The other players are taking their turns — wait for your turn before adding a tile.'); return; }
+  if(randomMode){ showMsg('Random is on — a dealt game can’t be edited by hand. At 13 tap Draw for your tile; at 14 tap a tile to discard. Untick Random to go back to building a rack by hand (that clears this game).'); return; }
+  var counts = allCounts();
+  if(totalTiles() >= rackLimit()){
+    showMsg('You already hold 14 tiles in total — the most anyone can hold. Discard one first (tap it) before adding another.');
     return;
   }
   if((counts[key] || 0) >= tileLimit(key)){
     showMsg('There are only ' + tileLimit(key) + ' ' + tileName(key) + (tileLimit(key) === 1 ? '' : 's') + ' in a set — that is all of them.');
     return;
   }
+  var wasThirteen = totalTiles() === 13;
   rack.push(key);
+  if(wasThirteen) drawsMade++;
+  // The rack arranges itself: for the chosen hand when one is chosen,
+  // by suit otherwise.
+  if(selectedHandId){ applyArrangeForSelected(); }
+  else { rackGapAfter = -1; rackArrangedForSelected = false; sortRackBySuit(); }
   showMsg('');
   showingMore = false;
   refresh();
+}
+function sortRackBySuit(){
+  // Auto-arrange: with no hand chosen, the rack always sits sorted by
+  // suit — Bams, Craks, Dots, Winds, Dragons, Flowers, Jokers.
+  rack.sort(function(a, b){ return arrangeKey(a) - arrangeKey(b); });
 }
 var ARRANGE_RANK = {bam:0, crak:1, dot:2, wind:3, dragon:4, flower:5, joker:6};
 var WIND_ORDER = {windN:0, windE:1, windW:2, windS:3};
@@ -1203,20 +2982,14 @@ function alignedGroupHTML(g){
   for(var i = 0; i < g.n; i++){
     var p = cellParts(g.k);
     var mark = i < g.got ? 'X' : (i < g.got + g.jok ? 'J' : '');
-    cells += '<span class="acell ' + p.cls + '"><span class="a-num">' + p.num + '</span><span class="a-let">' + p.let + '</span><span class="a-mark' + (mark === 'J' ? ' mark-j' : '') + '">' + mark + '</span></span>';
+    var stateCls = mark ? ' is-held' : ' is-needed';
+    if(mark === 'J') stateCls += ' is-joker';
+    cells += '<span class="acell ' + p.cls + stateCls + '"><span class="a-num">' + p.num + '</span><span class="a-let">' + p.let + '</span><span class="a-mark' + (mark === 'J' ? ' mark-j' : '') + '">' + mark + '</span></span>';
   }
   return '<span class="agroup">' + cells + '</span>';
 }
 function unusedKeysFor(r){
-  var consume = {};
-  r.groups.forEach(function(g){ if(g.got) consume[g.k] = (consume[g.k] || 0) + g.got; });
-  if(r.jokersUsed) consume['joker'] = (consume['joker'] || 0) + r.jokersUsed;
-  var out = [];
-  rack.forEach(function(k){
-    if(consume[k] > 0) consume[k]--;
-    else out.push(k);
-  });
-  return out;
+  return unusedFor(r, allTiles());
 }
 function spacedHand(s){
   // Keep every group in the card notation separated by a space:
@@ -1227,43 +3000,22 @@ function spacedHand(s){
     .replace(/([A-Za-z0-9])(?=[\(\[\{])/g, '$1 ')
     .trim();
 }
-function blockerName(key){
-  // Short name for a blocker note: a suit tile is just its number
-  // ("a 1"), the White Dragon is "Soap".
-  if(key === 'dragW') return 'Soap';
-  if(key === 'dragR') return 'Red Dragon';
-  if(key === 'dragG') return 'Green Dragon';
-  if(key === 'flower') return 'Flower';
-  if(WIND_NAME[key]) return WIND_NAME[key];
-  var m = /^(bam|crak|dot)([1-9])$/.exec(key);
-  if(m) return m[2];
-  return tileName(key);
-}
-function blockerText(blockers){
-  if(!blockers || !blockers.length) return '';
-  var parts = blockers.map(function(k){
-    var nm = blockerName(k);
-    return (/^[aeiou]/i.test(nm) ? 'an ' : 'a ') + nm;
-  });
-  var list = parts.length === 1 ? parts[0]
-    : parts.slice(0, -1).join(', ') + ' and ' + parts[parts.length - 1];
-  return 'Needs ' + list + ' you don’t hold';
-}
 function cardHTML(r, rank){
   var h = r.h;
   var xcClass = h.xc === 'C' ? 'xc-c' : 'xc-x';
   var xcLabel = h.xc === 'C' ? 'C · Concealed' : 'X · Exposed';
   var sectionDisplay = h.section.replace(' - ', ' — ');
   var aligned = r.groups.map(alignedGroupHTML).join('');
-  var badges = '<span class="badge ' + xcClass + '">' + esc(xcLabel) + '</span><span class="badge pts">' + esc(h.pts) + ' pts</span>';
-  if(r.neededCount === 0) badges = '<span class="badge mj">Mah Jongg</span>' + badges;
+  var isSel = selectedHandId === h.id;
+  var playHand = '<label class="select-hand"><input type="checkbox" data-select-hand="' + esc(h.id) + '"' + (isSel ? ' checked' : '') + '><span>Play hand</span></label>';
+  var badges = (r.neededCount === 0 ? '<span class="badge mj">Mah Jongg</span>' : '') +
+    playHand +
+    '<span class="badge ' + xcClass + '">' + esc(xcLabel) + '</span><span class="badge pts">' + esc(h.pts) + ' pts</span>';
   var haveNoJokers = r.matched - r.jokersUsed;
   var dontHave = r.neededCount;
   // Gold star: the hand includes singles and/or pairs (a group of 1
   // or 2 in the lined-up hand) — a Joker can never fill those.
-  var hasSinglesOrPairs = r.groups.some(function(g){ return g.n < 3; });
-  var starHTML = hasSinglesOrPairs ? ' <span class="sp-star" role="img" aria-label="Includes singles and/or pairs" title="Includes singles and/or pairs — a Joker can’t fill those">★</span>' : '';
-  var blockerNote = blockerText(r.blockers);
+  var starHTML = hasSinglesOrPairs(r) ? ' <span class="sp-star" role="img" aria-label="Includes singles and/or pairs" title="Includes singles and/or pairs — a Joker can’t fill those">★</span>' : '';
   var countsHTML = '<div class="points-counts" role="img" aria-label="' + haveNoJokers + ' tiles held toward this hand, not counting Jokers; ' + r.jokersUsed + (r.jokersUsed === 1 ? ' Joker' : ' Jokers') + ' used; ' + dontHave + (dontHave === 1 ? ' tile' : ' tiles') + ' still needed for this hand">' +
     '<span class="count-circle have">' + haveNoJokers + '</span>' +
     '<span class="count-circle joker">' + r.jokersUsed + '</span>' +
@@ -1284,8 +3036,7 @@ function cardHTML(r, rank){
     '<div class="section-name"><span class="section-label">Section</span>' + esc(sectionDisplay) + '</div></div>' +
     '<div class="badges-col"><div class="badges">' + badges + '</div>' + countsHTML + '</div></div>' +
     '<div class="hand-tiles"><div class="card-line">' + esc(spacedHand(h.hand)) + '</div>' +
-    (h.note ? '<p class="card-note">' + esc(h.note) + '</p>' : '') +
-    (blockerNote ? '<p class="blocker-note">' + esc(blockerNote) + '</p>' : '') + '</div>' +
+    (h.note ? '<p class="card-note">' + esc(h.note) + '</p>' : '') + '</div>' +
     '<div class="my-hand-box">' +
     '<div class="align-view">' + aligned + '</div>' +
     '<div class="hand-sep" aria-hidden="true"></div>' +
@@ -1304,6 +3055,98 @@ function groupedHTML(items){
   });
   return html;
 }
+/* The chosen hand can be changed at any time — while the rack is
+   being built, during the Charleston, or in the middle of play — as
+   the rack evolves and the discards come out. The one route in is
+   the Play hand tick on a hand card, through setSelectedHand: the
+   rack re-sorts for the new hand at once, no tiles are added or
+   taken away, and the Mah Jongg check simply re-runs against the
+   new hand, so switching away from a hand the rack happens to
+   complete frees the rack to discard again. The chosen hand's card
+   stays in the list below, its Play hand box ticked. */
+function setSelectedHand(id, fromPicker){
+  var prev = selectedHandId;
+  selectedHandId = id || null;
+  // The rack is about to be re-sorted, so tiles picked to swap in the
+  // Charleston (held by rack position) are unpicked — otherwise the
+  // swap would take whichever tiles landed in those spots.
+  if(gamePhase === 'charleston') charlestonSel = [];
+  if(selectedHandId){
+    // Selecting a hand sorts the rack for it right away.
+    applyArrangeForSelected();
+  } else {
+    rackGapAfter = -1; rackArrangedForSelected = false;
+    // No hand chosen now: the rack goes back to sorting by suit
+    // until another hand is chosen.
+    sortRackBySuit();
+  }
+  if(lastNewKey) lastNewIndex = rack.indexOf(lastNewKey);
+  showingMore = false;
+  refresh();
+  if(selectedHandId){
+    showMsg((prev && prev !== selectedHandId ? 'Hand changed to ' : 'Chosen hand: ') + selectedHandId + ' — your rack has sorted itself for it: tiles that fit are on the left, the rest on the right. Each new tile you pick will sort that way automatically, and you can change the hand again at any time.', true);
+  } else if(prev){
+    showMsg('Hand ' + prev + ' unselected — your rack is sorted by suit until you choose another hand.', true);
+  }
+}
+function attachSelectHandlers(){
+  var boxes = document.querySelectorAll('[data-select-hand]');
+  for(var i = 0; i < boxes.length; i++){
+    boxes[i].addEventListener('change', function(){
+      var id = this.getAttribute('data-select-hand');
+      if(this.checked) setSelectedHand(id, false);
+      else if(selectedHandId === id) setSelectedHand(null, false);
+    });
+  }
+}
+function applyArrangeForSelected(){
+  // Line the rack up with the chosen hand: tiles that fit come first,
+  // in the hand's own group order, with the Jokers it uses right beside
+  // the groups they fill; everything left over — the tiles this hand
+  // doesn't use — goes on the right, with a one-tile-wide space between
+  // the two runs when both exist. Returns the chosen hand, or null when
+  // no hand is chosen (or it no longer exists).
+  if(!selectedHandId) return null;
+  var hand = null;
+  for(var i = 0; i < HANDS.length; i++){ if(HANDS[i].id === selectedHandId){ hand = HANDS[i]; break; } }
+  if(!hand) return null;
+  var b = bestForHand(hand, allCounts());
+  var pool = rackCounts();
+  // Tiles already exposed in called sets count toward the hand but
+  // stay where they are — work out how much of each group they cover,
+  // and line up only the rack tiles that cover the rest.
+  var exposedPool = countsOf(meldTiles(exposedMelds));
+  var out = [];
+  var breaks = [];
+  function take(key, n){
+    for(var t = 0; t < n; t++){ if(pool[key] > 0){ out.push(key); pool[key]--; } }
+  }
+  b.groups.forEach(function(g){
+    var expGot = Math.min(g.got, exposedPool[g.k] || 0);
+    exposedPool[g.k] = (exposedPool[g.k] || 0) - expGot;
+    var expJok = Math.min(g.jok, exposedPool['joker'] || 0);
+    exposedPool['joker'] = (exposedPool['joker'] || 0) - expJok;
+    var before = out.length;
+    take(g.k, g.got - expGot);
+    take('joker', g.jok - expJok);
+    // A small space before each new part of the hand, so the sets
+    // being built — and how far each has got — can be seen at a glance.
+    if(out.length > before && before > 0) breaks.push(before);
+  });
+  var usedCount = out.length;
+  // The tiles this hand doesn't use go on the right sorted by suit —
+  // Bams, Craks, Dots, Winds, Dragons, Flowers, Jokers — the same
+  // order as a rack with no hand chosen.
+  var rest = [];
+  rack.forEach(function(k){ if(pool[k] > 0){ rest.push(k); pool[k]--; } });
+  rest.sort(function(a, b){ return arrangeKey(a) - arrangeKey(b); });
+  for(var ri = 0; ri < rest.length; ri++) out.push(rest[ri]);
+  rack = out;
+  rackGapAfter = (usedCount > 0 && usedCount < rack.length) ? usedCount : -1;
+  rackBreaks = breaks;
+  rackArrangedForSelected = true;
+  return hand;
+}
 function renderResults(){
   var listEl = document.getElementById('results');
   var emptyEl = document.getElementById('emptyState');
@@ -1313,6 +3156,8 @@ function renderResults(){
   var earlyEl = document.getElementById('earlyNote');
   var legendEl = document.getElementById('alignLegend');
   if(!rack.length){
+    selectedHandId = null;
+    rackGapAfter = -1; rackArrangedForSelected = false;
     listEl.className = 'list';
     listEl.innerHTML = '';
     moreWrap.hidden = true;
@@ -1327,15 +3172,25 @@ function renderResults(){
   emptyEl.hidden = true;
   legendEl.hidden = false;
   earlyEl.hidden = rack.length >= 8;
-  var counts = rackCounts();
-  var bySection = rankHands(counts).filter(function(r){ return selectedSections[sectionLetter(r.h)]; });
+  var counts = allCounts();
+  var allRanked = rankHands(counts);
+  var bySection = allRanked.filter(function(r){ return selectedSections[sectionLetter(r.h)]; });
   var ranked = bySection.filter(function(r){ return r.matched >= minMatched; });
+  if(spFilter === 'with') ranked = ranked.filter(hasSinglesOrPairs);
+  else if(spFilter === 'without') ranked = ranked.filter(function(r){ return !hasSinglesOrPairs(r); });
   // Hands stuck on a single or a pair tile the player does not hold (a
   // Joker cannot fill those) go in their own section below the main list,
   // unless "Sort all" is checked — then every hand ranks together in the
   // one list. rankHands already orders by useful tiles (Have + Jokers
   // used, most first), then Points, then card order, and both modes
   // keep that order; cards keep their blocker notes either way.
+  // The chosen hand stays in the list like any other hand — its Play
+  // hand box stays ticked — so choosing one never makes its card vanish.
+  if(selectedHandId){
+    var stillThere = false;
+    for(var si = 0; si < allRanked.length; si++){ if(allRanked[si].h.id === selectedHandId){ stillThere = true; break; } }
+    if(!stillThere) selectedHandId = null;
+  }
   var mainItems, sepItems;
   if(sortAll){
     mainItems = ranked.slice();
@@ -1351,7 +3206,10 @@ function renderResults(){
   if(!ranked.length){
     listEl.className = 'list';
     if(selectedSectionCount() === 0){
-      listEl.innerHTML = '<div class="empty"><h3>No sections selected</h3><p>Use the <strong>Sections</strong> button next to Clear and pick at least one section to see its hands.</p></div>';
+      listEl.innerHTML = '<div class="empty"><h3>No sections selected</h3><p>Use the <strong>Sections</strong> button above the list and pick at least one section to see its hands.</p></div>';
+    } else if(spFilter !== 'all'){
+      var spLabel = spFilter === 'with' ? 'with a single or pair (★)' : 'without a single or pair';
+      listEl.innerHTML = '<div class="empty"><h3>No hands ' + esc(spLabel) + '</h3><p>No hand in the selected sections matches your rack and the <strong>Singles &amp; pairs</strong> filter. Choose <strong>All hands</strong> to see both kinds.</p></div>';
     } else {
       var needLabel = minMatched >= 8 ? '8+' : String(minMatched);
       listEl.innerHTML = '<div class="empty"><h3>No hands have ' + esc(needLabel) + ' matching tiles</h3><p>No hand in the selected sections has at least ' + esc(needLabel) + ' matching tiles (tiles you hold toward the hand, plus Jokers used) from your rack. Lower <strong>Matching tiles</strong> to see more hands.</p></div>';
@@ -1359,6 +3217,7 @@ function renderResults(){
     moreWrap.hidden = true;
     moreArea.hidden = true;
     blockerWrap.hidden = true;
+    attachSelectHandlers();
     return;
   }
   var top = mainItems.slice(0, 10);
@@ -1382,6 +3241,7 @@ function renderResults(){
     blockerWrap.hidden = true;
     blockerArea.innerHTML = '';
   }
+  attachSelectHandlers();
 }
 function refresh(){
   renderRack();
@@ -1414,22 +3274,77 @@ document.getElementById('subDone').addEventListener('click', function(){
   renderGroupBadges();
   renderSubpicker();
 });
-document.getElementById('arrangeBtn').addEventListener('click', function(){
-  rack.sort(function(a, b){ return arrangeKey(a) - arrangeKey(b); });
-  lastNewIndex = -1; lastNewKey = null;
-  refresh();
-  showMsg('Arranged — Bams, Craks, Dots, Winds, Dragons, Flowers, Jokers.', true);
-});
-document.getElementById('clearBtn').addEventListener('click', function(){
+/* Reset to an empty, hand-built setup: no rack, no table, no
+   game. Shared by Clear (Manual), unticking Random, and the
+   banners' "Deal a new hand" in Manual. */
+function clearToSetup(){
   rack = [];
+  rackGapAfter = -1; rackBreaks = []; rackArrangedForSelected = false;
+  selectedHandId = null;
   lastNewIndex = -1; lastNewKey = null;
+  drawsMade = 0; discardsMade = 0;
+  discardPile = [];
+  resetTable();
+  gamePhase = 'setup'; charlestonRound = 0; charlestonSel = []; charlestonCompleted = false;
   showingMore = false;
+}
+document.getElementById('clearBtn').addEventListener('click', function(){
+  // Clearing follows the Random box: ticked, Clear deals a fresh
+  // hand; unticked, it empties the rack for building by hand.
+  if(randomMode){ dealRandomHand(); return; }
+  clearToSetup();
   showMsg('');
   refresh();
 });
-document.getElementById('modeManualBtn').addEventListener('click', function(){ setReplaceMode('manual'); });
-document.getElementById('modeRandomBtn').addEventListener('click', function(){ setReplaceMode('random'); });
-document.getElementById('drawRandomBtn').addEventListener('click', drawRandomTile);
+document.getElementById('charlestonCheck').addEventListener('change', function(){
+  charlestonWanted = this.checked;
+  if(!charlestonWanted){
+    if(gamePhase === 'charleston'){
+      // Unticking mid-Charleston ends it: the game begins from here.
+      gamePhase = 'play';
+      charlestonCompleted = true;
+      charlestonSel = [];
+      refresh();
+      showMsg('Charleston off — the Charleston stops here and the game begins: ' + playStartText(), true);
+      maybeStartPlay();
+      return;
+    }
+    if((rack.length === 13 || rack.length === 14) && gamePhase === 'setup'){
+      dealOpponents();
+      gamePhase = 'play';
+      refresh();
+      showMsg('Charleston off — this rack is the beginning of the game: ' + playStartText(), true);
+      maybeStartPlay();
+      return;
+    }
+    refresh();
+    showMsg('Charleston off — no Charleston this game. A random rack will count as the beginning of the game: deal or build your rack, then draw and discard.', true);
+    return;
+  }
+  refresh();
+  showMsg((rack.length === 13 || rack.length === 14)
+    ? 'Charleston on — tap Start Charleston under your rack to run the seven passes before play.'
+    : 'Charleston on — the seven passes will run after the deal, before play begins.', true);
+});
+document.getElementById('startCharlestonBtn').addEventListener('click', startCharleston);
+document.getElementById('swapBtn').addEventListener('click', swapCharlestonTiles);
+document.getElementById('randomCheck').addEventListener('change', function(){ setRandomMode(this.checked); renderRack(); });
+document.getElementById('exposedShowCheck').addEventListener('change', function(){ exposedVisible = this.checked; renderExposed(); });
+document.getElementById('discardsShowCheck').addEventListener('change', function(){ discardsVisible = this.checked; updateDiscardsUI(); });
+document.getElementById('drawOneBtn').addEventListener('click', drawOneTile);
+function startNewHand(){
+  if(randomMode){ dealRandomHand(); return; }
+  clearToSetup();
+  refresh();
+  showMsg('Rack cleared — add your new hand in Add tiles above. The other players will be dealt in when the game begins.', true);
+}
+document.getElementById('mjNewHandBtn').addEventListener('click', startNewHand);
+document.getElementById('endNewHandBtn').addEventListener('click', startNewHand);
+document.getElementById('callGroupBtn').addEventListener('click', doCallGroup);
+document.getElementById('callMjBtn').addEventListener('click', doCallMahJongg);
+document.getElementById('passCallBtn').addEventListener('click', passCall);
+document.getElementById('speedSelect').addEventListener('change', function(){ setGameSpeed(this.value); });
+document.getElementById('nextPlayerBtn').addEventListener('click', advanceNextPlayer);
 /* Random hand: deal rackLimit() tiles — 13, or 14 if East is checked —
    drawn without replacement from a full 152-tile American Mah Jongg
    set — 4 of every suit tile (1–9 in Bams, Craks and Dots), wind and
@@ -1454,20 +3369,52 @@ function buildWall(){
   return wall;
 }
 function dealRandomHand(){
+  resetTable(); // fresh table: cancels timers, clears calls, exposures and the result (scores carry over)
   var wall = buildWall();
   for(var i = wall.length - 1; i > 0; i--){
     var j = Math.floor(Math.random() * (i + 1));
     var tmp = wall[i]; wall[i] = wall[j]; wall[j] = tmp;
   }
-  var limit = rackLimit();
+  var limit = dealSize();
+  selectedHandId = null;
+  rackGapAfter = -1; rackBreaks = []; rackArrangedForSelected = false;
+  drawsMade = 0; discardsMade = 0;
+  discardPile = [];
+  charlestonCompleted = false;
+  // A fresh deal starts a fresh game. If the Charleston box is
+  // ticked, the Charleston runs first, from round 1 (First Right).
+  // If it is unticked, the dealt rack IS the beginning of the game:
+  // play starts at once (East discards first; everyone else draws).
+  gamePhase = charlestonWanted ? 'charleston' : 'play';
+  charlestonRound = 0; charlestonSel = [];
   rack = wall.slice(0, limit);
   rack.sort(function(a, b){ return arrangeKey(a) - arrangeKey(b); });
+  // The three simulated opponents are dealt from the same wall,
+  // right after your tiles: 13 each, or 14 for Right when Right is
+  // East (you are not). Their tiles are face-down on their cards.
+  opponents = makeOpponents();
+  var pos = limit;
+  opponents.forEach(function(o){
+    var n = (!isEast && o.id === 'right') ? 14 : 13;
+    o.rack = wall.slice(pos, pos + n);
+    pos += n;
+    o.status = charlestonWanted ? 'Waiting for the Charleston.' : (n === 14 ? 'East — discards first.' : 'Waiting.');
+  });
+  opponentsDealt = true;
   lastNewIndex = -1; lastNewKey = null;
   showingMore = false;
   refresh();
-  showMsg('Random hand dealt — ' + limit + ' tiles drawn from a full set' + (isEast ? ' (East)' : '') + '. Tap Random hand again for a new one.', true);
+  if(charlestonWanted){
+    showMsg(isEast
+      ? 'Random hand dealt to all four players — East (you) starts with 14 tiles. The Charleston comes first — First Right: pick 3 tiles and tap Swap, and they go to Right while Left’s pass comes to you.'
+      : 'Random hand dealt to all four players — you have 13 tiles. The Charleston comes first — First Right: pick 3 tiles and tap Swap, and they go to Right while Left’s pass comes to you.', true);
+  } else {
+    showMsg(isEast
+      ? 'Random hand dealt to all four players — East (you) starts with 14 tiles. Charleston off, so this rack is the beginning of the game: tap a tile to discard it to 13 and open play — then Right, Opposite and Left take their turns.'
+      : 'Random hand dealt to all four players — you have 13 tiles, and Right is East with 14. Charleston off, so the game begins with Right’s discard; watch for a tile you can call.', true);
+    maybeStartPlay();
+  }
 }
-document.getElementById('randomBtn').addEventListener('click', dealRandomHand);
 function closeSectionMenu(){
   var m = document.getElementById('sectionMenu');
   if(!m.hidden){
@@ -1499,21 +3446,23 @@ document.getElementById('matchSelect').addEventListener('change', function(){
   minMatched = parseInt(this.value, 10) || 1;
   renderResults();
 });
+document.getElementById('spFilterSelect').addEventListener('change', function(){
+  spFilter = this.value;
+  renderResults();
+});
 document.getElementById('sortAllCheck').addEventListener('change', function(){
   sortAll = this.checked;
   renderResults();
 });
 document.getElementById('eastCheck').addEventListener('change', function(){
   isEast = this.checked;
-  if(rack.length > rackLimit()){
-    var removed = rack.splice(rackLimit());
-    showingMore = false;
-    refresh();
-    showMsg('East unchecked — limit is now 13, so ' + removed.length + (removed.length === 1 ? ' tile was' : ' tiles were') + ' removed from the end of your rack.');
-    return;
-  }
+  // East only sets the next deal size (14 for East, 13 otherwise). It
+  // never cuts a rack already in play: anyone holding 14 on their turn
+  // keeps all 14 — that is the Mah Jongg size.
   refresh();
-  showMsg(isEast ? 'East checked — you can hold up to 14 tiles.' : 'East unchecked — rack limit is 13 tiles.', true);
+  showMsg(isEast
+    ? 'East checked — the next deal (tick Random) deals 14 tiles, and East discards first after the Charleston. Your current rack is unchanged.'
+    : 'East unchecked — the next deal (tick Random) deals 13 tiles. Your current rack is unchanged: you still draw to 14 on your turn.', true);
 });
 document.getElementById('showMoreBtn').addEventListener('click', function(){
   showingMore = !showingMore;
