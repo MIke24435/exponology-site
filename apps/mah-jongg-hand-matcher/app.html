@@ -113,6 +113,7 @@
   .btn-icon-lg{min-width:62px;padding:10px 12px;font-size:1.9rem}
   .panel h2{font-size:1.05rem;margin:0}
   .count-line{color:var(--ink-soft);font-weight:600;font-size:.98rem}
+  .round-line:empty{display:none}
   .hint{color:var(--ink-faint);font-size:.92rem;margin:4px 0 0}
   /* Rack */
   .rack{
@@ -175,10 +176,10 @@
   .panel-head .help-q{margin-left:2px}
   .draw-one-note{font-size:.88rem;color:var(--ink-faint);font-weight:600}
   /* Charleston — no box: the Swap button is just the ⇄ icon (the
-     passes run in the fixed order listed in Help), and greys out
-     when the Charleston is off or done. The Charleston buttons
-     (Start / Swap) live in the controls row under the rack, so they
-     take no row of their own. */
+     current pass shows at the right of the Your rack line), and
+     greys out when the Charleston is off or done. The Charleston
+     buttons (Start / Swap) live in the controls row under the rack,
+     so they take no row of their own. */
   .ctl-group[hidden]{display:none}
   .tile.is-pass{outline:3px solid var(--gold);outline-offset:2px;box-shadow:0 0 0 5px var(--gold-soft)}
   .tile .t-pass{position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);z-index:2;background:var(--red);color:#fff;font-family:ui-sans-system,-apple-system,sans-serif;font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:999px;border:2px solid var(--surface);white-space:nowrap}
@@ -648,6 +649,7 @@
   <section class="panel" aria-label="Your rack">
     <div class="panel-head">
       <h2>Your rack</h2>
+      <div class="count-line round-line" id="roundLine" aria-live="polite"></div>
     </div>
     <div class="mj-banner" id="mjBanner" hidden role="alert">
       <strong>🀄 Mah Jongg!</strong>
@@ -805,7 +807,7 @@
       <li><strong>First Right, First Opposite, First Left</strong> — then <strong>Second Left, Second Opposite, Second Right</strong> — and an <strong>Optional</strong> last pass.</li>
       <li>Dealing a hand — tick <strong>Random</strong> — starts it at once.</li>
       <li>With a hand-built rack, tap <strong>Start Charleston</strong> under your rack once your rack is full.</li>
-      <li>The <strong>Swap</strong> button under your rack is just the <strong>⇄</strong> icon. It greys out when the Charleston box is unticked, and again when the Charleston is done.</li>
+      <li>The <strong>Swap</strong> button under your rack is just the <strong>⇄</strong> icon. The current pass (First Right, and so on) shows at the right of the <strong>Your rack</strong> line. It greys out when the Charleston box is unticked, and again when the Charleston is done.</li>
       <li>Pick 3 tiles on your rack, then tap Swap.</li>
       <li>Nothing is final until you tap Swap: <strong>tap a tile you picked again to unpick it</strong>, then pick a different one.</li>
       <li>Inside the swap, your picked tiles go out first — to the player named in the round.</li>
@@ -2554,10 +2556,10 @@ function updateDiscardsUI(){
 }
 function updateCharlestonUI(){
   // No box and no extra text: the Swap button is just the ⇄ icon —
-  // the passes run in the fixed order listed in Help. The button
-  // sits in the controls row under the rack (no row of its own). It
-  // is live only when the picked tiles make a legal swap, and it
-  // stays visible but greyed out when the Charleston box is
+  // the current pass shows at the right of the Your rack line. The
+  // button sits in the controls row under the rack (no row of its
+  // own). It is live only when the picked tiles make a legal swap,
+  // and it stays visible but greyed out when the Charleston box is
   // unticked, before the Charleston starts, and once the Charleston
   // is done. The whole group hides while the rack is empty.
   var ctl = document.getElementById('charlestonCtl');
@@ -2635,7 +2637,7 @@ function updateTurnUI(){
       ? 'Speed is <strong>Manual</strong> — nobody moves until you tap <strong>Next player</strong> at the top of the form. One tap lets one player draw and discard, so you can study every discard before the next one.'
       : 'Speed is <strong>' + gameSpeed + ' seconds</strong> — the next player moves in about ' + gameSpeed + ' seconds. Watch their cards below — they draw, discard, and may call a discard and expose a set. Your turn comes after Left.');
   } else if(gamePhase === 'charleston'){
-    html = ''; // No turn line during the Charleston: the passes run in the fixed order listed in Help.
+    html = ''; // No turn line during the Charleston: the current pass shows at the right of the Your rack line.
   } else if(gamePhase === 'setup' && n >= 13){
     html = charlestonWanted
       ? '<span class="turn-step">Before play:</span> run the <strong>Charleston</strong> first (Swap under your rack), or untick its box to skip it — then ' + (isEast && n === 14 ? 'East discards one to 13 to open play.' : 'draw to 14, discard back to 13.')
@@ -2793,11 +2795,8 @@ function renderRack(){
   }
   var n = rack.length;
   var tot = totalTiles();
-  var label = (exposedMelds.length
-    ? tot + ' tiles in total — ' + n + ' on your rack + ' + (tot - n) + ' exposed'
-    : n + (n === 1 ? ' tile' : ' tiles') + ' entered') + ' — ' + (gamePhase === 'charleston' ? 'Charleston — ' + CHARLESTON_ROUNDS[charlestonRound] + ' — pick 3 and Swap' : (tot === 14 ? (isMahJongg() ? 'Mah Jongg!' : 'discard one to 13') : (tot === 13 ? 'Draw to 14' : 'building toward 13')));
-  var rc = document.getElementById('rackCount');
-  if(rc) rc.textContent = label;
+  var rl = document.getElementById('roundLine');
+  if(rl) rl.textContent = gamePhase === 'charleston' ? 'Charleston — ' + CHARLESTON_ROUNDS[charlestonRound] : '';
   document.getElementById('clearBtn').disabled = n === 0;
   updateDrawUI();
   updateTurnUI();
