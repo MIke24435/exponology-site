@@ -158,13 +158,13 @@
   .speed-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:0 1 auto}
   @media(max-width:560px){ .speed-controls{width:100%} .speed-controls .seg{width:100%} .speed-controls .seg-btn{flex:1;padding-left:8px;padding-right:8px} #nextPlayerBtn{width:100%} }
   .rack.is-discard .tile{outline:2px dashed var(--red);outline-offset:1px}
-  /* Compact game controls: one row under the rack — Charleston
-     (Swap), Draw and Clear, with the tile count at the end of the
-     row. Speed and Random live at the top of the form, to the left
+  /* Compact game controls: one row under the rack — the tile count
+     on the left, then Charleston (Swap), Draw and Clear on the right.
+     Speed and Random live at the top of the form, to the left
      of the Charleston and East boxes. */
   .game-controls{margin-top:12px;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
   .ctl-group{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
-  .ctl-count{margin-left:auto;font-weight:800;color:var(--ink-soft);font-size:.95rem;white-space:nowrap}
+  .ctl-count{margin-right:auto;font-weight:800;color:var(--ink-soft);font-size:.95rem;white-space:nowrap}
   .ctl-group .match-select{min-height:44px;padding-top:8px;padding-bottom:8px}
   /* Round "?" help links: details live in Help, not in the game area */
   .help-q{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;flex:0 0 auto;border-radius:50%;border:1.5px solid var(--jade);color:var(--jade);font-weight:800;font-size:.92rem;line-height:1;text-decoration:none;-webkit-tap-highlight-color:transparent}
@@ -193,7 +193,9 @@
   .opp-seat{color:var(--ink-faint);font-size:.82rem;font-weight:700}
   .opp-backs{display:flex;flex-wrap:wrap;gap:3px;margin-top:9px;min-height:26px}
   .tile-back{width:17px;height:24px;border-radius:3px;background:var(--jade);border:1px solid var(--jade-strong);border-bottom:3px solid var(--jade-strong)}
-  .opp-status{margin-top:9px;color:var(--ink-soft);font-size:.92rem;line-height:1.4;min-height:1.3em}
+  .opp-show{display:flex;align-items:center;gap:6px;margin-top:9px;font-size:.9rem;font-weight:700;color:var(--ink-soft);cursor:pointer}
+  .opp-show input{width:18px;height:18px;cursor:pointer}
+  .opp-hand{margin-top:8px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88rem;line-height:1.45;color:var(--ink);word-break:break-word}
   .opp-melds{display:flex;flex-wrap:wrap;gap:10px;margin-top:9px}
   .opp-melds .meld-tiles .tile{width:30px;height:40px;border-bottom-width:3px}
   .opp-melds .meld-tiles .tile .t-main{font-size:.82rem}
@@ -274,11 +276,11 @@
      the exposed tiles box; its header carries the wall count, the
      discard count and a Show tiles switch like the exposed box) */
   .discards-panel{border-color:var(--line-strong)}
-  .discards-grid .tile-back{width:52px;height:70px;border-radius:8px;border-bottom-width:4px}
-  .discards-grid{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px;min-height:86px;align-items:flex-start}
-  .discards-grid .tile{cursor:default}
-  .discards-summary{margin-top:12px;color:var(--ink-soft);font-size:.95rem;line-height:1.5}
-  .discards-summary strong{color:var(--ink)}
+  .discards-grid .tile-back{width:40px;height:54px;border-radius:6px;border-bottom-width:3px}
+  .discards-grid{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px;min-height:60px;align-items:flex-start}
+  .discards-grid .tile{cursor:default;width:40px;height:54px}
+  .discards-grid .tile .t-main{font-size:1.1rem}
+  .discards-grid .tile .t-num{width:27px;height:27px;font-size:1.02rem}
   .tile.is-new{outline:3px solid var(--jade);outline-offset:2px;box-shadow:0 0 0 5px var(--jade-soft)}
   .tile .t-new{position:absolute;top:-9px;left:50%;transform:translateX(-50%);z-index:2;background:var(--jade);color:#fff;font-family:ui-sans-system,-apple-system,sans-serif;font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:999px;border:2px solid var(--surface);white-space:nowrap}
   @media (prefers-color-scheme: dark){ .tile .t-new{color:#0e1a13} }
@@ -551,6 +553,7 @@
   .acell .a-num{height:1.05em;font-size:.78rem;font-weight:800;line-height:1.05;font-family:ui-sans-system,-apple-system,sans-serif}
   .acell .a-let{font-size:1.02rem;font-weight:800;line-height:1.2;font-family:ui-sans-system,-apple-system,sans-serif}
   .acell .a-mark{height:1.05em;font-size:.88rem;font-weight:800;line-height:1.05;color:var(--jade);font-family:ui-sans-system,-apple-system,sans-serif}
+  .acell .a-exp{display:block;height:1em;font-size:.62rem;font-weight:800;line-height:1;color:var(--jade);font-family:ui-sans-system,-apple-system,sans-serif}
   .acell.s-bam .a-num,.acell.s-bam .a-let{color:var(--jade)}
   .acell.s-crak .a-num,.acell.s-crak .a-let{color:var(--crak)}
   .acell.s-dot .a-num,.acell.s-dot .a-let{color:var(--dot-num)}
@@ -598,11 +601,16 @@
         <div class="ctl-group">
           <label class="match-label" for="speedSelect">Speed</label>
           <select id="speedSelect" class="match-select" aria-label="Game speed — seconds between the other players' moves, or Manual">
-            <option value="10">10 sec</option>
-            <option value="15" selected>15 sec</option>
-            <option value="20">20 sec</option>
-            <option value="25">25 sec</option>
-            <option value="30">30 sec</option>
+            <option value="1">1 sec</option>
+            <option value="2">2 sec</option>
+            <option value="3">3 sec</option>
+            <option value="4">4 sec</option>
+            <option value="5">5 sec</option>
+            <option value="6">6 sec</option>
+            <option value="7">7 sec</option>
+            <option value="8">8 sec</option>
+            <option value="9">9 sec</option>
+            <option value="10" selected>10 sec</option>
             <option value="manual">Manual</option>
           </select>
           <button type="button" class="btn btn-compact" id="nextPlayerBtn" hidden>Next player →</button>
@@ -658,6 +666,7 @@
       <button type="button" class="btn" id="endNewHandBtn">Deal a new hand</button>
     </div>
     <div class="turn-bar" id="turnBar" aria-live="polite"></div>
+    <div class="chosen-strip" id="chosenStrip" hidden></div>
     <div class="rack" id="rack"></div>
     <div class="call-bar" id="callBar" hidden>
       <span id="callTile"></span>
@@ -672,8 +681,8 @@
       <span id="exchangeBtns" style="display:contents"></span>
       <a class="help-q" href="#help-joker-exchange" aria-label="Help: Joker exchange">?</a>
     </div>
-    <div class="chosen-strip" id="chosenStrip" hidden></div>
     <div class="game-controls">
+      <div class="ctl-count" id="rackCountCtl" aria-live="polite"></div>
       <div class="ctl-group" id="charlestonCtl" hidden>
         <button type="button" class="btn btn-ghost btn-compact" id="startCharlestonBtn" hidden>Start Charleston</button>
         <button type="button" class="btn btn-compact" id="swapBtn" disabled>Swap</button>
@@ -685,7 +694,6 @@
       <div class="ctl-group">
         <button type="button" class="btn btn-ghost btn-compact" id="clearBtn" disabled>Clear</button>
       </div>
-      <div class="ctl-count" id="rackCountCtl" aria-live="polite"></div>
     </div>
     <p class="msg" id="rackMsg" role="alert"></p>
   </section>
@@ -695,22 +703,20 @@
       <strong class="melds-label">Discarded tiles</strong>
       <span class="wall-pill" id="wallPillDiscards" aria-live="polite"></span>
       <span class="count-line" id="discardsCount">0 discarded</span>
-      <label class="sort-all-filter exposed-toggle" for="discardsShowCheck" title="Tick to show the discarded tiles face-up; untick to turn them face-down.">
+      <label class="sort-all-filter exposed-toggle" for="discardsShowCheck" title="Tick to show the discarded tiles; untick to collapse the box.">
         <input type="checkbox" id="discardsShowCheck" checked>
         <span class="sort-all-label">Show tiles</span>
       </label>
       <a class="help-q" href="#help-discards" aria-label="Help: the discard pile">?</a>
     </div>
-    <p class="hint">Every tile discarded in this game, in the order it was discarded.</p>
     <div class="discards-grid" id="discardsGrid"></div>
-    <p class="discards-summary" id="discardsSummary"></p>
   </section>
 
   <section class="panel exposed-area" id="exposedArea" hidden aria-label="Your exposed tiles">
     <div class="exposed-head">
       <strong class="melds-label">Exposed tiles</strong>
       <span class="wall-pill" id="wallPill" aria-live="polite"></span>
-      <label class="sort-all-filter exposed-toggle" for="exposedShowCheck" title="Tick to show your exposed tiles face-up; untick to turn them face-down.">
+      <label class="sort-all-filter exposed-toggle" for="exposedShowCheck" title="Tick to show your exposed tiles; untick to collapse the box.">
         <input type="checkbox" id="exposedShowCheck" checked>
         <span class="sort-all-label">Show tiles</span>
       </label>
@@ -724,7 +730,6 @@
       <h2>Other players <a class="help-q" href="#help-opponents" aria-label="Help: the other players">?</a></h2>
       <div class="count-line" id="oppCount">Not dealt yet</div>
     </div>
-    <p class="hint">Right, Opposite and Left. Their exposed sets show face-up on their cards.</p>
     <div class="opp-grid" id="oppGrid"></div>
   </section>
 
@@ -853,8 +858,8 @@
       <li>Every tile discarded in the game is kept — yours and the other players’.</li>
       <li>There is no Discards button: the <strong>Discarded tiles</strong> box sits above the <strong>Exposed tiles</strong> box and opens on its own when the first tile is discarded, and stays open for the rest of the game.</li>
       <li>Its header shows how many tiles have been discarded, alongside the <strong>Wall</strong> count — how many tiles are left to draw from.</li>
-      <li>Its <strong>Show tiles</strong> switch turns the discarded tiles face-up or face-down, as you prefer — the counts stay either way.</li>
-      <li>Tiles show in the order they were discarded, with a tally of what is gone — useful when you are choosing which hand to play.</li>
+      <li>Its <strong>Show tiles</strong> switch shows or hides the discarded tiles — unticked, the box collapses.</li>
+      <li>Tiles show in the order they were discarded.</li>
       <li>A tile that gets called leaves the pile and joins the caller’s exposed sets.</li>
       <li>Tiles passed in the Charleston are swaps, not discards, so they are not listed.</li>
       <li>A new deal or Clear starts the pile empty — and the area closes again until the next first discard.</li>
@@ -867,15 +872,15 @@
       <li>Their exposed sets show face-up on their cards.</li>
       <li>Yours sit in the <strong>Exposed tiles</strong> box, above the other players.</li>
       <li>That box also carries the <strong>Wall</strong> count — how many tiles are left to draw from.</li>
-      <li>Its <strong>Show tiles</strong> switch turns your exposed sets face-up or face-down, as you prefer.</li>
+      <li>Its <strong>Show tiles</strong> switch shows or hides your exposed sets — unticked, the box collapses.</li>
       <li>They are beginners’ teachers, not sharks: they throw the tiles their hand doesn’t need.</li>
       <li>On their turns they also make <strong>Joker exchanges</strong> — swapping a tile they hold into any exposed set whose Joker it matches, theirs or yours, and taking the Joker. See <strong>Joker exchange</strong> under Calling a discard.</li>
-      <li>Everything they do is written on their card.</li>
+      <li>Tick <strong>Show hand</strong> on a card to see the hand they are going for, in the card's own notation.</li>
     </ul>
     <h4 id="help-speed">Game speed</h4>
     <ul>
       <li>This is a teaching game, so you choose how fast the other players discard and call.</li>
-      <li>Use the <strong>Speed</strong> dropdown at the top of the form, to the left of Charleston and East: <strong>10, 15, 20, 25 or 30 seconds</strong> between their moves.</li>
+      <li>Use the <strong>Speed</strong> dropdown at the top of the form, to the left of Charleston and East: <strong>1 to 10 seconds</strong> between their moves.</li>
       <li>Pick the pace that gives you time to follow each discard, check the discard pile, and think about your hand.</li>
       <li><strong>Manual</strong> turns the timer off completely:</li>
       <li>No opponent moves until you tap <strong>Next player</strong> at the top of the form (the button names who plays next).</li>
@@ -1340,7 +1345,7 @@ var resolveChain = 0;      // guards against endless call chains on one discard 
    Charleston is not timed either — its passes happen when the user
    taps Swap. Changing speed while an opponent is waiting applies
    to that wait at once. */
-var gameSpeed = 15;        // seconds between opponent moves, or 'manual' — starts at 15 seconds, the teaching pace
+var gameSpeed = 10;        // seconds between opponent moves, or 'manual' — starts at 10 seconds, the teaching pace
 var opponentTimer = null;  // id of the pending auto-advance timer, if any
 var pendingStep = null;    // the opponent move waiting to happen: {kind:'turn', seat} or {kind:'discard', oppId}
 function speedDelayMs(){ return gameSpeed === 'manual' ? null : gameSpeed * 1000; }
@@ -1399,7 +1404,7 @@ function advanceNextPlayer(){
 }
 function setGameSpeed(v){
   var val = (v === 'manual') ? 'manual' : parseInt(v, 10);
-  if(val !== 'manual' && [10, 15, 20, 25, 30].indexOf(val) === -1) return;
+  if(val !== 'manual' && [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].indexOf(val) === -1) return;
   gameSpeed = val;
   if(pendingStep) armPendingTimer(); // the new pace applies to the player already waiting
   updateSpeedUI();
@@ -1717,9 +1722,9 @@ function shuffleCopy(arr){
 }
 function makeOpponents(){
   return [
-    {id:'right', name:'Right', label:'Player on your right', rack:[], melds:[], status:'Waiting.', target:null},
-    {id:'opposite', name:'Opposite', label:'Player across from you', rack:[], melds:[], status:'Waiting.', target:null},
-    {id:'left', name:'Left', label:'Player on your left', rack:[], melds:[], status:'Waiting.', target:null}
+    {id:'right', name:'Right', label:'Player on your right', rack:[], melds:[], status:'Waiting.', target:null, showHand:false},
+    {id:'opposite', name:'Opposite', label:'Player across from you', rack:[], melds:[], status:'Waiting.', target:null, showHand:false},
+    {id:'left', name:'Left', label:'Player on your left', rack:[], melds:[], status:'Waiting.', target:null, showHand:false}
   ];
 }
 /* Each opponent plays toward one card hand — the one their tiles are
@@ -2198,29 +2203,40 @@ function renderOpponents(){
         ? '<div class="opp-melds">' + o.melds.map(function(m){
             return '<span class="meld"><span class="meld-tiles">' + m.tiles.map(revealTileHTML).join('') + '</span><span class="meld-label">' + m.kind + ' · ' + esc(tileName(m.key)) + '</span></span>';
           }).join('') + '</div>'
-        : '<div class="opp-none">No exposed sets yet — their tiles are all hidden.</div>';
+        : '';
       var eastTag = (!isEast && o.id === 'right') ? ' · East' : '';
       var targetTag = (gamePhase === 'play' && o.target) ? '<span class="opp-seat">going for ' + esc(o.target) + '</span>' : '';
-      return '<div class="opp-card' + (currentTurnSeat === o.id ? ' is-turn' : '') + '"><div class="opp-head"><span class="opp-name">' + esc(o.name) + eastTag + '</span>' + targetTag + '</div><div class="opp-backs" role="img" aria-label="' + o.rack.length + ' hidden tiles">' + backs + '</div>' + melds + '<div class="opp-status">' + esc(o.status || 'Waiting.') + '</div></div>';
+      var showHand = '';
+      if(o.target){
+        var th = null;
+        for(var hi = 0; hi < HANDS.length; hi++){ if(HANDS[hi].id === o.target){ th = HANDS[hi]; break; } }
+        showHand = '<label class="opp-show"><input type="checkbox" data-opp-show="' + o.id + '"' + (o.showHand ? ' checked' : '') + '> Show hand</label>' +
+          (o.showHand && th ? '<div class="opp-hand">' + esc(th.id) + ' — ' + esc(th.hand) + '</div>' : '');
+      }
+      return '<div class="opp-card' + (currentTurnSeat === o.id ? ' is-turn' : '') + '"><div class="opp-head"><span class="opp-name">' + esc(o.name) + eastTag + '</span>' + targetTag + '</div><div class="opp-backs" role="img" aria-label="' + o.rack.length + ' hidden tiles">' + backs + '</div>' + melds + showHand + '</div>';
     }).join('');
+    var boxes = grid.querySelectorAll('[data-opp-show]');
+    for(var bi = 0; bi < boxes.length; bi++){
+      boxes[bi].addEventListener('change', function(){
+        var opp = opponentById(this.getAttribute('data-opp-show'));
+        if(opp){ opp.showHand = this.checked; renderOpponents(); }
+      });
+    }
   }
 }
 function renderExposed(){
   var area = document.getElementById('exposedArea');
   if(!area) return;
   // The exposed tiles box sits above Other players once a game is
-  // dealt — an empty "None yet" line until you call your first set.
-  // The Show tiles switch turns the sets face-up or face-down.
+  // dealt — empty until you call your first set, with no text in it.
+  // The Show tiles switch shows or hides the box: unticked, it collapses.
   if(!opponentsDealt && !exposedMelds.length){ area.hidden = true; return; }
   area.hidden = false;
   var box = document.getElementById('exposedMelds');
-  if(!exposedMelds.length){ box.innerHTML = '<span class="melds-none">None yet — sets you call appear here.</span>'; return; }
+  if(!exposedVisible){ box.style.display = 'none'; return; }
+  box.style.display = '';
+  if(!exposedMelds.length){ box.innerHTML = ''; return; }
   box.innerHTML = exposedMelds.map(function(m){
-    if(!exposedVisible){
-      var backs = '';
-      for(var i = 0; i < m.tiles.length; i++) backs += '<span class="tile-back" aria-hidden="true"></span>';
-      return '<span class="meld"><span class="meld-tiles meld-backs" role="img" aria-label="A hidden exposed set of ' + m.tiles.length + ' tiles">' + backs + '</span></span>';
-    }
     return '<span class="meld"><span class="meld-tiles">' + m.tiles.map(revealTileHTML).join('') + '</span><span class="meld-label">' + m.kind + ' · ' + esc(tileName(m.key)) + '</span></span>';
   }).join('');
 }
@@ -2450,7 +2466,7 @@ function updateChosenStrip(){
   var hand = m.hand;
   var b = bestForHand(hand, allCounts());
   var fakeResult = {groups: b.groups, jokersUsed: b.jokersUsed};
-  var aligned = b.groups.map(alignedGroupHTML).join('');
+  var aligned = b.groups.map(function(g){ return alignedGroupHTML(g, hand.xc === 'X'); }).join('');
   var haveNoJokers = b.matched - b.jokersUsed;
   var xcClass = hand.xc === 'C' ? 'xc-c' : 'xc-x';
   var xcLabel = hand.xc === 'C' ? 'C · Concealed' : 'X · Exposed';
@@ -2519,19 +2535,15 @@ function updateDiscardsUI(){
   var countEl = document.getElementById('discardsCount');
   if(countEl) countEl.textContent = discardPile.length + (discardPile.length === 1 ? ' tile discarded' : ' tiles discarded');
   var grid = document.getElementById('discardsGrid');
-  var summary = document.getElementById('discardsSummary');
   if(!discardsVisible){
-    grid.innerHTML = discardPile.map(function(){ return '<span class="tile-back" aria-hidden="true"></span>'; }).join('');
-    summary.innerHTML = '';
+    grid.style.display = 'none';
     return;
   }
+  grid.style.display = '';
   grid.innerHTML = discardPile.map(function(key){
     var imgCls = TILE_IMG[key] ? ' has-img' : '';
     return '<span class="tile ' + tileFace(key).cls + imgCls + '" role="img" aria-label="' + esc(tileName(key)) + '">' + tileButtonHTML(key, 0, true) + '</span>';
   }).join('');
-  var tally = {}, order = [];
-  discardPile.forEach(function(k){ if(tally[k] === undefined){ tally[k] = 0; order.push(k); } tally[k]++; });
-  summary.innerHTML = '<strong>Gone so far:</strong> ' + order.map(function(k){ return esc(tileName(k)) + (tally[k] > 1 ? ' ×' + tally[k] : ''); }).join(', ') + '.';
 }
 function updateCharlestonUI(){
   // No box and no extra text: the Swap button just says Swap — the
@@ -2977,14 +2989,15 @@ function cellParts(key){
   if(key === 'joker') return {num:'', let:'J', cls:''};
   return {num:'', let:'?', cls:''};
 }
-function alignedGroupHTML(g){
+function alignedGroupHTML(g, exposed){
   var cells = '';
   for(var i = 0; i < g.n; i++){
     var p = cellParts(g.k);
     var mark = i < g.got ? 'X' : (i < g.got + g.jok ? 'J' : '');
     var stateCls = mark ? ' is-held' : ' is-needed';
     if(mark === 'J') stateCls += ' is-joker';
-    cells += '<span class="acell ' + p.cls + stateCls + '"><span class="a-num">' + p.num + '</span><span class="a-let">' + p.let + '</span><span class="a-mark' + (mark === 'J' ? ' mark-j' : '') + '">' + mark + '</span></span>';
+    var exp = exposed ? '<span class="a-exp">E</span>' : '';
+    cells += '<span class="acell ' + p.cls + stateCls + '"><span class="a-num">' + p.num + '</span><span class="a-let">' + p.let + '</span>' + exp + '<span class="a-mark' + (mark === 'J' ? ' mark-j' : '') + '">' + mark + '</span></span>';
   }
   return '<span class="agroup">' + cells + '</span>';
 }
@@ -3005,7 +3018,7 @@ function cardHTML(r, rank){
   var xcClass = h.xc === 'C' ? 'xc-c' : 'xc-x';
   var xcLabel = h.xc === 'C' ? 'C · Concealed' : 'X · Exposed';
   var sectionDisplay = h.section.replace(' - ', ' — ');
-  var aligned = r.groups.map(alignedGroupHTML).join('');
+  var aligned = r.groups.map(function(g){ return alignedGroupHTML(g, h.xc === 'X'); }).join('');
   var isSel = selectedHandId === h.id;
   var playHand = '<label class="select-hand"><input type="checkbox" data-select-hand="' + esc(h.id) + '"' + (isSel ? ' checked' : '') + '><span>Play hand</span></label>';
   var badges = (r.neededCount === 0 ? '<span class="badge mj">Mah Jongg</span>' : '') +
