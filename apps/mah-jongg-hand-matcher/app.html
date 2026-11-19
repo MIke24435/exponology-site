@@ -3063,7 +3063,10 @@ function cardHTML(r, rank){
 function listHTML(items){
   // One flat list in rank order — left to right, top to bottom, no
   // section breaks. Each card still carries its own section title.
-  return '<div class="list">' + items.map(function(r){ return cardHTML(r, r.rankNum); }).join('') + '</div>';
+  // Returns the cards only, with no wrapper: the caller supplies the
+  // .list element, because #results already carries class "list"
+  // itself — wrapping it again would halve the card width.
+  return items.map(function(r){ return cardHTML(r, r.rankNum); }).join('');
 }
 /* The chosen hand can be changed at any time — while the rack is
    being built, during the Charleston, or in the middle of play — as
@@ -3237,7 +3240,7 @@ function renderResults(){
   if(rest.length){
     moreWrap.hidden = false;
     moreArea.className = '';
-    moreArea.innerHTML = listHTML(rest);
+    moreArea.innerHTML = '<div class="list">' + listHTML(rest) + '</div>';
     moreArea.hidden = !showingMore;
     document.getElementById('showMoreBtn').textContent = showingMore ? 'Show fewer hands' : 'Show more hands';
   } else {
@@ -3246,7 +3249,7 @@ function renderResults(){
   }
   if(sepItems.length){
     blockerWrap.hidden = false;
-    blockerArea.innerHTML = listHTML(sepItems);
+    blockerArea.innerHTML = '<div class="list">' + listHTML(sepItems) + '</div>';
   } else {
     blockerWrap.hidden = true;
     blockerArea.innerHTML = '';
