@@ -109,6 +109,7 @@
   .add-tools{display:flex;align-items:center;gap:12px 20px;flex-wrap:wrap}
   .add-tools .match-select{min-height:44px;padding-top:8px;padding-bottom:8px}
   .btn-compact{min-height:44px;padding:8px 16px;font-size:.95rem}
+  .btn-icon{min-width:44px;padding:8px 10px;font-size:1.25rem;line-height:1}
   .panel h2{font-size:1.05rem;margin:0}
   .count-line{color:var(--ink-soft);font-weight:600;font-size:.98rem}
   .hint{color:var(--ink-faint);font-size:.92rem;margin:4px 0 0}
@@ -139,7 +140,7 @@
   .draw-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:0 1 auto}
   .draw-controls .match-select{max-width:100%}
   @media(max-width:560px){ .draw-controls{width:100%} .draw-controls .match-select{flex:1 1 160px} }
-  /* Wall count — a pill in the exposed tiles box, nothing more */
+  /* Wall count — a pill in the discarded tiles box, nothing more */
   .wall-pill{background:var(--jade-soft);border:1px solid var(--line);padding:4px 10px;border-radius:999px;font-weight:800;color:var(--jade);font-size:.92rem;white-space:nowrap}
   .mj-banner{margin-top:14px;padding:16px;border-radius:12px;background:var(--jade);color:#fff;text-align:center;border:2px solid var(--gold)}
   @media (prefers-color-scheme: dark){ .mj-banner{color:#0e1a13} }
@@ -158,20 +159,21 @@
   .speed-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:0 1 auto}
   @media(max-width:560px){ .speed-controls{width:100%} .speed-controls .seg{width:100%} .speed-controls .seg-btn{flex:1;padding-left:8px;padding-right:8px} #nextPlayerBtn{width:100%} }
   .rack.is-discard .tile{outline:2px dashed var(--red);outline-offset:1px}
-  /* Compact game controls: one row under the rack — the tile count
-     on the left, then Charleston (Swap), Draw and Clear on the right.
-     Speed and Random live at the top of the form, to the left
-     of the Charleston and East boxes. */
+  /* Compact game controls: one row under the rack — your exposed
+     tiles on the left, then Charleston (Swap), Draw and Clear as
+     small icon buttons on the right. Speed and Random live at the
+     top of the form, to the left of the Charleston and East boxes. */
   .game-controls{margin-top:12px;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
   .ctl-group{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
-  .ctl-count{margin-right:auto;font-weight:800;color:var(--ink-soft);font-size:.95rem;white-space:nowrap}
+  .game-controls .exposed-melds{margin:0 auto 0 0;align-items:center}
+  .game-controls .exposed-melds:empty{display:block}
   .ctl-group .match-select{min-height:44px;padding-top:8px;padding-bottom:8px}
   /* Round "?" help links: details live in Help, not in the game area */
   .help-q{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;flex:0 0 auto;border-radius:50%;border:1.5px solid var(--jade);color:var(--jade);font-weight:800;font-size:.92rem;line-height:1;text-decoration:none;-webkit-tap-highlight-color:transparent}
   .help-q:hover,.help-q:focus-visible{background:var(--jade-soft)}
   .panel-head .help-q{margin-left:2px}
   .draw-one-note{font-size:.88rem;color:var(--ink-faint);font-weight:600}
-  /* Charleston — no box: the Swap button just says Swap (the rack
+  /* Charleston — no box: the Swap button is just the ⇄ icon (the rack
      count line names the current pass), and greys out when the
      Charleston is off or done. The Charleston buttons (Start /
      Swap) live in the controls row under the rack, so they take
@@ -221,10 +223,8 @@
   .exchange-bar[hidden]{display:none}
   .exchange-bar .btn{border-color:var(--joker-purple);color:var(--joker-purple)}
   @media (prefers-color-scheme: dark){ .exchange-bar .btn{color:#d3a6e8} }
-  /* Exposed tiles — the box sitting above Other
-     players: your called sets, the wall count, and a switch that
-     turns the exposed tiles face-up or face-down */
-  .exposed-area[hidden]{display:none}
+  /* Exposed tiles — your called sets, shown in the controls box
+     under the rack (no box of their own) */
   .exposed-head{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap}
   .exposed-head .melds-label{font-size:1.05rem;white-space:nowrap}
   .exposed-toggle{margin-left:auto}
@@ -275,8 +275,8 @@
   .end-banner span{display:block;margin-top:4px;font-size:.98rem;font-weight:600;line-height:1.4}
   .end-banner .btn{margin-top:10px}
   /* Discards area (opens on its own at the first discard, above
-     the exposed tiles box; its header carries the wall count, the
-     discard count and a collapse button like the exposed box) */
+     the other players; its header carries the wall count, the
+     discard count and a collapse button) */
   .discards-panel{border-color:var(--line-strong)}
   .discards-grid .tile-back{width:40px;height:54px;border-radius:6px;border-bottom-width:3px}
   .discards-grid{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px;min-height:60px;align-items:flex-start}
@@ -677,17 +677,16 @@
       <a class="help-q" href="#help-joker-exchange" aria-label="Help: Joker exchange">?</a>
     </div>
     <div class="game-controls">
-      <div class="ctl-count" id="rackCountCtl" aria-live="polite"></div>
+      <div class="exposed-melds" id="exposedMelds"></div>
       <div class="ctl-group" id="charlestonCtl" hidden>
         <button type="button" class="btn btn-ghost btn-compact" id="startCharlestonBtn" hidden>Start Charleston</button>
-        <button type="button" class="btn btn-compact" id="swapBtn" disabled>Swap</button>
-        <a class="help-q" href="#help-charleston" aria-label="Help: the Charleston">?</a>
+        <button type="button" class="btn btn-compact btn-icon" id="swapBtn" disabled aria-label="Swap" title="Swap">⇄</button>
       </div>
       <div class="ctl-group">
-        <button type="button" class="btn btn-ghost btn-compact" id="drawOneBtn">Draw</button>
+        <button type="button" class="btn btn-ghost btn-compact btn-icon" id="drawOneBtn" aria-label="Draw a tile" title="Draw a tile">+</button>
       </div>
       <div class="ctl-group">
-        <button type="button" class="btn btn-ghost btn-compact" id="clearBtn" disabled>Clear</button>
+        <button type="button" class="btn btn-ghost btn-compact btn-icon" id="clearBtn" disabled aria-label="Clear the rack" title="Clear the rack">✕</button>
       </div>
     </div>
   </section>
@@ -707,15 +706,6 @@
     <div class="discards-grid" id="discardsGrid"></div>
   </section>
 
-  <section class="panel exposed-area" id="exposedArea" hidden aria-label="Your exposed tiles">
-    <div class="exposed-head">
-      <strong class="melds-label">Exposed tiles</strong>
-      <span class="wall-pill" id="wallPill" aria-live="polite"></span>
-      <button type="button" class="collapse-toggle" id="exposedCollapseBtn" aria-expanded="true" aria-controls="exposedMelds" aria-label="Collapse exposed tiles">▲</button>
-      <a class="help-q" href="#help-call" aria-label="Help: exposed sets and calling">?</a>
-    </div>
-    <div class="exposed-melds" id="exposedMelds"></div>
-  </section>
 
   <section class="panel" aria-label="Other players">
     <div class="panel-head">
@@ -817,7 +807,7 @@
       <li><strong>First Right, First Opposite, First Left</strong> — then <strong>Second Left, Second Opposite, Second Right</strong> — and an <strong>Optional</strong> last pass.</li>
       <li>Dealing a hand — tick <strong>Random</strong> — starts it at once.</li>
       <li>With a hand-built rack, tap <strong>Start Charleston</strong> under your rack once your rack is full.</li>
-      <li>The <strong>Swap</strong> button under your rack just says <strong>Swap</strong> — the count line above your rack names the pass (First Right, and so on). It greys out when the Charleston box is unticked, and again when the Charleston is done.</li>
+      <li>The <strong>Swap</strong> button under your rack is just the <strong>⇄</strong> icon — the count line above your rack names the pass (First Right, and so on). It greys out when the Charleston box is unticked, and again when the Charleston is done.</li>
       <li>Pick 3 tiles on your rack, then tap Swap.</li>
       <li>Nothing is final until you tap Swap: <strong>tap a tile you picked again to unpick it</strong>, then pick a different one.</li>
       <li>Inside the swap, your picked tiles go out first — to the player named in the round.</li>
@@ -838,7 +828,7 @@
     <h4>Turns — draw, then discard</h4>
     <ul>
       <li>At <strong>13</strong> tiles, draw one to make <strong>14</strong>:</li>
-      <li>Tap <strong>Draw</strong> in Random, or pick a tile in Add tiles in Manual.</li>
+      <li>Tap <strong>+</strong> (Draw) in Random, or pick a tile in Add tiles in Manual.</li>
       <li>At <strong>14</strong>, tap the tile you want to discard — it leaves the rack, back to 13.</li>
       <li>East’s first turn is the exception: no draw, just the discard.</li>
       <li>Keep alternating 13 → 14 → 13.</li>
@@ -848,7 +838,7 @@
     <h4 id="help-discards">Discards</h4>
     <ul>
       <li>Every tile discarded in the game is kept — yours and the other players’.</li>
-      <li>There is no Discards button: the <strong>Discarded tiles</strong> box sits above the <strong>Exposed tiles</strong> box and opens on its own when the first tile is discarded, and stays open for the rest of the game.</li>
+      <li>There is no Discards button: the <strong>Discarded tiles</strong> box sits above the other players and opens on its own when the first tile is discarded, and stays open for the rest of the game.</li>
       <li>Its header shows how many tiles have been discarded, alongside the <strong>Wall</strong> count — how many tiles are left to draw from.</li>
       <li>Tap the <strong>▲ / ▼</strong> button in its header to collapse or expand the box.</li>
       <li>Tiles show in the order they were laid down. Tick <strong>Sort by suit</strong> in the header to group them by suit instead.</li>
@@ -863,7 +853,7 @@
       <li>Each works toward the card hand their tiles are closest to.</li>
       <li>Their hidden tiles show as green tile backs; the number is how many they hold.</li>
       <li>Their exposed sets show face-up on their cards.</li>
-      <li>Yours sit in the <strong>Exposed tiles</strong> box, above the other players.</li>
+      <li>Yours sit in the controls box under your rack.</li>
       <li>That box also carries the <strong>Wall</strong> count — how many tiles are left to draw from.</li>
       <li>Tap the <strong>▲ / ▼</strong> button in its header to collapse or expand the box.</li>
       <li>They are beginners’ teachers, not sharks: they throw the tiles their hand doesn’t need.</li>
@@ -892,7 +882,7 @@
       <li>You can call it two ways:</li>
       <li><strong>For Mah Jongg</strong> — if it is the last tile you need.</li>
       <li><strong>For a pung or kong</strong> — if you already hold 2 (or 3) more of that tile.</li>
-      <li>Calling for a set puts those tiles <strong>face-up in the Exposed tiles box above the other players</strong>.</li>
+      <li>Calling for a set puts those tiles <strong>face-up in the controls box under your rack</strong>.</li>
       <li>The turn jumps to you, and you discard one tile.</li>
       <li>A Joker can stand in for tiles in a set of 3 or more. To call, you must hold at least one real tile of the kind — Jokers on your rack fill the rest of the set, and the <strong>Call</strong> button says how many Jokers it will use.</li>
       <li>An exposed Joker is not stuck there: anyone holding the tile it stands for can swap it back out — see <strong>Joker exchange</strong> below.</li>
@@ -937,7 +927,7 @@
       <li>You add tiles yourself in Add tiles, and tapping a tile on your rack takes it off.</li>
       <li><strong>Tick Random to deal</strong> — ticking the box deals a whole new hand to all four players at once and starts the game. There is no separate deal button; the tick is the deal.</li>
       <li>Once a dealt game has started, there is <strong>no editing it by hand</strong> — Add tiles is closed, and tiles move only by <strong>Draw</strong>, discarding, calling and the Charleston.</li>
-      <li>In a dealt game at 13, tap <strong>Draw</strong> for a random tile from the wall; at 14, tap a tile to discard it.</li>
+      <li>In a dealt game at 13, tap <strong>+</strong> (Draw) for a random tile from the wall; at 14, tap a tile to discard it.</li>
       <li><strong>Clear</strong> follows the box: Random ticked, Clear deals a fresh hand; unticked, Clear empties the rack.</li>
       <li>Unticking Random leaves the dealt game behind and starts over with an empty rack to build by hand.</li>
     </ul>
@@ -1317,7 +1307,6 @@ var PLAY_ORDER = ['you', 'right', 'opposite', 'left'];
 var opponents = [];        // {id, name, label, rack:[], melds:[{key,tiles,kind}], status}
 var opponentsDealt = false;
 var exposedMelds = [];     // the user's called sets: {key, tiles:[keys], kind:'Pung'|'Kong'}
-var exposedVisible = true; // the chevron button in the exposed tiles box: open or collapsed
 var discardsVisible = true; // the chevron button in the discarded tiles box: open or collapsed
 var discardsSortBySuit = false; // the Sort by suit box in the discarded tiles header: laid-down order by default
 var discardsHighlightKey = null; // the discarded tile tapped to highlight its matches, or null
@@ -2018,7 +2007,7 @@ function doCallGroup(){
   if(selectedHandId) applyArrangeForSelected();
   else { rackGapAfter = -1; rackArrangedForSelected = false; sortRackBySuit(); }
   refresh();
-  showMsg('You called ' + tileName(pc.key) + ' from ' + seatName(pc.by) + ' and exposed a ' + kind + (jokersUsed ? ' — with ' + jokersUsed + (jokersUsed === 1 ? ' Joker' : ' Jokers') + ' from your rack standing in for ' + tileName(pc.key) + '. Anyone holding a ' + tileName(pc.key) + ' — you included — can later swap it in and take the Joker back in a Joker exchange' : '') + ' — it sits in your exposed tiles box above the other players and counts toward your 14. Now tap a tile on your rack to discard, back to 13 in total.', true);
+  showMsg('You called ' + tileName(pc.key) + ' from ' + seatName(pc.by) + ' and exposed a ' + kind + (jokersUsed ? ' — with ' + jokersUsed + (jokersUsed === 1 ? ' Joker' : ' Jokers') + ' from your rack standing in for ' + tileName(pc.key) + '. Anyone holding a ' + tileName(pc.key) + ' — you included — can later swap it in and take the Joker back in a Joker exchange' : '') + ' — it sits in the controls box under your rack and counts toward your 14. Now tap a tile on your rack to discard, back to 13 in total.', true);
 }
 function doCallMahJongg(){
   if(!pendingCall || !pendingCall.mj) return;
@@ -2217,17 +2206,10 @@ function renderOpponents(){
   }
 }
 function renderExposed(){
-  var area = document.getElementById('exposedArea');
-  if(!area) return;
-  // The exposed tiles box sits above Other players once a game is
-  // dealt — empty until you call your first set, with no text in it.
-  // The header button collapses or expands the box: up when open, down when shut.
-  if(!opponentsDealt && !exposedMelds.length){ area.hidden = true; return; }
-  area.hidden = false;
-  syncCollapseBtn('exposedCollapseBtn', exposedVisible, 'exposed tiles');
+  // Your exposed tiles live in the controls box under the rack, in
+  // place of the tile count — empty until you call your first set.
   var box = document.getElementById('exposedMelds');
-  if(!exposedVisible){ box.style.display = 'none'; return; }
-  box.style.display = '';
+  if(!box) return;
   if(!exposedMelds.length){ box.innerHTML = ''; return; }
   box.innerHTML = exposedMelds.map(function(m){
     return '<span class="meld"><span class="meld-tiles">' + m.tiles.map(revealTileHTML).join('') + '</span><span class="meld-label">' + m.kind + ' · ' + esc(tileName(m.key)) + '</span></span>';
@@ -2515,12 +2497,10 @@ function updateCharlestonCheckUI(){
 /* The Discards area: no button — it opens on its own when the
    first tile is discarded and stays open while the pile is
    non-empty, showing every tile discarded this game, in discard
-   order. It sits above the
-   exposed tiles box, and its header carries the wall count, the
-   discard count and a chevron button that collapses or expands
-   the box, like the exposed tiles box. An
-   empty pile (a new deal, Clear, or the only discard being
-   called) closes it again. */
+   order. It sits above the other players, and its header carries
+   the wall count, the discard count and a chevron button that
+   collapses or expands the box. An empty pile (a new deal, Clear,
+   or the only discard being called) closes it again. */
 function syncCollapseBtn(id, visible, what){
   var b = document.getElementById(id);
   if(!b) return;
@@ -2550,8 +2530,8 @@ function updateDiscardsUI(){
   }).join('');
 }
 function updateCharlestonUI(){
-  // No box and no extra text: the Swap button just says Swap — the
-  // rack count line names the current pass (First Right, and so
+  // No box and no extra text: the Swap button is just the ⇄ icon —
+  // the rack count line names the current pass (First Right, and so
   // on). The button sits in the controls row under the rack (no
   // row of its own). It is live only when the picked tiles make a
   // legal swap, and it stays visible but greyed out when the
@@ -2566,7 +2546,7 @@ function updateCharlestonUI(){
   if(!rack.length){ ctl.hidden = true; return; }
   ctl.hidden = false;
   startBtn.hidden = !(gamePhase === 'setup' && charlestonWanted && fullRack);
-  swapBtn.textContent = 'Swap';
+  swapBtn.textContent = '⇄';
   if(!charlestonWanted){
     swapBtn.disabled = true;
     return;
@@ -2668,13 +2648,11 @@ function updateDrawUI(){
     : (randomMode
     ? 'Drag a tile sideways to move it. A dealt game is not edited by hand: at 13 use Draw to draw to 14, then tap a tile to discard back to 13.'
     : 'Drag a tile sideways to move it. A plain tap takes a tile off.'));
-  // The wall count lives in the exposed tiles box, and again in
-  // the discarded tiles box header next to the discard count —
-  // just the count, no explanation. Draws come only from what is
-  // left; at zero before anyone wins, the hand is a draw.
+  // The wall count lives in the discarded tiles box header next
+  // to the discard count — just the count, no explanation. Draws
+  // come only from what is left; at zero before anyone wins, the
+  // hand is a draw.
   var wallText = 'Wall: ' + remainingPool().length + ' tiles left';
-  var wallEl = document.getElementById('wallPill');
-  if(wallEl) wallEl.textContent = wallText;
   var wallElD = document.getElementById('wallPillDiscards');
   if(wallElD) wallElD.textContent = wallText;
 }
@@ -2799,8 +2777,6 @@ function renderRack(){
     ? tot + ' tiles in total — ' + n + ' on your rack + ' + (tot - n) + ' exposed'
     : n + (n === 1 ? ' tile' : ' tiles') + ' entered') + ' — ' + (gamePhase === 'charleston' ? 'Charleston — ' + CHARLESTON_ROUNDS[charlestonRound] + ' — pick 3 and Swap' : (tot === 14 ? (isMahJongg() ? 'Mah Jongg!' : 'discard one to 13') : (tot === 13 ? 'Draw to 14' : 'building toward 13')));
   document.getElementById('rackCount').textContent = label;
-  var ctlCount = document.getElementById('rackCountCtl');
-  if(ctlCount) ctlCount.textContent = tot + (tot === 1 ? ' tile' : ' tiles');
   document.getElementById('clearBtn').disabled = n === 0;
   updateDrawUI();
   updateTurnUI();
@@ -3342,7 +3318,6 @@ document.getElementById('charlestonCheck').addEventListener('change', function()
 document.getElementById('startCharlestonBtn').addEventListener('click', startCharleston);
 document.getElementById('swapBtn').addEventListener('click', swapCharlestonTiles);
 document.getElementById('randomCheck').addEventListener('change', function(){ setRandomMode(this.checked); renderRack(); });
-document.getElementById('exposedCollapseBtn').addEventListener('click', function(){ exposedVisible = !exposedVisible; renderExposed(); });
 document.getElementById('discardsCollapseBtn').addEventListener('click', function(){ discardsVisible = !discardsVisible; updateDiscardsUI(); });
 document.getElementById('discardsSortCheck').addEventListener('change', function(){ discardsSortBySuit = this.checked; updateDiscardsUI(); });
 document.getElementById('discardsGrid').addEventListener('click', function(e){
