@@ -306,9 +306,6 @@
     background:none;border:0;color:var(--jade);font-weight:700;font-size:1rem;
     cursor:pointer;padding:11px 6px;min-height:50px;text-decoration:underline;text-underline-offset:3px;
   }
-  .msg{min-height:1.4em;color:var(--red);font-weight:600;font-size:.95rem;margin:10px 0 0}
-  .msg.ok{color:var(--jade)}
-  .msg:empty{display:none}
   /* Tiles */
   .tile{
     width:52px;height:70px;flex:0 0 auto;
@@ -697,7 +694,6 @@
         <button type="button" class="btn btn-ghost btn-compact" id="clearBtn" disabled>Clear</button>
       </div>
     </div>
-    <p class="msg" id="rackMsg" role="alert"></p>
   </section>
 
   <section class="panel discards-panel" id="discardsView" hidden aria-label="Discarded tiles">
@@ -924,7 +920,7 @@
       <li>When a swap is open to you, a <strong>Joker exchange</strong> bar appears under your rack, with one button per set — tap it to make that swap.</li>
       <li>You can make more than one exchange in the same turn, as long as you hold the matching tiles — the bar stays while swaps remain.</li>
       <li>Exchanges are made on your own turn: not during the Charleston, not while a Call decision is waiting, and not while the other players are moving.</li>
-      <li><strong>They exchange too:</strong> on their turns, the other players swap for any exposed Joker they hold the tile for — including Jokers in <strong>your</strong> exposed sets. Their card and the message line say when it happens.</li>
+      <li><strong>They exchange too:</strong> on their turns, the other players swap for any exposed Joker they hold the tile for — including Jokers in <strong>your</strong> exposed sets. Their card says when it happens.</li>
       <li>A Joker in a set can only be swapped out with the real tile — a Joker can never be exchanged for another Joker, and singles and pairs never hold Jokers to exchange.</li>
     </ul>
     <h4>Mah Jongg</h4>
@@ -1284,7 +1280,6 @@ var rackBreaks = [];     // rack indices where a new part (group) of the chosen 
 var rackArrangedForSelected = false; // true while the rack sits in the arranged-for-the-chosen-hand layout (set automatically when a hand is chosen and each time a new tile is picked while a hand is chosen; cleared by dragging a tile — the next tile picked re-arranges the rack)
 var openGroup = null;    // picker group currently highlighted: bam/crak/dot/wind/dragon (grid open), or flower/joker (highlight only, no grid)
 var showingMore = false;
-var msgTimer = null;
 var randomMode = false; // Random checkbox (unticked by default = Manual): off = tiles are added by hand in Add tiles and tapping a rack tile takes it off. Ticking it on IS the deal — it deals a fresh hand to all four players at once (there is no separate Random hand button), and a dealt game can't be edited by hand: its tiles move only by Draw, discard, calls and the Charleston. Unticking leaves the dealt game behind for an empty hand-built rack. Clear follows the box: ticked deals a fresh hand, unticked empties the rack.
 var lastNewIndex = -1;      // rack index of the tile most recently drawn at random
 var lastNewKey = null;
@@ -1514,11 +1509,8 @@ function rackCounts(){
   return counts;
 }
 function showMsg(text, ok){
-  var el = document.getElementById('rackMsg');
-  el.textContent = text || '';
-  el.classList.toggle('ok', !!ok);
-  if(msgTimer) clearTimeout(msgTimer);
-  if(text) msgTimer = setTimeout(function(){ el.textContent = ''; el.classList.remove('ok'); }, 5000);
+  // The message line under the rack was removed Nov 18, 2026 (Mike) —
+  // calls stay so the game logic is untouched, but nothing is shown.
 }
 function tileFace(key){
   // Returns {cls, main, sub} for drawing a tile.
@@ -2116,7 +2108,7 @@ function doUserJokerExchange(owner, meldIndex){
     : 'Joker exchange — you swapped your ' + tileName(meld.key) + ' into ' + seatName(owner) + '’s exposed ' + meld.kind + ', and took the Joker onto your rack (marked New), free to stand in anywhere a Joker can. Their set is unchanged: it still counts as a ' + meld.kind + ' of ' + tileName(meld.key) + 's.' + (totalTiles() === 14 ? ' You still hold 14 in total — tap a tile to discard when you are ready.' : ''), true);
 }
 /* An opponent exchanges every Joker they can on their turn and
-   returns a note per swap, for their card and the message line. */
+   returns a note per swap, for their card. */
 function opponentDoExchanges(opp){
   var notes = [];
   var guard = 0;
