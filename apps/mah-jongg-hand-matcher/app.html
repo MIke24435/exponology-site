@@ -110,6 +110,7 @@
   .add-tools .match-select{min-height:44px;padding-top:8px;padding-bottom:8px}
   .btn-compact{min-height:44px;padding:8px 16px;font-size:.95rem}
   .btn-icon{min-width:44px;padding:8px 10px;font-size:1.25rem;line-height:1}
+  .btn-icon-lg{min-width:62px;padding:10px 12px;font-size:1.9rem}
   .panel h2{font-size:1.05rem;margin:0}
   .count-line{color:var(--ink-soft);font-weight:600;font-size:.98rem}
   .hint{color:var(--ink-faint);font-size:.92rem;margin:4px 0 0}
@@ -173,11 +174,11 @@
   .help-q:hover,.help-q:focus-visible{background:var(--jade-soft)}
   .panel-head .help-q{margin-left:2px}
   .draw-one-note{font-size:.88rem;color:var(--ink-faint);font-weight:600}
-  /* Charleston — no box: the Swap button is just the ⇄ icon (the rack
-     count line names the current pass), and greys out when the
-     Charleston is off or done. The Charleston buttons (Start /
-     Swap) live in the controls row under the rack, so they take
-     no row of their own. */
+  /* Charleston — no box: the Swap button is just the ⇄ icon (the
+     passes run in the fixed order listed in Help), and greys out
+     when the Charleston is off or done. The Charleston buttons
+     (Start / Swap) live in the controls row under the rack, so they
+     take no row of their own. */
   .ctl-group[hidden]{display:none}
   .tile.is-pass{outline:3px solid var(--gold);outline-offset:2px;box-shadow:0 0 0 5px var(--gold-soft)}
   .tile .t-pass{position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);z-index:2;background:var(--red);color:#fff;font-family:ui-sans-system,-apple-system,sans-serif;font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:999px;border:2px solid var(--surface);white-space:nowrap}
@@ -646,10 +647,8 @@
 
   <section class="panel" aria-label="Your rack">
     <div class="panel-head">
-      <h2>Your rack <a class="help-q" href="#help-use" aria-label="Help: your rack, turns and drawing">?</a></h2>
-      <div class="count-line" id="rackCount">0 tiles entered</div>
+      <h2>Your rack</h2>
     </div>
-    <p class="hint" id="rackHint">Drag a tile sideways to move it.</p>
     <div class="mj-banner" id="mjBanner" hidden role="alert">
       <strong>🀄 Mah Jongg!</strong>
       <span id="mjBannerText">Your rack matches your chosen hand.</span>
@@ -660,7 +659,6 @@
       <span id="endBannerText"></span>
       <button type="button" class="btn" id="endNewHandBtn">Deal a new hand</button>
     </div>
-    <div class="turn-bar" id="turnBar" aria-live="polite"></div>
     <div class="chosen-strip" id="chosenStrip" hidden></div>
     <div class="rack" id="rack"></div>
     <div class="call-bar" id="callBar" hidden>
@@ -680,10 +678,10 @@
       <div class="exposed-melds" id="exposedMelds"></div>
       <div class="ctl-group" id="charlestonCtl" hidden>
         <button type="button" class="btn btn-ghost btn-compact" id="startCharlestonBtn" hidden>Start Charleston</button>
-        <button type="button" class="btn btn-compact btn-icon" id="swapBtn" disabled aria-label="Swap" title="Swap">⇄</button>
+        <button type="button" class="btn btn-compact btn-icon btn-icon-lg" id="swapBtn" disabled aria-label="Swap" title="Swap">⇄</button>
       </div>
       <div class="ctl-group">
-        <button type="button" class="btn btn-ghost btn-compact btn-icon" id="drawOneBtn" aria-label="Draw a tile" title="Draw a tile">+</button>
+        <button type="button" class="btn btn-ghost btn-compact btn-icon btn-icon-lg" id="drawOneBtn" aria-label="Draw a tile" title="Draw a tile">+</button>
       </div>
       <div class="ctl-group">
         <button type="button" class="btn btn-ghost btn-compact btn-icon" id="clearBtn" disabled aria-label="Clear the rack" title="Clear the rack">✕</button>
@@ -807,7 +805,7 @@
       <li><strong>First Right, First Opposite, First Left</strong> — then <strong>Second Left, Second Opposite, Second Right</strong> — and an <strong>Optional</strong> last pass.</li>
       <li>Dealing a hand — tick <strong>Random</strong> — starts it at once.</li>
       <li>With a hand-built rack, tap <strong>Start Charleston</strong> under your rack once your rack is full.</li>
-      <li>The <strong>Swap</strong> button under your rack is just the <strong>⇄</strong> icon — the count line above your rack names the pass (First Right, and so on). It greys out when the Charleston box is unticked, and again when the Charleston is done.</li>
+      <li>The <strong>Swap</strong> button under your rack is just the <strong>⇄</strong> icon. It greys out when the Charleston box is unticked, and again when the Charleston is done.</li>
       <li>Pick 3 tiles on your rack, then tap Swap.</li>
       <li>Nothing is final until you tap Swap: <strong>tap a tile you picked again to unpick it</strong>, then pick a different one.</li>
       <li>Inside the swap, your picked tiles go out first — to the player named in the round.</li>
@@ -1177,7 +1175,7 @@ function buildExpansions(h){
 }
 HANDS.forEach(function(h){ h._exp = buildExpansions(h); });
 
-function matchGroups(groups, rackCounts){
+function matchGroups(groups, rackCounts, boundJokers){
   var avail = {};
   for(var k in rackCounts) avail[k] = rackCounts[k];
   var jokersLeft = avail['joker'] || 0;
@@ -1189,11 +1187,25 @@ function matchGroups(groups, rackCounts){
   res.forEach(function(r){
     if(r.n >= 3){ var take = Math.min(r.n, avail[r.k] || 0); r.got = take; avail[r.k] = (avail[r.k] || 0) - take; }
   });
+  // Jokers locked inside an exposed set belong to that set's group:
+  // spend them on their own group first, then share the free (rack)
+  // Jokers over the groups still short, in group order.
+  var bound = boundJokers || {};
+  var boundTotal = 0;
+  for(var bk in bound) boundTotal += bound[bk];
+  var freeLeft = jokersLeft - boundTotal;
+  if(freeLeft < 0) freeLeft = 0;
   var jokersUsed = 0;
   res.forEach(function(r){
-    if(r.n >= 3){
-      var use = Math.min(r.n - r.got, jokersLeft - jokersUsed);
+    if(r.n >= 3 && bound[r.k]){
+      var use = Math.min(r.n - r.got, bound[r.k]);
       if(use > 0){ r.jok = use; jokersUsed += use; }
+    }
+  });
+  res.forEach(function(r){
+    if(r.n >= 3){
+      var use = Math.min(r.n - r.got - r.jok, freeLeft);
+      if(use > 0){ r.jok += use; jokersUsed += use; freeLeft -= use; }
     }
   });
   var matched = 0;
@@ -1222,10 +1234,10 @@ function matchGroups(groups, rackCounts){
   });
   return {matched: matched, jokersUsed: jokersUsed, needed: merged, unreachable: unreachable, groups: res, blockers: blockers};
 }
-function bestForHand(h, rackCounts){
+function bestForHand(h, rackCounts, boundJokers){
   var best = null;
   for(var i = 0; i < h._exp.length; i++){
-    var m = matchGroups(h._exp[i], rackCounts);
+    var m = matchGroups(h._exp[i], rackCounts, boundJokers);
     if(!best ||
        m.matched > best.matched ||
        (m.matched === best.matched && m.unreachable !== best.unreachable && !m.unreachable) ||
@@ -1235,9 +1247,9 @@ function bestForHand(h, rackCounts){
   }
   return best;
 }
-function rankHands(rackCounts){
+function rankHands(rackCounts, boundJokers){
   var results = HANDS.map(function(h){
-    var b = bestForHand(h, rackCounts);
+    var b = bestForHand(h, rackCounts, boundJokers);
     return {h: h, matched: b.matched, neededCount: 14 - b.matched, jokersUsed: b.jokersUsed,
             needed: b.needed, unreachable: b.unreachable, groups: b.groups, blockers: b.blockers || []};
   });
@@ -1445,7 +1457,7 @@ function selectedMatch(){
   var hand = null;
   for(var i = 0; i < HANDS.length; i++){ if(HANDS[i].id === selectedHandId){ hand = HANDS[i]; break; } }
   if(!hand) return null;
-  var b = bestForHand(hand, allCounts());
+  var b = bestForHand(hand, allCounts(), exposedMeldJokers());
   return {hand: hand, matched: b.matched, neededCount: 14 - b.matched, jokersUsed: b.jokersUsed};
 }
 function isMahJongg(){
@@ -1457,7 +1469,7 @@ function isMahJongg(){
 }
 function anyMahJonggHand(){
   if(totalTiles() !== 14) return null;
-  return handMatchingCounts(allCounts(), true);
+  return handMatchingCounts(allCounts(), true, exposedMeldJokers());
 }
 function sectionLetter(h){ return h.section.charAt(0); }
 function selectedSectionCount(){
@@ -1561,6 +1573,19 @@ function meldTiles(melds){
   melds.forEach(function(m){ m.tiles.forEach(function(k){ out.push(k); }); });
   return out;
 }
+/* Jokers sitting inside an exposed set belong to that set: the map
+   is key -> how many Jokers that set holds, so the matcher spends
+   them on their own group instead of the first group that is short. */
+function meldJokers(melds){
+  var out = {};
+  melds.forEach(function(m){
+    var n = 0;
+    m.tiles.forEach(function(k){ if(k === 'joker') n++; });
+    if(n > 0) out[m.key] = (out[m.key] || 0) + n;
+  });
+  return out;
+}
+function exposedMeldJokers(){ return meldJokers(exposedMelds); }
 function allTiles(){ return rack.concat(meldTiles(exposedMelds)); }
 function allCounts(){ return countsOf(allTiles()); }
 function totalTiles(){ return rack.length + meldTiles(exposedMelds).length; }
@@ -1581,13 +1606,13 @@ function seatName(seat){
 }
 /* A complete 14-tile match in a counts object, or null. When the
    user has exposed sets, Concealed hands no longer count for them. */
-function handMatchingCounts(counts, forUser){
+function handMatchingCounts(counts, forUser, boundJokers){
   var total = 0;
   for(var k in counts) total += counts[k];
   if(total !== 14) return null;
   for(var i = 0; i < HANDS.length; i++){
     if(forUser && exposedMelds.length && HANDS[i].xc === 'C') continue;
-    var b = bestForHand(HANDS[i], counts);
+    var b = bestForHand(HANDS[i], counts, boundJokers);
     if(b.matched === 14) return HANDS[i];
   }
   return null;
@@ -1712,7 +1737,7 @@ function makeOpponents(){
    taught to play, and their card shows the hand they are going for. */
 function oppTargetResult(opp){
   var counts = oppAllCounts(opp);
-  var ranked = rankHands(counts);
+  var ranked = rankHands(counts, meldJokers(opp.melds));
   if(!ranked.length) return null;
   var best = ranked[0];
   if(!opp.target){ opp.target = best.h.id; return best; }
@@ -1779,7 +1804,7 @@ function canUserCall(key){
   }
   var sim = allCounts();
   sim[key] = (sim[key] || 0) + 1;
-  var h = handMatchingCounts(sim, true);
+  var h = handMatchingCounts(sim, true, exposedMeldJokers());
   if(h){ out.mj = true; out.mjHand = h; }
   return out;
 }
@@ -1787,7 +1812,7 @@ function oppCanCallMahJongg(opp, key){
   if(oppTotal(opp) !== 13) return null;
   var sim = oppAllCounts(opp);
   sim[key] = (sim[key] || 0) + 1;
-  return handMatchingCounts(sim, false);
+  return handMatchingCounts(sim, false, meldJokers(opp.melds));
 }
 /* An opponent calls a discard for a set only when it moves the hand
    they are playing toward forward: they must hold at least 2 more of
@@ -1818,7 +1843,7 @@ function chooseOpponentDiscard(opp){
   if(!opp.rack.length) return null;
   var counts = oppAllCounts(opp);
   var best = oppTargetResult(opp);
-  var match = bestForHand(best.h, counts);
+  var match = bestForHand(best.h, counts, meldJokers(opp.melds));
   var unused = unusedFor(match, opp.rack.concat(meldTiles(opp.melds))).filter(function(k){ return opp.rack.indexOf(k) !== -1; });
   var nonJoker = unused.filter(function(k){ return k !== 'joker'; });
   var pickFrom = nonJoker.length ? nonJoker : unused;
@@ -1856,7 +1881,7 @@ function opponentTurn(seat){
     if(!pool.length){ endWallGame(); return; }
     opp.rack.push(pickFromPool(pool));
   }
-  var winHand = handMatchingCounts(oppAllCounts(opp), false);
+  var winHand = handMatchingCounts(oppAllCounts(opp), false, meldJokers(opp.melds));
   if(winHand && oppTotal(opp) === 14){ endOpponentWin(opp, winHand, false, null); return; }
   opponentDiscardNow(opp);
 }
@@ -1866,7 +1891,7 @@ function opponentDiscardNow(opp){
   // they swap it in and take the Joker before discarding.
   var exNotes = opponentDoExchanges(opp);
   if(exNotes.length && oppTotal(opp) === 14){
-    var exWin = handMatchingCounts(oppAllCounts(opp), false);
+    var exWin = handMatchingCounts(oppAllCounts(opp), false, meldJokers(opp.melds));
     if(exWin){ endOpponentWin(opp, exWin, false, null); return; }
   }
   var key = chooseOpponentDiscard(opp);
@@ -2210,7 +2235,7 @@ function renderExposed(){
   if(!box) return;
   if(!exposedMelds.length){ box.innerHTML = ''; return; }
   box.innerHTML = exposedMelds.map(function(m){
-    return '<span class="meld"><span class="meld-tiles">' + m.tiles.map(revealTileHTML).join('') + '</span><span class="meld-label">' + m.kind + ' · ' + esc(tileName(m.key)) + '</span></span>';
+    return '<span class="meld"><span class="meld-tiles">' + m.tiles.map(revealTileHTML).join('') + '</span></span>';
   }).join('');
 }
 function updateCallUI(){
@@ -2256,7 +2281,7 @@ function renderReveal(){
   document.getElementById('revealTitle').textContent = gameResult.type === 'opp-mj' ? gameResult.opp.name + '’s winning hand, revealed' : 'Your winning hand, revealed';
   document.getElementById('revealMeta').textContent = hand.id + ' · ' + hand.section.replace(' - ', ' — ') + ' · ' + hand.pts + ' pts';
   document.getElementById('revealText').textContent = 'All 14 winning tiles, grouped into the sets that make the hand — a single, a pair, a pung (3), a kong (4) or a quint (5). A Joker shown in a set of 3 or more is standing in for that tile; Jokers can never fill a single or a pair. Studying a revealed hand like this is the fastest way to learn what a finished hand looks like.';
-  var b = bestForHand(hand, counts);
+  var b = bestForHand(hand, counts, gameResult.type === 'opp-mj' ? meldJokers(gameResult.opp.melds) : exposedMeldJokers());
   document.getElementById('revealGroups').innerHTML = b.groups.map(function(g){
     var tilesHtml = '';
     var i;
@@ -2437,7 +2462,7 @@ function updateChosenStrip(){
   var m = selectedMatch();
   if(!m){ el.hidden = true; el.innerHTML = ''; return; }
   var hand = m.hand;
-  var b = bestForHand(hand, allCounts());
+  var b = bestForHand(hand, allCounts(), exposedMeldJokers());
   var fakeResult = {groups: b.groups, jokersUsed: b.jokersUsed};
   var exposedKeys = exposedMelds.map(function(m){ return m.key; });
   var aligned = b.groups.map(function(g){ return alignedGroupHTML(g, exposedKeys.indexOf(g.k) !== -1); }).join('');
@@ -2529,13 +2554,12 @@ function updateDiscardsUI(){
 }
 function updateCharlestonUI(){
   // No box and no extra text: the Swap button is just the ⇄ icon —
-  // the rack count line names the current pass (First Right, and so
-  // on). The button sits in the controls row under the rack (no
-  // row of its own). It is live only when the picked tiles make a
-  // legal swap, and it stays visible but greyed out when the
-  // Charleston box is unticked, before the Charleston starts, and
-  // once the Charleston is done. The whole group hides while the
-  // rack is empty.
+  // the passes run in the fixed order listed in Help. The button
+  // sits in the controls row under the rack (no row of its own). It
+  // is live only when the picked tiles make a legal swap, and it
+  // stays visible but greyed out when the Charleston box is
+  // unticked, before the Charleston starts, and once the Charleston
+  // is done. The whole group hides while the rack is empty.
   var ctl = document.getElementById('charlestonCtl');
   if(!ctl) return;
   var startBtn = document.getElementById('startCharlestonBtn');
@@ -2566,7 +2590,6 @@ function updateTurnUI(){
   var bannerText = document.getElementById('mjBannerText');
   var rackEl = document.getElementById('rack');
   var drawOneBtn = document.getElementById('drawOneBtn');
-  if(!bar) return;
   // No Mah Jongg can be called during the Charleston — the game has
   // not begun yet, even if East's 14 tiles already match a hand.
   var mj = gamePhase !== 'charleston' && isMahJongg();
@@ -2612,7 +2635,7 @@ function updateTurnUI(){
       ? 'Speed is <strong>Manual</strong> — nobody moves until you tap <strong>Next player</strong> at the top of the form. One tap lets one player draw and discard, so you can study every discard before the next one.'
       : 'Speed is <strong>' + gameSpeed + ' seconds</strong> — the next player moves in about ' + gameSpeed + ' seconds. Watch their cards below — they draw, discard, and may call a discard and expose a set. Your turn comes after Left.');
   } else if(gamePhase === 'charleston'){
-    html = ''; // Dropped: the rack count line and the Swap button already say round, pick 3 and Swap.
+    html = ''; // No turn line during the Charleston: the passes run in the fixed order listed in Help.
   } else if(gamePhase === 'setup' && n >= 13){
     html = charlestonWanted
       ? '<span class="turn-step">Before play:</span> run the <strong>Charleston</strong> first (Swap under your rack), or untick its box to skip it — then ' + (isEast && n === 14 ? 'East discards one to 13 to open play.' : 'draw to 14, discard back to 13.')
@@ -2634,8 +2657,7 @@ function updateTurnUI(){
       html = '<span class="turn-step">You hold 14 — discard:</span> <strong>tap the tile you want to discard</strong> to go back to 13' + (selectedHandId ? '. Your rack does not yet match ' + esc(selectedHandId) + ' — check its card in the list below for what is still needed.' : '. Pick a hand with <strong>Play hand</strong> on its card below to see how close you are.') + ' If these 14 exactly matched your chosen hand, the page would call Mah Jongg instead.';
     }
   }
-  bar.innerHTML = html;
-  bar.hidden = !html;
+  if(bar){ bar.innerHTML = html; bar.hidden = !html; }
 }
 function updateDrawUI(){
   var rackHint = document.getElementById('rackHint');
@@ -2774,7 +2796,8 @@ function renderRack(){
   var label = (exposedMelds.length
     ? tot + ' tiles in total — ' + n + ' on your rack + ' + (tot - n) + ' exposed'
     : n + (n === 1 ? ' tile' : ' tiles') + ' entered') + ' — ' + (gamePhase === 'charleston' ? 'Charleston — ' + CHARLESTON_ROUNDS[charlestonRound] + ' — pick 3 and Swap' : (tot === 14 ? (isMahJongg() ? 'Mah Jongg!' : 'discard one to 13') : (tot === 13 ? 'Draw to 14' : 'building toward 13')));
-  document.getElementById('rackCount').textContent = label;
+  var rc = document.getElementById('rackCount');
+  if(rc) rc.textContent = label;
   document.getElementById('clearBtn').disabled = n === 0;
   updateDrawUI();
   updateTurnUI();
@@ -3097,7 +3120,7 @@ function applyArrangeForSelected(){
   var hand = null;
   for(var i = 0; i < HANDS.length; i++){ if(HANDS[i].id === selectedHandId){ hand = HANDS[i]; break; } }
   if(!hand) return null;
-  var b = bestForHand(hand, allCounts());
+  var b = bestForHand(hand, allCounts(), exposedMeldJokers());
   var pool = rackCounts();
   // Tiles already exposed in called sets count toward the hand but
   // stay where they are — work out how much of each group they cover,
@@ -3160,7 +3183,7 @@ function renderResults(){
   legendEl.hidden = false;
   earlyEl.hidden = rack.length >= 8;
   var counts = allCounts();
-  var allRanked = rankHands(counts);
+  var allRanked = rankHands(counts, exposedMeldJokers());
   var bySection = allRanked.filter(function(r){ return selectedSections[sectionLetter(r.h)]; });
   var ranked = bySection.filter(function(r){ return r.matched >= minMatched; });
   if(spFilter === 'with') ranked = ranked.filter(hasSinglesOrPairs);
