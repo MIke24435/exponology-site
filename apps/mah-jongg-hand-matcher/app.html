@@ -524,10 +524,6 @@
   .section-opt.on .opt-box{background:var(--jade);border-color:var(--jade);color:#fff}
   @media (prefers-color-scheme: dark){ .section-opt.on .opt-box{color:#0e1a13} }
   .section-menu-done{margin-top:10px;width:100%}
-  /* Results grouped by section */
-  .grouped-results{display:grid;gap:20px}
-  .section-group-head{font-family:Georgia,serif;font-size:1.22rem;margin:0 0 10px;color:var(--ink)}
-  .section-group-head .sg-name{color:var(--jade)}
   .hand-tiles{
     margin:12px 0 8px;
     font-size:1rem;font-weight:700;line-height:1.5;
@@ -3064,17 +3060,10 @@ function cardHTML(r, rank){
     unusedHTML + '</div>' +
     '</article>';
 }
-function groupedHTML(items){
-  // Group cards by section, headings in card order A–I; items keep their
-  // existing ranking order within each section.
-  var html = '';
-  SECTIONS.forEach(function(s){
-    var inSec = items.filter(function(r){ return sectionLetter(r.h) === s.letter; });
-    if(!inSec.length) return;
-    html += '<div class="section-group"><h3 class="section-group-head">Section <span class="sg-name">' + esc(s.name.replace(' - ', ' — ')) + '</span></h3><div class="list">' +
-      inSec.map(function(r){ return cardHTML(r, r.rankNum); }).join('') + '</div></div>';
-  });
-  return html;
+function listHTML(items){
+  // One flat list in rank order — left to right, top to bottom, no
+  // section breaks. Each card still carries its own section title.
+  return '<div class="list">' + items.map(function(r){ return cardHTML(r, r.rankNum); }).join('') + '</div>';
 }
 /* The chosen hand can be changed at any time — while the rack is
    being built, during the Charleston, or in the middle of play — as
@@ -3243,12 +3232,12 @@ function renderResults(){
   }
   var top = mainItems.slice(0, 10);
   var rest = mainItems.slice(10);
-  listEl.className = 'grouped-results';
-  listEl.innerHTML = groupedHTML(top);
+  listEl.className = 'list';
+  listEl.innerHTML = listHTML(top);
   if(rest.length){
     moreWrap.hidden = false;
     moreArea.className = '';
-    moreArea.innerHTML = '<div class="grouped-results">' + groupedHTML(rest) + '</div>';
+    moreArea.innerHTML = listHTML(rest);
     moreArea.hidden = !showingMore;
     document.getElementById('showMoreBtn').textContent = showingMore ? 'Show fewer hands' : 'Show more hands';
   } else {
@@ -3257,7 +3246,7 @@ function renderResults(){
   }
   if(sepItems.length){
     blockerWrap.hidden = false;
-    blockerArea.innerHTML = '<div class="grouped-results">' + groupedHTML(sepItems) + '</div>';
+    blockerArea.innerHTML = listHTML(sepItems);
   } else {
     blockerWrap.hidden = true;
     blockerArea.innerHTML = '';
