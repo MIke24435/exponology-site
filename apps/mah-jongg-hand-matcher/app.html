@@ -280,7 +280,8 @@
   .discards-panel{border-color:var(--line-strong)}
   .discards-grid .tile-back{width:40px;height:54px;border-radius:6px;border-bottom-width:3px}
   .discards-grid{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px;min-height:60px;align-items:flex-start}
-  .discards-grid .tile{cursor:default;width:40px;height:54px}
+  .discards-grid .tile{cursor:pointer;width:40px;height:54px}
+  .discards-grid .tile.is-same{outline:3px solid var(--jade);outline-offset:2px;box-shadow:0 0 0 5px var(--jade-soft)}
   .discards-grid .tile .t-main{font-size:1.1rem}
   .discards-grid .tile .t-num{width:27px;height:27px;font-size:1.02rem}
   .tile.is-new{outline:3px solid var(--jade);outline-offset:2px;box-shadow:0 0 0 5px var(--jade-soft)}
@@ -555,7 +556,6 @@
   .acell .a-num{height:1.05em;font-size:.78rem;font-weight:800;line-height:1.05;font-family:ui-sans-system,-apple-system,sans-serif}
   .acell .a-let{font-size:1.02rem;font-weight:800;line-height:1.2;font-family:ui-sans-system,-apple-system,sans-serif}
   .acell .a-mark{height:1.05em;font-size:.88rem;font-weight:800;line-height:1.05;color:var(--jade);font-family:ui-sans-system,-apple-system,sans-serif}
-  .acell .a-exp{display:block;height:1em;font-size:.62rem;font-weight:800;line-height:1;color:var(--jade);font-family:ui-sans-system,-apple-system,sans-serif}
   .acell.s-bam .a-num,.acell.s-bam .a-let{color:var(--jade)}
   .acell.s-crak .a-num,.acell.s-crak .a-let{color:var(--crak)}
   .acell.s-dot .a-num,.acell.s-dot .a-let{color:var(--dot-num)}
@@ -706,6 +706,10 @@
       <span class="wall-pill" id="wallPillDiscards" aria-live="polite"></span>
       <span class="count-line" id="discardsCount">0 discarded</span>
       <button type="button" class="collapse-toggle" id="discardsCollapseBtn" aria-expanded="true" aria-controls="discardsGrid" aria-label="Collapse discarded tiles">▲</button>
+      <label class="sort-all-filter" for="discardsSortCheck" title="Tick to group the discarded tiles by suit; untick for the order they were laid down.">
+        <input type="checkbox" id="discardsSortCheck">
+        <span class="sort-all-label">Sort by suit</span>
+      </label>
       <a class="help-q" href="#help-discards" aria-label="Help: the discard pile">?</a>
     </div>
     <div class="discards-grid" id="discardsGrid"></div>
@@ -855,7 +859,8 @@
       <li>There is no Discards button: the <strong>Discarded tiles</strong> box sits above the <strong>Exposed tiles</strong> box and opens on its own when the first tile is discarded, and stays open for the rest of the game.</li>
       <li>Its header shows how many tiles have been discarded, alongside the <strong>Wall</strong> count — how many tiles are left to draw from.</li>
       <li>Tap the <strong>▲ / ▼</strong> button in its header to collapse or expand the box.</li>
-      <li>Tiles show in the order they were discarded.</li>
+      <li>Tiles show in the order they were laid down. Tick <strong>Sort by suit</strong> in the header to group them by suit instead.</li>
+      <li>Tap a discarded tile to highlight every tile like it; tap it again to clear the highlight.</li>
       <li>A tile that gets called leaves the pile and joins the caller’s exposed sets.</li>
       <li>Tiles passed in the Charleston are swaps, not discards, so they are not listed.</li>
       <li>A new deal or Clear starts the pile empty — and the area closes again until the next first discard.</li>
@@ -1322,6 +1327,8 @@ var opponentsDealt = false;
 var exposedMelds = [];     // the user's called sets: {key, tiles:[keys], kind:'Pung'|'Kong'}
 var exposedVisible = true; // the chevron button in the exposed tiles box: open or collapsed
 var discardsVisible = true; // the chevron button in the discarded tiles box: open or collapsed
+var discardsSortBySuit = false; // the Sort by suit box in the discarded tiles header: laid-down order by default
+var discardsHighlightKey = null; // the discarded tile tapped to highlight its matches, or null
 var discardLog = [];       // parallel to discardPile: {key, by: seat id}
 var pendingCall = null;    // {key, by, pung, kong, mj, mjHand} — play is paused for the user's call decision
 var opponentsRunning = false;
@@ -2463,7 +2470,8 @@ function updateChosenStrip(){
   var hand = m.hand;
   var b = bestForHand(hand, allCounts());
   var fakeResult = {groups: b.groups, jokersUsed: b.jokersUsed};
-  var aligned = b.groups.map(function(g){ return alignedGroupHTML(g, hand.xc === 'X'); }).join('');
+  var exposedKeys = exposedMelds.map(function(m){ return m.key; });
+  var aligned = b.groups.map(function(g){ return alignedGroupHTML(g, exposedKeys.indexOf(g.k) !== -1); }).join('');
   var haveNoJokers = b.matched - b.jokersUsed;
   var xcClass = hand.xc === 'C' ? 'xc-c' : 'xc-x';
   var xcLabel = hand.xc === 'C' ? 'C · Concealed' : 'X · Exposed';
@@ -2545,9 +2553,11 @@ function updateDiscardsUI(){
     return;
   }
   grid.style.display = '';
-  grid.innerHTML = discardPile.map(function(key){
+  var shown = discardsSortBySuit ? discardPile.slice().sort(function(a, b){ return arrangeKey(a) - arrangeKey(b); }) : discardPile;
+  grid.innerHTML = shown.map(function(key){
     var imgCls = TILE_IMG[key] ? ' has-img' : '';
-    return '<span class="tile ' + tileFace(key).cls + imgCls + '" role="img" aria-label="' + esc(tileName(key)) + '">' + tileButtonHTML(key, 0, true) + '</span>';
+    var same = (discardsHighlightKey && key === discardsHighlightKey) ? ' is-same' : '';
+    return '<span class="tile ' + tileFace(key).cls + imgCls + same + '" data-key="' + esc(key) + '" role="img" aria-label="' + esc(tileName(key)) + '">' + tileButtonHTML(key, 0, true) + '</span>';
   }).join('');
 }
 function updateCharlestonUI(){
@@ -2999,10 +3009,10 @@ function alignedGroupHTML(g, exposed){
   for(var i = 0; i < g.n; i++){
     var p = cellParts(g.k);
     var mark = i < g.got ? 'X' : (i < g.got + g.jok ? 'J' : '');
+    if(exposed && mark === 'X') mark = 'E';
     var stateCls = mark ? ' is-held' : ' is-needed';
     if(mark === 'J') stateCls += ' is-joker';
-    var exp = exposed ? '<span class="a-exp">E</span>' : '';
-    cells += '<span class="acell ' + p.cls + stateCls + '"><span class="a-num">' + p.num + '</span><span class="a-let">' + p.let + '</span>' + exp + '<span class="a-mark' + (mark === 'J' ? ' mark-j' : '') + '">' + mark + '</span></span>';
+    cells += '<span class="acell ' + p.cls + stateCls + '"><span class="a-num">' + p.num + '</span><span class="a-let">' + p.let + '</span><span class="a-mark' + (mark === 'J' ? ' mark-j' : '') + '">' + mark + '</span></span>';
   }
   return '<span class="agroup">' + cells + '</span>';
 }
@@ -3023,7 +3033,7 @@ function cardHTML(r, rank){
   var xcClass = h.xc === 'C' ? 'xc-c' : 'xc-x';
   var xcLabel = h.xc === 'C' ? 'C · Concealed' : 'X · Exposed';
   var sectionDisplay = h.section.replace(' - ', ' — ');
-  var aligned = r.groups.map(function(g){ return alignedGroupHTML(g, h.xc === 'X'); }).join('');
+  var aligned = r.groups.map(alignedGroupHTML).join('');
   var isSel = selectedHandId === h.id;
   var playHand = '<label class="select-hand"><input type="checkbox" data-select-hand="' + esc(h.id) + '"' + (isSel ? ' checked' : '') + '><span>Play hand</span></label>';
   var badges = (r.neededCount === 0 ? '<span class="badge mj">Mah Jongg</span>' : '') +
@@ -3349,6 +3359,14 @@ document.getElementById('swapBtn').addEventListener('click', swapCharlestonTiles
 document.getElementById('randomCheck').addEventListener('change', function(){ setRandomMode(this.checked); renderRack(); });
 document.getElementById('exposedCollapseBtn').addEventListener('click', function(){ exposedVisible = !exposedVisible; renderExposed(); });
 document.getElementById('discardsCollapseBtn').addEventListener('click', function(){ discardsVisible = !discardsVisible; updateDiscardsUI(); });
+document.getElementById('discardsSortCheck').addEventListener('change', function(){ discardsSortBySuit = this.checked; updateDiscardsUI(); });
+document.getElementById('discardsGrid').addEventListener('click', function(e){
+  var t = e.target && e.target.closest ? e.target.closest('.tile') : null;
+  if(!t || !t.getAttribute('data-key')) return;
+  var k = t.getAttribute('data-key');
+  discardsHighlightKey = (discardsHighlightKey === k) ? null : k;
+  updateDiscardsUI();
+});
 document.getElementById('drawOneBtn').addEventListener('click', drawOneTile);
 function startNewHand(){
   if(randomMode){ dealRandomHand(); return; }
