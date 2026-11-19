@@ -1149,11 +1149,19 @@ function buildExpansions(h){
   var sMaps = suitMaps(tokens);
   var mode = dragonMode(h);
   var runs = dragonRuns(tokens);
+  // Dragon groups in different brackets are different dragon colors
+  // (the brackets mean different suits), and groups in the same bracket
+  // share one color — so pick one color per bracket, all different.
+  var ctxs = [];
+  runs.forEach(function(ti){
+    var c = tokens[ti].ctx;
+    if(ctxs.indexOf(c) === -1) ctxs.push(c);
+  });
   var out = [];
   nMaps.forEach(function(nm){
     sMaps.forEach(function(sm){
-      var opts = runs.map(function(ti){
-        if(mode === 'matching') return [MATCH_DRAGON[sm[tokens[ti].ctx]]];
+      var opts = ctxs.map(function(c){
+        if(mode === 'matching') return [MATCH_DRAGON[sm[c]]];
         if(mode === 'opposite'){
           var md = MATCH_DRAGON[sm['(']];
           return ALL_DRAGONS.filter(function(d){ return d !== md; });
@@ -1163,12 +1171,18 @@ function buildExpansions(h){
       var combos = [[]];
       opts.forEach(function(o){
         var next = [];
-        combos.forEach(function(cmb){ o.forEach(function(v){ next.push(cmb.concat([v])); }); });
+        combos.forEach(function(cmb){
+          o.forEach(function(v){
+            if(cmb.indexOf(v) === -1) next.push(cmb.concat([v]));
+          });
+        });
         combos = next;
       });
       combos.forEach(function(combo){
         var pick = {};
-        runs.forEach(function(ti, ri){ pick[ti] = combo[ri]; });
+        runs.forEach(function(ti){
+          pick[ti] = combo[ctxs.indexOf(tokens[ti].ctx)];
+        });
         out.push(expandGroups(h, tokens, nm, sm, pick));
       });
     });
