@@ -3034,7 +3034,7 @@ function cardHTML(r, rank){
   var xcClass = h.xc === 'C' ? 'xc-c' : 'xc-x';
   var xcLabel = h.xc === 'C' ? 'C · Concealed' : 'X · Exposed';
   var sectionDisplay = h.section.replace(' - ', ' — ');
-  var aligned = r.groups.map(alignedGroupHTML).join('');
+  var aligned = r.groups.map(function(g){ return alignedGroupHTML(g, false); }).join('');
   var isSel = selectedHandId === h.id;
   var playHand = '<label class="select-hand"><input type="checkbox" data-select-hand="' + esc(h.id) + '"' + (isSel ? ' checked' : '') + '><span>Play hand</span></label>';
   var badges = (r.neededCount === 0 ? '<span class="badge mj">Mah Jongg</span>' : '') +
