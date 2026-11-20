@@ -110,7 +110,7 @@
   .add-tools .match-select{min-height:44px;padding-top:8px;padding-bottom:8px}
   .btn-compact{min-height:44px;padding:8px 16px;font-size:.95rem}
   .btn-icon{min-width:44px;padding:8px 10px;font-size:1.25rem;line-height:1}
-  .btn-icon-lg{min-width:62px;padding:10px 12px;font-size:1.9rem}
+  .btn-icon-lg{min-width:76px;padding:12px 14px;font-size:2.4rem;font-weight:800}
   .panel h2{font-size:1.05rem;margin:0}
   .count-line{color:var(--ink-soft);font-weight:600;font-size:.98rem}
   .round-line:empty{display:none}
@@ -153,6 +153,8 @@
   .turn-bar{margin-top:12px;padding:11px 12px;border-radius:10px;background:var(--gold-soft);border:1px solid var(--line);font-size:.96rem;line-height:1.45}
   .turn-bar strong{color:var(--ink)}
   .turn-bar .turn-step{font-weight:800}
+  /* Settings box: Speed, Random, Charleston and East in one row */
+  .settings-controls{display:flex;align-items:center;gap:14px 24px;flex-wrap:wrap;margin-top:12px}
   /* Game speed: how fast the other players move, or Manual advance */
   .speed-bar{margin-top:12px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px}
   .speed-copy{min-width:200px;flex:1 1 240px}
@@ -495,7 +497,7 @@
   /* Singles & pairs (star) filter, next to the hand count above the results */
   .sp-filter{display:flex;align-items:center;gap:8px;min-height:50px;flex-wrap:wrap;max-width:100%}
   .sp-filter .match-select{min-height:50px;max-width:100%}
-  /* Sort all checkbox (to the right of the hand count, above the results) */
+  /* Checkbox labels (Random, Charleston, East in Settings) */
   .sort-all-filter{display:flex;align-items:center;gap:8px;min-height:50px;cursor:pointer;-webkit-tap-highlight-color:transparent}
   .sort-all-filter input{width:24px;height:24px;flex:0 0 auto;margin:0;accent-color:var(--jade);cursor:pointer}
   .sort-all-label{font-weight:700;font-size:1rem;color:var(--ink);white-space:nowrap}
@@ -591,10 +593,12 @@
     <p class="lede"><strong>What hand are my tiles closest to?</strong> Tap your tiles in, see the 2026 card hands ranked by how few tiles you still need — then play a full teaching game against three simulated opponents, with the Charleston, calls, Joker exchanges, and Mah Jongg. Wherever you see a <strong>?</strong>, tap it for the details in Help.</p>
   </header>
 
-  <section class="panel" aria-label="Add tiles">
-    <div class="add-head">
-      <h2>Add tiles</h2>
-      <div class="add-tools">
+  <section class="panel" aria-label="Settings">
+    <div class="panel-head">
+      <h2>Settings</h2>
+      <button type="button" class="collapse-toggle" id="settingsCollapseBtn" aria-expanded="true" aria-controls="settingsBody" aria-label="Collapse Settings">▲</button>
+    </div>
+    <div class="settings-controls" id="settingsBody">
         <div class="ctl-group">
           <label class="match-label" for="speedSelect">Speed</label>
           <select id="speedSelect" class="match-select" aria-label="Game speed — seconds between the other players' moves, or Manual">
@@ -628,8 +632,15 @@
           <input type="checkbox" id="eastCheck" checked>
           <span class="sort-all-label">East</span>
         </label>
-      </div>
     </div>
+  </section>
+
+  <section class="panel" aria-label="Add tiles">
+    <div class="add-head">
+      <h2>Add tiles</h2>
+      <button type="button" class="collapse-toggle" id="addTilesCollapseBtn" aria-expanded="true" aria-controls="addTilesBody" aria-label="Collapse Add tiles">▲</button>
+    </div>
+    <div id="addTilesBody">
     <p class="hint">Tap the kind first, then the tile. Flowers and Jokers go on with one tap. <a class="help-q" href="#help-use" aria-label="Help: adding tiles, East and the Charleston">?</a></p>
     <div class="picker-groups" id="pickerGroups" role="group" aria-label="Tile kinds">
       <button type="button" class="group-btn" data-group="bam">Bams<span class="g-sub">tap, then 1–9</span></button>
@@ -643,6 +654,7 @@
     <div class="subpicker" id="subpicker" hidden>
       <div class="sub-head"><strong id="subTitle"></strong><button type="button" class="sub-done" id="subDone">Done</button></div>
       <div class="sub-grid" id="subGrid"></div>
+    </div>
     </div>
   </section>
 
@@ -686,7 +698,7 @@
         <button type="button" class="btn btn-ghost btn-compact btn-icon btn-icon-lg" id="drawOneBtn" aria-label="Draw a tile" title="Draw a tile">+</button>
       </div>
       <div class="ctl-group">
-        <button type="button" class="btn btn-ghost btn-compact btn-icon" id="clearBtn" disabled aria-label="Clear the rack" title="Clear the rack">✕</button>
+        <button type="button" class="btn btn-ghost btn-compact btn-icon btn-icon-lg" id="clearBtn" disabled aria-label="Clear the rack" title="Clear the rack">✕</button>
       </div>
     </div>
   </section>
@@ -711,6 +723,7 @@
     <div class="panel-head">
       <h2>Other players <a class="help-q" href="#help-opponents" aria-label="Help: the other players">?</a></h2>
       <div class="count-line" id="oppCount">Not dealt yet</div>
+      <button type="button" class="collapse-toggle" id="oppCollapseBtn" aria-expanded="true" aria-controls="oppGrid" aria-label="Collapse Other players">▲</button>
     </div>
     <div class="opp-grid" id="oppGrid"></div>
   </section>
@@ -758,10 +771,6 @@
             <option value="without" selected>Without single / pair</option>
           </select>
         </div>
-        <label class="sort-all-filter" for="sortAllCheck">
-          <input type="checkbox" id="sortAllCheck">
-          <span class="sort-all-label">Sort all</span>
-        </label>
         <a class="help-link" href="#help-read">Help</a>
       </div>
     </div>
@@ -857,14 +866,15 @@
       <li>They are beginners’ teachers, not sharks: they throw the tiles their hand doesn’t need.</li>
       <li>On their turns they also make <strong>Joker exchanges</strong> — swapping a tile they hold into any exposed set whose Joker it matches, theirs or yours, and taking the Joker. See <strong>Joker exchange</strong> under Calling a discard.</li>
       <li>Tick <strong>Show hand</strong> on a card to see the hand they are going for, in the card's own notation.</li>
+      <li>Tap the <strong>▲ / ▼</strong> button at the right of a box header to collapse or expand it — Settings, Add tiles, and Other players all collapse that way.</li>
     </ul>
     <h4 id="help-speed">Game speed</h4>
     <ul>
       <li>This is a teaching game, so you choose how fast the other players discard and call.</li>
-      <li>Use the <strong>Speed</strong> dropdown at the top of the form, to the left of Charleston and East: <strong>1 to 10 seconds</strong> between their moves.</li>
+      <li>Use the <strong>Speed</strong> dropdown in the <strong>Settings</strong> box: <strong>1 to 10 seconds</strong> between their moves.</li>
       <li>Pick the pace that gives you time to follow each discard, check the discard pile, and think about your hand.</li>
       <li><strong>Manual</strong> turns the timer off completely:</li>
-      <li>No opponent moves until you tap <strong>Next player</strong> at the top of the form (the button names who plays next).</li>
+      <li>No opponent moves until you tap <strong>Next player</strong> in the <strong>Settings</strong> box (the button names who plays next).</li>
       <li>Each tap lets exactly one player take their turn — draw and discard, or discard after a call.</li>
       <li>So you can study the table for as long as you like between moves.</li>
       <li>You can change speed at any time, even while an opponent is waiting — the new pace applies to that wait at once.</li>
@@ -962,8 +972,7 @@
       <li><strong>Sections</strong> (above the hands list) limits the results to the card sections you pick.</li>
       <li><strong>Matching tiles</strong> sets how many of your tiles a hand must use to be listed.</li>
       <li><strong>Singles &amp; pairs</strong> shows all hands, only hands with a single or pair (★), or only hands without one.</li>
-      <li><strong>Sort all</strong> ranks every hand together in one list.</li>
-      <li>With it off, hands blocked by a single or a pair you don’t hold are listed separately, below the main list.</li>
+      <li>Hands blocked by a single or a pair you don’t hold are listed separately, below the main list.</li>
       <li>The list sharpens as you add tiles — with fewer than 8 entered, treat it as a broad guide.</li>
     </ul>
     <h3 id="help-read">How to read the Hands you could make</h3>
@@ -1339,6 +1348,9 @@ var opponents = [];        // {id, name, label, rack:[], melds:[{key,tiles,kind}
 var opponentsDealt = false;
 var exposedMelds = [];     // the user's called sets: {key, tiles:[keys], kind:'Pung'|'Kong'}
 var discardsVisible = true; // the chevron button in the discarded tiles box: open or collapsed
+var settingsVisible = true; // Settings box chevron: open or collapsed
+var addTilesVisible = true; // Add tiles box chevron: open or collapsed
+var oppVisible = true; // Other players box chevron: open or collapsed
 var discardsSortBySuit = false; // the Sort by suit box in the discarded tiles header: laid-down order by default
 var discardsHighlightKey = null; // the discarded tile tapped to highlight its matches, or null
 var discardLog = [];       // parallel to discardPile: {key, by: seat id}
@@ -1461,7 +1473,6 @@ var SECTIONS = [
 var selectedSections = {};
 SECTIONS.forEach(function(s){ selectedSections[s.letter] = true; });
 var minMatched = 1;
-var sortAll = false;
 var spFilter = 'without'; // 'all' | 'with' | 'without' — singles & pairs (★) filter
 var selectedHandId = null; // hand id chosen with "Play hand" on a hand card
 function hasSinglesOrPairs(r){ return r.groups.some(function(g){ return g.n < 3; }); }
@@ -3207,11 +3218,10 @@ function renderResults(){
   if(spFilter === 'with') ranked = ranked.filter(hasSinglesOrPairs);
   else if(spFilter === 'without') ranked = ranked.filter(function(r){ return !hasSinglesOrPairs(r); });
   // Hands stuck on a single or a pair tile the player does not hold (a
-  // Joker cannot fill those) go in their own section below the main list,
-  // unless "Sort all" is checked — then every hand ranks together in the
-  // one list. rankHands already orders by useful tiles (Have + Jokers
-  // used, most first), then Points, then card order, and both modes
-  // keep that order; cards keep their blocker notes either way.
+  // Joker cannot fill those) go in their own section below the main list.
+  // rankHands already orders by useful tiles (Have + Jokers
+  // used, most first), then Points, then card order; cards keep their
+  // blocker notes either way.
   // The chosen hand stays in the list like any other hand — its Play
   // hand box stays ticked — so choosing one never makes its card vanish.
   if(selectedHandId){
@@ -3220,13 +3230,8 @@ function renderResults(){
     if(!stillThere) selectedHandId = null;
   }
   var mainItems, sepItems;
-  if(sortAll){
-    mainItems = ranked.slice();
-    sepItems = [];
-  } else {
-    mainItems = ranked.filter(function(r){ return !r.blockers.length; });
-    sepItems = ranked.filter(function(r){ return r.blockers.length; });
-  }
+  mainItems = ranked.filter(function(r){ return !r.blockers.length; });
+  sepItems = ranked.filter(function(r){ return r.blockers.length; });
   mainItems.concat(sepItems).forEach(function(r, i){ r.rankNum = i + 1; });
   countEl.textContent = ranked.length + (ranked.length === 1 ? ' hand' : ' hands');
   var blockerWrap = document.getElementById('blockerWrap');
@@ -3358,6 +3363,27 @@ document.getElementById('startCharlestonBtn').addEventListener('click', startCha
 document.getElementById('swapBtn').addEventListener('click', swapCharlestonTiles);
 document.getElementById('randomCheck').addEventListener('change', function(){ setRandomMode(this.checked); renderRack(); });
 document.getElementById('discardsCollapseBtn').addEventListener('click', function(){ discardsVisible = !discardsVisible; updateDiscardsUI(); });
+function updateSettingsUI(){
+  var body = document.getElementById('settingsBody');
+  if(!body) return;
+  syncCollapseBtn('settingsCollapseBtn', settingsVisible, 'Settings');
+  body.style.display = settingsVisible ? '' : 'none';
+}
+function updateAddTilesUI(){
+  var body = document.getElementById('addTilesBody');
+  if(!body) return;
+  syncCollapseBtn('addTilesCollapseBtn', addTilesVisible, 'Add tiles');
+  body.style.display = addTilesVisible ? '' : 'none';
+}
+function updateOppUI(){
+  var grid = document.getElementById('oppGrid');
+  if(!grid) return;
+  syncCollapseBtn('oppCollapseBtn', oppVisible, 'Other players');
+  grid.style.display = oppVisible ? '' : 'none';
+}
+document.getElementById('settingsCollapseBtn').addEventListener('click', function(){ settingsVisible = !settingsVisible; updateSettingsUI(); });
+document.getElementById('addTilesCollapseBtn').addEventListener('click', function(){ addTilesVisible = !addTilesVisible; updateAddTilesUI(); });
+document.getElementById('oppCollapseBtn').addEventListener('click', function(){ oppVisible = !oppVisible; updateOppUI(); });
 document.getElementById('discardsSortCheck').addEventListener('change', function(){ discardsSortBySuit = this.checked; updateDiscardsUI(); });
 document.getElementById('discardsGrid').addEventListener('click', function(e){
   var t = e.target && e.target.closest ? e.target.closest('.tile') : null;
@@ -3483,10 +3509,6 @@ document.getElementById('matchSelect').addEventListener('change', function(){
 });
 document.getElementById('spFilterSelect').addEventListener('change', function(){
   spFilter = this.value;
-  renderResults();
-});
-document.getElementById('sortAllCheck').addEventListener('change', function(){
-  sortAll = this.checked;
   renderResults();
 });
 document.getElementById('eastCheck').addEventListener('change', function(){
