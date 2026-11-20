@@ -455,6 +455,13 @@
   .help-panel h2{font-size:1.3rem;margin:0}
   .help-panel h3{font-size:1.08rem;margin:20px 0 6px}
   .help-panel h4{font-size:1rem;margin:16px 0 5px;color:var(--jade)}
+  /* Every Help heading collapses, with the ▲ / ▼ at the far right:
+     Help itself, the two sections, and every green sub-heading.
+     "How to use" is red, "How to read" stays green, so the two
+     sections read apart at a glance. */
+  .help-panel h2,.help-panel h3,.help-panel h4{display:flex;align-items:center;gap:8px}
+  .help-panel h3#help-use{color:var(--red)}
+  .help-panel h3#help-read{color:var(--jade)}
   .help-panel ul{margin:0;padding-left:20px}
   .help-panel li{margin:4px 0}
   .blocker-head{
@@ -727,12 +734,12 @@
       <strong class="melds-label">Discarded tiles</strong>
       <span class="wall-pill" id="wallPillDiscards" aria-live="polite"></span>
       <span class="count-line" id="discardsCount">0 discarded</span>
-      <button type="button" class="collapse-toggle" id="discardsCollapseBtn" aria-expanded="true" aria-controls="discardsGrid" aria-label="Collapse discarded tiles">▲</button>
       <label class="sort-all-filter" for="discardsSortCheck" title="Tick to group the discarded tiles by suit; untick for the order they were laid down.">
         <input type="checkbox" id="discardsSortCheck">
         <span class="sort-all-label">Sort by suit</span>
       </label>
       <a class="help-q" href="#help-discards" aria-label="Help: the discard pile">?</a>
+      <button type="button" class="collapse-toggle" id="discardsCollapseBtn" aria-expanded="true" aria-controls="discardsGrid" aria-label="Collapse discarded tiles">▲</button>
     </div>
     <div class="discards-grid" id="discardsGrid"></div>
   </section>
@@ -811,16 +818,25 @@
   </section>
 
   <section class="panel help-panel" id="help" aria-label="Help">
-    <h2>Help</h2>
-    <h3 id="help-use">How to use Mah Jongg Learning Game</h3>
-    <h4>Getting started</h4>
-    <ul>
+    <h2>Help <button type="button" class="collapse-toggle" id="helpCollapseBtn" aria-expanded="true" aria-controls="helpBody" aria-label="Collapse Help">▲</button></h2>
+    <div id="helpBody">
+    <h3 id="help-use">How to use Mah Jongg Learning Game <button type="button" class="collapse-toggle" id="helpUseCollapseBtn" aria-expanded="true" aria-controls="helpUseBody" aria-label="Collapse How to use">▲</button></h3>
+    <div class="help-body" id="helpUseBody">
+        <div class="help-sub">
+      <h4>Getting started <button type="button" class="collapse-toggle" id="helpSubBtn1" aria-expanded="true" aria-controls="helpSubBody1" data-what="Getting started" aria-label="Collapse Getting started">▲</button></h4>
+      <div class="help-sub-body" id="helpSubBody1">
+        <ul>
       <li><strong>Add tiles:</strong> tap a kind — Bams, Craks, Dots, Winds or Dragons — then tap the tile.</li>
       <li>Flowers and Jokers go on with a single tap.</li>
+      <li>Every heading in Help collapses — tap the <strong>▲ / ▼</strong> at its right — so you can leave just the headings showing.</li>
       <li>You can’t add more of a tile than a real set holds.</li>
     </ul>
-    <h4>East</h4>
-    <ul>
+      </div>
+    </div>
+        <div class="help-sub">
+      <h4>East <button type="button" class="collapse-toggle" id="helpSubBtn2" aria-expanded="true" aria-controls="helpSubBody2" data-what="East" aria-label="Collapse East">▲</button></h4>
+      <div class="help-sub-body" id="helpSubBody2">
+        <ul>
       <li><strong>East</strong> starts ticked.</li>
       <li>East is dealt 14 and, after the Charleston, just discards one to 13 to start.</li>
       <li>Everyone else is dealt 13.</li>
@@ -828,8 +844,12 @@
       <li>East only sets the size of the next deal when you tick <strong>Random</strong>.</li>
       <li>Changing it never takes a tile off a rack already in play — anyone can be holding 14 on their turn.</li>
     </ul>
-    <h4 id="help-charleston">The Charleston (optional)</h4>
-    <ul>
+      </div>
+    </div>
+        <div class="help-sub">
+      <h4 id="help-charleston">The Charleston (optional) <button type="button" class="collapse-toggle" id="helpSubBtn3" aria-expanded="true" aria-controls="helpSubBody3" data-what="The Charleston (optional)" aria-label="Collapse The Charleston (optional)">▲</button></h4>
+      <div class="help-sub-body" id="helpSubBody3">
+        <ul>
       <li>The <strong>Charleston</strong> box next to East starts ticked.</li>
       <li>Ticked, seven passes come before play:</li>
       <li><strong>First Right, First Opposite, First Left</strong> — then <strong>Second Left, Second Opposite, Second Right</strong> — and an <strong>Optional</strong> last pass.</li>
@@ -845,16 +865,24 @@
       <li>The Optional pass is a courtesy swap with the player across from you: 0 to 3 tiles, or none.</li>
       <li>When the Charleston is done, the game begins — the opposite order: draw first, discard second.</li>
     </ul>
-    <h4>Skipping the Charleston</h4>
-    <ul>
+      </div>
+    </div>
+        <div class="help-sub">
+      <h4>Skipping the Charleston <button type="button" class="collapse-toggle" id="helpSubBtn4" aria-expanded="true" aria-controls="helpSubBody4" data-what="Skipping the Charleston" aria-label="Collapse Skipping the Charleston">▲</button></h4>
+      <div class="help-sub-body" id="helpSubBody4">
+        <ul>
       <li>Untick the Charleston box at any time to skip the Charleston, or the rest of it.</li>
       <li><strong>Unticked, there is no Charleston at all:</strong> a random rack counts as the beginning of the game, and play starts with draw and discard straight away.</li>
       <li>Once the Charleston is completed, the box <strong>greys out</strong> for the rest of that hand.</li>
       <li>It also greys out once play has begun without one.</li>
       <li>Your tick is remembered for the next deal; tap <strong>Clear</strong> to change it before the next hand.</li>
     </ul>
-    <h4>Turns — draw, then discard</h4>
-    <ul>
+      </div>
+    </div>
+        <div class="help-sub">
+      <h4>Turns — draw, then discard <button type="button" class="collapse-toggle" id="helpSubBtn5" aria-expanded="true" aria-controls="helpSubBody5" data-what="Turns — draw, then discard" aria-label="Collapse Turns — draw, then discard">▲</button></h4>
+      <div class="help-sub-body" id="helpSubBody5">
+        <ul>
       <li>At <strong>13</strong> tiles, draw one to make <strong>14</strong>:</li>
       <li>Tap <strong>+</strong> (Draw) in Random, or pick a tile in Add tiles in Manual.</li>
       <li><strong>Undo</strong> (−) takes back your last move — a draw, a discard, a Charleston swap, a call, a Joker exchange, or clearing the rack. It only works on your turn.</li>
@@ -864,20 +892,28 @@
       <li>After your discard, <strong>Right, Opposite and Left take their turns in order</strong> — watch their cards under <strong>Other players</strong>.</li>
       <li>Then it comes back to you.</li>
     </ul>
-    <h4 id="help-discards">Discards</h4>
-    <ul>
+      </div>
+    </div>
+        <div class="help-sub">
+      <h4 id="help-discards">Discards <button type="button" class="collapse-toggle" id="helpSubBtn6" aria-expanded="true" aria-controls="helpSubBody6" data-what="Discards" aria-label="Collapse Discards">▲</button></h4>
+      <div class="help-sub-body" id="helpSubBody6">
+        <ul>
       <li>Every tile discarded in the game is kept — yours and the other players’.</li>
       <li>There is no Discards button: the <strong>Discarded tiles</strong> box sits above the other players and opens on its own when the first tile is discarded, and stays open for the rest of the game.</li>
       <li>Its header shows how many tiles have been discarded, alongside the <strong>Wall</strong> count — how many tiles are left to draw from.</li>
-      <li>Tap the <strong>▲ / ▼</strong> button in its header to collapse or expand the box.</li>
+      <li>Tap the <strong>▲ / ▼</strong> button at the right of its header to collapse or expand the box.</li>
       <li>Tiles show in the order they were laid down. Tick <strong>Sort by suit</strong> in the header to group them by suit instead.</li>
       <li>Tap a discarded tile to highlight every tile like it; tap it again to clear the highlight.</li>
       <li>A tile that gets called leaves the pile and joins the caller’s exposed sets.</li>
       <li>Tiles passed in the Charleston are swaps, not discards, so they are not listed.</li>
       <li>A new deal or Clear starts the pile empty — and the area closes again until the next first discard.</li>
     </ul>
-    <h4 id="help-opponents">The other players</h4>
-    <ul>
+      </div>
+    </div>
+        <div class="help-sub">
+      <h4 id="help-opponents">The other players <button type="button" class="collapse-toggle" id="helpSubBtn7" aria-expanded="true" aria-controls="helpSubBody7" data-what="The other players" aria-label="Collapse The other players">▲</button></h4>
+      <div class="help-sub-body" id="helpSubBody7">
+        <ul>
       <li>Three simulated opponents play real racks from the same wall.</li>
       <li>Each works toward the card hand their tiles are closest to.</li>
       <li>Their hidden tiles show as green tile backs; the number is how many they hold.</li>
@@ -886,10 +922,14 @@
       <li>They are beginners’ teachers, not sharks: they throw the tiles their hand doesn’t need.</li>
       <li>On their turns they also make <strong>Joker exchanges</strong> — swapping a tile they hold into any exposed set whose Joker it matches, theirs or yours, and taking the Joker. See <strong>Joker exchange</strong> under Calling a discard.</li>
       <li>Tick <strong>Show hand</strong> on a card to see the hand they are going for, in the card's own notation.</li>
-      <li>Tap the <strong>▲ / ▼</strong> button at the right of a box header to collapse or expand it — Settings, Add tiles, and Other players all collapse that way.</li>
+      <li>Tap the <strong>▲ / ▼</strong> button at the right of a box header to collapse or expand it — Settings, Add tiles, Discarded tiles, Other players and Help all collapse that way, and so do the headings inside Help.</li>
     </ul>
-    <h4 id="help-speed">Game speed</h4>
-    <ul>
+      </div>
+    </div>
+        <div class="help-sub">
+      <h4 id="help-speed">Game speed <button type="button" class="collapse-toggle" id="helpSubBtn8" aria-expanded="true" aria-controls="helpSubBody8" data-what="Game speed" aria-label="Collapse Game speed">▲</button></h4>
+      <div class="help-sub-body" id="helpSubBody8">
+        <ul>
       <li>This is a teaching game, so you choose how fast the other players discard and call.</li>
       <li>Use the <strong>Speed</strong> dropdown in the <strong>Settings</strong> box: <strong>1 to 10 seconds</strong> between their moves.</li>
       <li>Pick the pace that gives you time to follow each discard, check the discard pile, and think about your hand.</li>
@@ -903,8 +943,12 @@
       <li>A <strong>Call</strong> decision waits for you however long you take.</li>
       <li>The Charleston is never timed — its passes happen when you tap Swap.</li>
     </ul>
-    <h4 id="help-call">Calling a discard</h4>
-    <ul>
+      </div>
+    </div>
+        <div class="help-sub">
+      <h4 id="help-call">Calling a discard <button type="button" class="collapse-toggle" id="helpSubBtn9" aria-expanded="true" aria-controls="helpSubBody9" data-what="Calling a discard" aria-label="Collapse Calling a discard">▲</button></h4>
+      <div class="help-sub-body" id="helpSubBody9">
+        <ul>
       <li>A discard is not dead until everyone has passed on it.</li>
       <li>If a tile another player throws is one you can use, play pauses and the <strong>Call / Pass</strong> buttons appear under your rack.</li>
       <li>You can call it two ways:</li>
@@ -917,8 +961,12 @@
       <li>Once you expose a set, a <strong>Concealed</strong> hand can no longer be won.</li>
       <li><strong>Pass</strong> lets the tile go.</li>
     </ul>
-    <h4>They call too</h4>
-    <ul>
+      </div>
+    </div>
+        <div class="help-sub">
+      <h4>They call too <button type="button" class="collapse-toggle" id="helpSubBtn10" aria-expanded="true" aria-controls="helpSubBody10" data-what="They call too" aria-label="Collapse They call too">▲</button></h4>
+      <div class="help-sub-body" id="helpSubBody10">
+        <ul>
       <li>The other players call your discards — and each other’s — the same way.</li>
       <li>A Mah Jongg call beats any other call.</li>
       <li>Otherwise calls are taken in turn order, from the player after the discarder.</li>
@@ -926,8 +974,12 @@
       <li>So you can see what they are building — and steer your own hand, and your discards, away from feeding it.</li>
       <li>If you pass on a tile, an opponent may still call it.</li>
     </ul>
-    <h4 id="help-joker-exchange">Joker exchange</h4>
-    <ul>
+      </div>
+    </div>
+        <div class="help-sub">
+      <h4 id="help-joker-exchange">Joker exchange <button type="button" class="collapse-toggle" id="helpSubBtn11" aria-expanded="true" aria-controls="helpSubBody11" data-what="Joker exchange" aria-label="Collapse Joker exchange">▲</button></h4>
+      <div class="help-sub-body" id="helpSubBody11">
+        <ul>
       <li>A Joker in an exposed set — a pung, kong or quint — <strong>stands for that set’s tile</strong>.</li>
       <li>If you hold that tile, you can swap it in: <strong>your tile takes the Joker’s place in the set, and the Joker comes onto your rack</strong>, free to stand in anywhere a Joker can.</li>
       <li>It works on <strong>any</strong> exposed set — your own, or any other player’s. The set itself does not change: it still counts as the same pung or kong for its owner.</li>
@@ -937,8 +989,12 @@
       <li><strong>They exchange too:</strong> on their turns, the other players swap for any exposed Joker they hold the tile for — including Jokers in <strong>your</strong> exposed sets. Their card says when it happens.</li>
       <li>A Joker in a set can only be swapped out with the real tile — a Joker can never be exchanged for another Joker, and singles and pairs never hold Jokers to exchange.</li>
     </ul>
-    <h4>Mah Jongg</h4>
-    <ul>
+      </div>
+    </div>
+        <div class="help-sub">
+      <h4>Mah Jongg <button type="button" class="collapse-toggle" id="helpSubBtn12" aria-expanded="true" aria-controls="helpSubBody12" data-what="Mah Jongg" aria-label="Collapse Mah Jongg">▲</button></h4>
+      <div class="help-sub-body" id="helpSubBody12">
+        <ul>
       <li>Every hand on the card is 14 tiles, so you can only win holding 14.</li>
       <li>When your 14 tiles exactly match the hand you chose with <strong>Play hand</strong> — nothing still needed — the page calls it for you, with a big <strong>Mah Jongg!</strong> banner over your rack.</li>
       <li>At 13 you are never Mah Jongg, even if the 13 all fit: you still need the draw that makes 14.</li>
@@ -949,8 +1005,12 @@
       <li>Your wins are revealed the same way.</li>
       <li>If the wall runs out first, the hand is a draw and nobody scores.</li>
     </ul>
-    <h4 id="help-draw">Draw tiles — Random and Manual</h4>
-    <ul>
+      </div>
+    </div>
+        <div class="help-sub">
+      <h4 id="help-draw">Draw tiles — Random and Manual <button type="button" class="collapse-toggle" id="helpSubBtn13" aria-expanded="true" aria-controls="helpSubBody13" data-what="Draw tiles — Random and Manual" aria-label="Collapse Draw tiles — Random and Manual">▲</button></h4>
+      <div class="help-sub-body" id="helpSubBody13">
+        <ul>
       <li><strong>Random</strong> starts unticked. Unticked is <strong>Manual</strong>:</li>
       <li>You add tiles yourself in Add tiles, and tapping a tile on your rack takes it off.</li>
       <li><strong>Tick Random to deal</strong> — ticking the box deals a whole new hand to all four players at once and starts the game. There is no separate deal button; the tick is the deal.</li>
@@ -959,15 +1019,23 @@
       <li><strong>Clear</strong> follows the box: Random ticked, Clear deals a fresh hand; unticked, Clear empties the rack.</li>
       <li>Unticking Random leaves the dealt game behind and starts over with an empty rack to build by hand.</li>
     </ul>
-    <h4>Your rack</h4>
-    <ul>
+      </div>
+    </div>
+        <div class="help-sub">
+      <h4>Your rack <button type="button" class="collapse-toggle" id="helpSubBtn14" aria-expanded="true" aria-controls="helpSubBody14" data-what="Your rack" aria-label="Collapse Your rack">▲</button></h4>
+      <div class="help-sub-body" id="helpSubBody14">
+        <ul>
       <li>Below 14 in Manual, tap a tile to take it off. In a dealt (Random) game the rack is not edited by hand — tiles move only by Draw, discard, calls and the Charleston.</li>
       <li>At 14, tapping always discards (see Turns above).</li>
       <li>Either way, drag a tile sideways to move it without discarding.</li>
       <li><strong>Clear</strong> follows the Random box: ticked, it deals a fresh hand; unticked, it empties the rack.</li>
     </ul>
-    <h4>Your chosen hand</h4>
-    <ul>
+      </div>
+    </div>
+        <div class="help-sub">
+      <h4>Your chosen hand <button type="button" class="collapse-toggle" id="helpSubBtn15" aria-expanded="true" aria-controls="helpSubBody15" data-what="Your chosen hand" aria-label="Collapse Your chosen hand">▲</button></h4>
+      <div class="help-sub-body" id="helpSubBody15">
+        <ul>
       <li>Tick <strong>Play hand</strong> on any hand card to choose that hand.</li>
       <li>The ticked box is the mark — the card itself stays the same as every other.</li>
       <li>The <strong>Chosen</strong> card sits right above your rack as a wide, flat strip across the panel — same card detail (notation, lined-up tiles, counts, tiles not used) in as little height as possible.</li>
@@ -978,8 +1046,12 @@
       <li>Mid-Charleston, changing hands unpicks any tiles you had picked to swap, since the rack moves.</li>
       <li>Only one hand at a time — untick to clear the choice, and your rack goes back to sorting by suit until you choose another hand.</li>
     </ul>
-    <h4>Arranging</h4>
-    <ul>
+      </div>
+    </div>
+        <div class="help-sub">
+      <h4>Arranging <button type="button" class="collapse-toggle" id="helpSubBtn16" aria-expanded="true" aria-controls="helpSubBody16" data-what="Arranging" aria-label="Collapse Arranging">▲</button></h4>
+      <div class="help-sub-body" id="helpSubBody16">
+        <ul>
       <li>Your rack arranges itself automatically.</li>
       <li>With no hand chosen, tiles sort by suit: Bams, Craks, Dots, Winds, Dragons, Flowers, Jokers.</li>
       <li>With a hand chosen, the rack lines up for that hand instead.</li>
@@ -987,17 +1059,27 @@
       <li>Each part of the hand — each pair, pung or kong — sits behind a <strong>small space</strong>, so you can see the sets you are building and how far each has got.</li>
       <li>The tiles that don’t fit sit off to the right, behind a wider, tile-wide space, sorted by suit — Bams, Craks, Dots, Winds, Dragons, Flowers, Jokers.</li>
     </ul>
-    <h4>Filtering the hands list</h4>
-    <ul>
+      </div>
+    </div>
+        <div class="help-sub">
+      <h4>Filtering the hands list <button type="button" class="collapse-toggle" id="helpSubBtn17" aria-expanded="true" aria-controls="helpSubBody17" data-what="Filtering the hands list" aria-label="Collapse Filtering the hands list">▲</button></h4>
+      <div class="help-sub-body" id="helpSubBody17">
+        <ul>
       <li><strong>Sections</strong> (above the hands list) limits the results to the card sections you pick.</li>
       <li><strong>Matching tiles</strong> sets how many of your tiles a hand must use to be listed.</li>
       <li><strong>Singles &amp; pairs</strong> shows all hands, only hands with a single or pair (★), or only hands without one.</li>
       <li>Hands blocked by a single or a pair you don’t hold are listed separately, below the main list.</li>
       <li>The list sharpens as you add tiles — with fewer than 8 entered, treat it as a broad guide.</li>
     </ul>
-    <h3 id="help-read">How to read the Hands you could make</h3>
-    <h4>Ranking and badges</h4>
-    <ul>
+      </div>
+    </div>
+    </div>
+    <h3 id="help-read">How to read the Hands you could make <button type="button" class="collapse-toggle" id="helpReadCollapseBtn" aria-expanded="true" aria-controls="helpReadBody" aria-label="Collapse How to read">▲</button></h3>
+    <div class="help-body" id="helpReadBody">
+        <div class="help-sub">
+      <h4>Ranking and badges <button type="button" class="collapse-toggle" id="helpSubBtn18" aria-expanded="true" aria-controls="helpSubBody18" data-what="Ranking and badges" aria-label="Collapse Ranking and badges">▲</button></h4>
+      <div class="help-sub-body" id="helpSubBody18">
+        <ul>
       <li>Hands are ranked by how many of your tiles count toward the hand, most first, then by points.</li>
       <li>The big code, like <strong>E2.2</strong>, is the hand’s place on the 2026 card, with its section named underneath.</li>
       <li>A gold <span class="sp-star" aria-hidden="true">★</span> next to the hand ID means the hand includes <strong>singles and/or pairs</strong>.</li>
@@ -1008,8 +1090,12 @@
       <li>The Jokers used (purple).</li>
       <li>The tiles you still need for that hand (red).</li>
     </ul>
-    <h4>The lined-up hand</h4>
-    <ul>
+      </div>
+    </div>
+        <div class="help-sub">
+      <h4>The lined-up hand <button type="button" class="collapse-toggle" id="helpSubBtn19" aria-expanded="true" aria-controls="helpSubBody19" data-what="The lined-up hand" aria-label="Collapse The lined-up hand">▲</button></h4>
+      <div class="help-sub-body" id="helpSubBody19">
+        <ul>
       <li>In the lined-up hand, the number sits over its suit letter:</li>
       <li><strong>B</strong> Bam, <strong>C</strong> Crak, <strong>D</strong> Dot.</li>
       <li>Winds are <strong>NEWS</strong>, Dragons <strong>RGW</strong>, Flower <strong>F</strong>, Joker <strong>J</strong>.</li>
@@ -1021,8 +1107,12 @@
       <li>Below the line are the tiles on your rack that don’t fit this hand.</li>
       <li>If it says “None”, every tile on your rack fits.</li>
     </ul>
-    <h4>Filters and Jokers</h4>
-    <ul>
+      </div>
+    </div>
+        <div class="help-sub">
+      <h4>Filters and Jokers <button type="button" class="collapse-toggle" id="helpSubBtn20" aria-expanded="true" aria-controls="helpSubBody20" data-what="Filters and Jokers" aria-label="Collapse Filters and Jokers">▲</button></h4>
+      <div class="help-sub-body" id="helpSubBody20">
+        <ul>
       <li><strong>Singles &amp; pairs</strong>, next to the hand count above the results, filters the list by the gold star:</li>
       <li><strong>All hands</strong> shows starred and unstarred hands together.</li>
       <li><strong>★ With single / pair</strong> shows only hands that include a single or a pair.</li>
@@ -1030,6 +1120,10 @@
       <li>Jokers count only in a group of three or more — never for a single tile or a pair.</li>
       <li>The White Dragon is also the <strong>Soap</strong>, and counts as the <strong>0</strong> in hands that use one.</li>
     </ul>
+      </div>
+    </div>
+    </div>
+    </div>
   </section>
 
   <footer>
@@ -1371,6 +1465,10 @@ var discardsVisible = true; // the chevron button in the discarded tiles box: op
 var settingsVisible = true; // Settings box chevron: open or collapsed
 var addTilesVisible = true; // Add tiles box chevron: open or collapsed
 var oppVisible = true; // Other players box chevron: open or collapsed
+var helpVisible = true; // Help panel chevron: open or collapsed
+var helpUseVisible = true; // "How to use" section chevron: open or collapsed
+var helpReadVisible = true; // "How to read" section chevron: open or collapsed
+var helpSubOpen = {}; // green sub-heading bodies in Help: body id -> false when collapsed
 var discardsSortBySuit = false; // the Sort by suit box in the discarded tiles header: laid-down order by default
 var discardsHighlightKey = null; // the discarded tile tapped to highlight its matches, or null
 var discardLog = [];       // parallel to discardPile: {key, by: seat id}
@@ -3501,6 +3599,66 @@ function updateOppUI(){
 document.getElementById('settingsCollapseBtn').addEventListener('click', function(){ settingsVisible = !settingsVisible; updateSettingsUI(); });
 document.getElementById('addTilesCollapseBtn').addEventListener('click', function(){ addTilesVisible = !addTilesVisible; updateAddTilesUI(); });
 document.getElementById('oppCollapseBtn').addEventListener('click', function(){ oppVisible = !oppVisible; updateOppUI(); });
+function updateHelpUI(){
+  var hb = document.getElementById('helpBody');
+  if(hb) hb.style.display = helpVisible ? '' : 'none';
+  syncCollapseBtn('helpCollapseBtn', helpVisible, 'Help');
+  var ub = document.getElementById('helpUseBody');
+  if(ub) ub.style.display = helpUseVisible ? '' : 'none';
+  syncCollapseBtn('helpUseCollapseBtn', helpUseVisible, 'How to use');
+  var rb = document.getElementById('helpReadBody');
+  if(rb) rb.style.display = helpReadVisible ? '' : 'none';
+  syncCollapseBtn('helpReadCollapseBtn', helpReadVisible, 'How to read');
+  var subs = document.querySelectorAll('.help-sub');
+  for(var i = 0; i < subs.length; i++){
+    var btn = subs[i].querySelector('.collapse-toggle');
+    var body = subs[i].querySelector('.help-sub-body');
+    if(!btn || !body) continue;
+    var open = helpSubOpen[body.id] !== false;
+    syncCollapseBtn(btn.id, open, btn.getAttribute('data-what') || 'section');
+    body.style.display = open ? '' : 'none';
+  }
+}
+document.getElementById('helpCollapseBtn').addEventListener('click', function(){ helpVisible = !helpVisible; updateHelpUI(); });
+document.getElementById('helpUseCollapseBtn').addEventListener('click', function(){ helpUseVisible = !helpUseVisible; updateHelpUI(); });
+document.getElementById('helpReadCollapseBtn').addEventListener('click', function(){ helpReadVisible = !helpReadVisible; updateHelpUI(); });
+(function(){
+  var btns = document.querySelectorAll('.help-sub .collapse-toggle');
+  for(var i = 0; i < btns.length; i++){
+    btns[i].addEventListener('click', function(){
+      var bodyId = this.getAttribute('aria-controls');
+      helpSubOpen[bodyId] = (helpSubOpen[bodyId] === false);
+      updateHelpUI();
+    });
+  }
+})();
+/* A "?" link into Help opens whatever it points at: the Help panel,
+   its section, and the green sub-heading the target sits under — so a
+   jump never lands on a collapsed heading with nothing below it. */
+function expandHelpFor(id){
+  var el = document.getElementById(id);
+  if(!el) return;
+  var changed = false;
+  if(!helpVisible){ helpVisible = true; changed = true; }
+  if(id === 'help-use' && !helpUseVisible){ helpUseVisible = true; changed = true; }
+  if(id === 'help-read' && !helpReadVisible){ helpReadVisible = true; changed = true; }
+  var sec = el.closest ? el.closest('.help-body') : null;
+  if(sec){
+    if(sec.id === 'helpUseBody' && !helpUseVisible){ helpUseVisible = true; changed = true; }
+    if(sec.id === 'helpReadBody' && !helpReadVisible){ helpReadVisible = true; changed = true; }
+  }
+  var sub = el.closest ? el.closest('.help-sub') : null;
+  if(sub){
+    var body = sub.querySelector('.help-sub-body');
+    if(body && helpSubOpen[body.id] === false){ helpSubOpen[body.id] = true; changed = true; }
+  }
+  if(changed) updateHelpUI();
+}
+document.addEventListener('click', function(e){
+  var a = e.target && e.target.closest ? e.target.closest('a[href^="#help"]') : null;
+  if(a) expandHelpFor(a.getAttribute('href').slice(1));
+});
+if(location.hash && location.hash.indexOf('#help') === 0) expandHelpFor(location.hash.slice(1));
 document.getElementById('discardsSortCheck').addEventListener('change', function(){ discardsSortBySuit = this.checked; updateDiscardsUI(); });
 document.getElementById('discardsGrid').addEventListener('click', function(e){
   var t = e.target && e.target.closest ? e.target.closest('.tile') : null;
