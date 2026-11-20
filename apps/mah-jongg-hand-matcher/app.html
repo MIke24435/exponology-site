@@ -110,7 +110,10 @@
   .add-tools .match-select{min-height:44px;padding-top:8px;padding-bottom:8px}
   .btn-compact{min-height:44px;padding:8px 16px;font-size:.95rem}
   .btn-icon{min-width:44px;padding:8px 10px;font-size:1.25rem;line-height:1}
-  .btn-icon-lg{min-width:76px;padding:12px 14px;font-size:2.4rem;font-weight:800}
+  /* .btn sets font-size:1rem later in the file, so this needs the
+     doubled selector to win: without it the glyphs stayed 1rem
+     inside the big ovals (caught by the live check, Nov 20). */
+  .btn.btn-icon-lg{min-width:76px;padding:12px 14px;font-size:2.4rem;font-weight:800;line-height:1}
   .panel h2{font-size:1.05rem;margin:0}
   .count-line{color:var(--ink-soft);font-weight:600;font-size:.98rem}
   .round-line:empty{display:none}
