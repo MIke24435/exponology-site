@@ -701,7 +701,9 @@
     <div class="call-bar" id="callBar" hidden>
       <span id="callTile"></span>
       <span class="call-label" id="callLabel"></span>
-      <button type="button" class="btn btn-compact" id="callGroupBtn">Call</button>
+      <button type="button" class="btn btn-compact" id="callPungBtn">Call — Pung</button>
+      <button type="button" class="btn btn-compact" id="callKongBtn">Call — Kong</button>
+      <button type="button" class="btn btn-compact" id="callQuintBtn">Call — Quint</button>
       <button type="button" class="btn btn-compact" id="callMjBtn" hidden>Call Mah Jongg</button>
       <button type="button" class="btn btn-ghost btn-compact" id="passCallBtn">Pass</button>
       <a class="help-q" href="#help-call" aria-label="Help: calling a discard">?</a>
@@ -953,7 +955,8 @@
       <li>If a tile another player throws is one you can use, play pauses and the <strong>Call / Pass</strong> buttons appear under your rack.</li>
       <li>You can call it two ways:</li>
       <li><strong>For Mah Jongg</strong> — if it is the last tile you need.</li>
-      <li><strong>For a pung or kong</strong> — if you already hold 2 (or 3) more of that tile.</li>
+      <li><strong>For a pung, kong or quint</strong> — if you already hold 2, 3 or 4 more of that tile.</li>
+      <li>When more than one size is possible you get a button for each — pick the one your hand needs, so you don’t spend a Joker you didn’t have to.</li>
       <li>Calling for a set puts those tiles <strong>face-up in the controls box under your rack</strong>.</li>
       <li>The turn jumps to you, and you discard one tile.</li>
       <li>A Joker can stand in for tiles in a set of 3 or more. To call, you must hold at least one real tile of the kind — Jokers on your rack fill the rest of the set, and the <strong>Call</strong> button says how many Jokers it will use.</li>
@@ -1460,7 +1463,7 @@ var discardPile = [];
 var PLAY_ORDER = ['you', 'right', 'opposite', 'left'];
 var opponents = [];        // {id, name, label, rack:[], melds:[{key,tiles,kind}], status}
 var opponentsDealt = false;
-var exposedMelds = [];     // the user's called sets: {key, tiles:[keys], kind:'Pung'|'Kong'}
+var exposedMelds = [];     // the user's called sets: {key, tiles:[keys], kind:'Pung'|'Kong'|'Quint'}
 var discardsVisible = true; // the chevron button in the discarded tiles box: open or collapsed
 var settingsVisible = true; // Settings box chevron: open or collapsed
 var addTilesVisible = true; // Add tiles box chevron: open or collapsed
@@ -1506,7 +1509,7 @@ function snapshotGame(){
     discardLog: discardLog.map(function(d){ return {key: d.key, by: d.by}; }),
     opponents: opponents.map(function(o){ return {id: o.id, name: o.name, label: o.label, rack: o.rack.slice(), melds: cloneMelds(o.melds), status: o.status, target: o.target, showHand: o.showHand}; }),
     opponentsDealt: opponentsDealt, exposedMelds: cloneMelds(exposedMelds),
-    pendingCall: pendingCall ? {key: pendingCall.key, by: pendingCall.by, pung: pendingCall.pung, kong: pendingCall.kong, mj: pendingCall.mj, mjHand: pendingCall.mjHand, pungJokers: pendingCall.pungJokers, kongJokers: pendingCall.kongJokers} : null,
+    pendingCall: pendingCall ? {key: pendingCall.key, by: pendingCall.by, pung: pendingCall.pung, kong: pendingCall.kong, quint: pendingCall.quint, mj: pendingCall.mj, mjHand: pendingCall.mjHand, pungJokers: pendingCall.pungJokers, kongJokers: pendingCall.kongJokers, quintJokers: pendingCall.quintJokers} : null,
     opponentsRunning: opponentsRunning, gameOver: gameOver,
     gameResult: gameResult ? {type: gameResult.type, opp: gameResult.opp, hand: gameResult.hand, viaCall: gameResult.viaCall} : null,
     scores: {you: scores.you, right: scores.right, opposite: scores.opposite, left: scores.left},
@@ -1529,7 +1532,7 @@ function restoreGame(s){
   discardLog = s.discardLog.map(function(d){ return {key: d.key, by: d.by}; });
   opponents = s.opponents.map(function(o){ return {id: o.id, name: o.name, label: o.label, rack: o.rack.slice(), melds: cloneMelds(o.melds), status: o.status, target: o.target, showHand: o.showHand}; });
   opponentsDealt = s.opponentsDealt; exposedMelds = cloneMelds(s.exposedMelds);
-  pendingCall = s.pendingCall ? {key: s.pendingCall.key, by: s.pendingCall.by, pung: s.pendingCall.pung, kong: s.pendingCall.kong, mj: s.pendingCall.mj, mjHand: s.pendingCall.mjHand, pungJokers: s.pendingCall.pungJokers, kongJokers: s.pendingCall.kongJokers} : null;
+  pendingCall = s.pendingCall ? {key: s.pendingCall.key, by: s.pendingCall.by, pung: s.pendingCall.pung, kong: s.pendingCall.kong, quint: s.pendingCall.quint, mj: s.pendingCall.mj, mjHand: s.pendingCall.mjHand, pungJokers: s.pendingCall.pungJokers, kongJokers: s.pendingCall.kongJokers, quintJokers: s.pendingCall.quintJokers} : null;
   opponentsRunning = s.opponentsRunning; gameOver = s.gameOver;
   gameResult = s.gameResult ? {type: s.gameResult.type, opp: s.gameResult.opp, hand: s.gameResult.hand, viaCall: s.gameResult.viaCall} : null;
   if(gameResult && gameResult.opp) gameResult.opp = opponentById(gameResult.opp.id) || gameResult.opp;
@@ -2018,14 +2021,14 @@ function takeLastDiscard(){
   return discardLog.pop();
 }
 function canUserCall(key){
-  var out = {pung: false, kong: false, mj: false, mjHand: null, pungJokers: 0, kongJokers: 0};
+  var out = {pung: false, kong: false, quint: false, mj: false, mjHand: null, pungJokers: 0, kongJokers: 0, quintJokers: 0};
   if(gamePhase !== 'play' || gameOver || totalTiles() !== 13) return out;
   var counts = rackCounts();
   var inRack = counts[key] || 0;
   if(key === 'joker'){
     // A Joker in the rack is not a tile a set can be built from —
     // keep the plain count rule for a discarded Joker.
-    if(inRack >= 2){ out.pung = true; out.kong = inRack >= 3; }
+    if(inRack >= 2){ out.pung = true; out.kong = inRack >= 3; out.quint = inRack >= 4; }
   } else {
     // A called set needs at least one real tile from the rack;
     // Jokers on the rack fill the rest of a pung or kong, so an
@@ -2034,6 +2037,7 @@ function canUserCall(key){
     var jokers = counts['joker'] || 0;
     if(inRack >= 1 && inRack + jokers >= 2){ out.pung = true; out.pungJokers = Math.max(0, 2 - inRack); }
     if(inRack >= 1 && inRack + jokers >= 3){ out.kong = true; out.kongJokers = Math.max(0, 3 - inRack); }
+    if(inRack >= 1 && inRack + jokers >= 4){ out.quint = true; out.quintJokers = Math.max(0, 4 - inRack); }
   }
   var sim = allCounts();
   sim[key] = (sim[key] || 0) + 1;
@@ -2166,7 +2170,7 @@ function resolveAfterDiscard(discarder){
     if(seat === 'you'){
       var uc = canUserCall(key);
       if(uc.mj){
-        pendingCall = {key: key, by: discarder, pung: uc.pung, kong: uc.kong, mj: true, mjHand: uc.mjHand, pungJokers: uc.pungJokers, kongJokers: uc.kongJokers};
+        pendingCall = {key: key, by: discarder, pung: uc.pung, kong: uc.kong, quint: uc.quint, mj: true, mjHand: uc.mjHand, pungJokers: uc.pungJokers, kongJokers: uc.kongJokers, quintJokers: uc.quintJokers};
         refresh();
         var cb = document.getElementById('callBar');
         if(cb) cb.scrollIntoView({behavior: 'smooth', block: 'center'});
@@ -2182,9 +2186,9 @@ function resolveAfterDiscard(discarder){
       }
     }
   }
-  var uc2 = discarder !== 'you' ? canUserCall(key) : {pung: false, kong: false, pungJokers: 0, kongJokers: 0};
+  var uc2 = discarder !== 'you' ? canUserCall(key) : {pung: false, kong: false, quint: false, pungJokers: 0, kongJokers: 0, quintJokers: 0};
   if(uc2.pung){
-    pendingCall = {key: key, by: discarder, pung: true, kong: uc2.kong, mj: false, mjHand: null, pungJokers: uc2.pungJokers, kongJokers: uc2.kongJokers};
+    pendingCall = {key: key, by: discarder, pung: true, kong: uc2.kong, quint: uc2.quint, mj: false, mjHand: null, pungJokers: uc2.pungJokers, kongJokers: uc2.kongJokers, quintJokers: uc2.quintJokers};
     refresh();
     var cb2 = document.getElementById('callBar');
     if(cb2) cb2.scrollIntoView({behavior: 'smooth', block: 'center'});
@@ -2241,14 +2245,17 @@ function executeOpponentPungCall(oppId, discarder, key){
   showMsg(opp.name + ' called the ' + tileName(key) + ' that ' + seatName(discarder) + ' discarded, and exposed a ' + kind + ' of ' + tileName(key) + 's' + (info.jokers ? ' — with ' + info.jokers + (info.jokers === 1 ? ' Joker' : ' Jokers') + ' standing in, which anyone holding a ' + tileName(key) + ' can later swap out in a Joker exchange' : '') + ' — you can see it on their card. Calling jumps the turn to them, and they discard next' + (gameSpeed === 'manual' ? ' — tap “Next player” when you are ready for their discard.' : '.'), true);
   armPendingTimer();
 }
-function doCallGroup(){
-  if(!pendingCall || !pendingCall.pung) return;
+function doCallGroup(kind){
+  if(!pendingCall) return;
+  if(kind === 'Kong' && !pendingCall.kong) return;
+  if(kind === 'Quint' && !pendingCall.quint) return;
+  if(kind === 'Pung' && !pendingCall.pung) return;
   pushUndo();
   var pc = pendingCall;
   pendingCall = null;
   takeLastDiscard();
-  var use = pc.kong ? 3 : 2;
-  var jokersUsed = pc.kong ? (pc.kongJokers || 0) : (pc.pungJokers || 0);
+  var use = kind === 'Quint' ? 4 : kind === 'Kong' ? 3 : 2;
+  var jokersUsed = kind === 'Quint' ? (pc.quintJokers || 0) : kind === 'Kong' ? (pc.kongJokers || 0) : (pc.pungJokers || 0);
   var tiles = [pc.key];
   for(var i = 0; i < use - jokersUsed; i++){
     var ix = rack.indexOf(pc.key);
@@ -2258,7 +2265,7 @@ function doCallGroup(){
     var jx = rack.indexOf('joker');
     if(jx !== -1){ rack.splice(jx, 1); tiles.push('joker'); }
   }
-  var kind = tiles.length === 4 ? 'Kong' : 'Pung';
+  var kind = tiles.length === 5 ? 'Quint' : tiles.length === 4 ? 'Kong' : 'Pung';
   exposedMelds.push({key: pc.key, tiles: tiles, kind: kind});
   lastNewIndex = -1; lastNewKey = null;
   if(selectedHandId) applyArrangeForSelected();
@@ -2482,10 +2489,16 @@ function updateCallUI(){
   bar.hidden = false;
   document.getElementById('callTile').innerHTML = revealTileHTML(pendingCall.key);
   document.getElementById('callLabel').textContent = seatName(pendingCall.by) + ' discarded ' + tileName(pendingCall.key) + (pendingCall.mj ? ' — Mah Jongg!' : ' — call it?');
-  var gb = document.getElementById('callGroupBtn');
-  gb.hidden = !pendingCall.pung;
-  var callJokers = pendingCall.kong ? (pendingCall.kongJokers || 0) : (pendingCall.pungJokers || 0);
-  gb.textContent = (pendingCall.kong ? 'Call — Kong' : 'Call — Pung') + (callJokers ? ' (' + callJokers + (callJokers === 1 ? ' Joker' : ' Jokers') + ')' : '');
+  var pb = document.getElementById('callPungBtn');
+  var kb = document.getElementById('callKongBtn');
+  var qb = document.getElementById('callQuintBtn');
+  pb.hidden = !pendingCall.pung;
+  kb.hidden = !pendingCall.kong;
+  qb.hidden = !pendingCall.quint;
+  var jokerBit = function(n){ return n ? ' (' + n + (n === 1 ? ' Joker' : ' Jokers') + ')' : ''; };
+  pb.textContent = 'Call — Pung' + jokerBit(pendingCall.pungJokers || 0);
+  kb.textContent = 'Call — Kong' + jokerBit(pendingCall.kongJokers || 0);
+  qb.textContent = 'Call — Quint' + jokerBit(pendingCall.quintJokers || 0);
   document.getElementById('callMjBtn').hidden = !pendingCall.mj;
 }
 function updateEndUI(){
@@ -3678,7 +3691,9 @@ function startNewHand(){
 }
 document.getElementById('mjNewHandBtn').addEventListener('click', startNewHand);
 document.getElementById('endNewHandBtn').addEventListener('click', startNewHand);
-document.getElementById('callGroupBtn').addEventListener('click', doCallGroup);
+document.getElementById('callPungBtn').addEventListener('click', function(){ doCallGroup('Pung'); });
+document.getElementById('callKongBtn').addEventListener('click', function(){ doCallGroup('Kong'); });
+document.getElementById('callQuintBtn').addEventListener('click', function(){ doCallGroup('Quint'); });
 document.getElementById('callMjBtn').addEventListener('click', doCallMahJongg);
 document.getElementById('passCallBtn').addEventListener('click', passCall);
 document.getElementById('speedSelect').addEventListener('change', function(){ setGameSpeed(this.value); });
