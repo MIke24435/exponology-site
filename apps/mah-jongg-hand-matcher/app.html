@@ -116,7 +116,15 @@
   /* 2.4rem was not enough in ink: the ordinary "+" glyph is only
      about half the em tall, so it measured ~19px. 3rem plus the
      fullwidth "+" below (which fills the em square) for Draw. */
-  .btn.btn-icon-lg{min-width:76px;padding:12px 14px;font-size:3rem;font-weight:800;line-height:1}
+  /* Icon circles: 54px across — about the height of the exposed
+     tiles in this same controls box (.meld-tiles .tile is 54px
+     tall) — with the 3rem glyphs kept. Solid jade fill with white
+     glyphs, so the circles stand out from the pale box (they were
+     pale ghost buttons before, Nov 20). */
+  .btn.btn-icon-lg{width:54px;height:54px;min-width:54px;min-height:54px;padding:0;border-radius:50%;font-size:3rem;font-weight:800;line-height:1;background:var(--jade);color:#fff;border-color:var(--jade)}
+  /* The controls box lights up on the player's turn: a gold ring
+     round it, so it is obvious whose move it is. */
+  .game-controls.your-turn{border-color:var(--jade);outline:3px solid var(--gold);outline-offset:2px}
   .panel h2{font-size:1.05rem;margin:0}
   .count-line{color:var(--ink-soft);font-weight:600;font-size:.98rem}
   .round-line:empty{display:none}
@@ -701,10 +709,13 @@
         <button type="button" class="btn btn-compact btn-icon btn-icon-lg" id="swapBtn" disabled aria-label="Swap" title="Swap">⇄</button>
       </div>
       <div class="ctl-group">
-        <button type="button" class="btn btn-ghost btn-compact btn-icon btn-icon-lg" id="drawOneBtn" aria-label="Draw a tile" title="Draw a tile">＋</button>
+        <button type="button" class="btn btn-compact btn-icon btn-icon-lg" id="drawOneBtn" aria-label="Draw a tile" title="Draw a tile">＋</button>
       </div>
       <div class="ctl-group">
-        <button type="button" class="btn btn-ghost btn-compact btn-icon btn-icon-lg" id="clearBtn" disabled aria-label="Clear the rack" title="Clear the rack">✕</button>
+        <button type="button" class="btn btn-compact btn-icon btn-icon-lg" id="undoBtn" disabled aria-label="Undo last move" title="Undo last move">−</button>
+      </div>
+      <div class="ctl-group">
+        <button type="button" class="btn btn-compact btn-icon btn-icon-lg" id="clearBtn" disabled aria-label="Clear the rack" title="Clear the rack">✕</button>
       </div>
     </div>
   </section>
@@ -844,6 +855,7 @@
     <ul>
       <li>At <strong>13</strong> tiles, draw one to make <strong>14</strong>:</li>
       <li>Tap <strong>+</strong> (Draw) in Random, or pick a tile in Add tiles in Manual.</li>
+      <li><strong>Undo</strong> (−) takes back your last move — a draw, a discard, a Charleston swap, a call, a Joker exchange, or clearing the rack. It only works on your turn.</li>
       <li>At <strong>14</strong>, tap the tile you want to discard — it leaves the rack, back to 13.</li>
       <li>East’s first turn is the exception: no draw, just the discard.</li>
       <li>Keep alternating 13 → 14 → 13.</li>
@@ -1369,6 +1381,87 @@ var scoredThisGame = false;
 var turnSeq = 0;           // bumped on every new game to cancel pending opponent timers
 var lastDiscarder = null;  // seat id of whoever discarded most recently
 var resolveChain = 0;      // guards against endless call chains on one discard sequence
+/* ================= Undo — the last move only =================
+   Before every move the user makes (draw, discard, Charleston
+   swap, call, Joker exchange, adding or taking a tile off by
+   hand, Clear, dealing a new hand), the whole table is
+   snapshotted; Undo puts the last snapshot back. Opponent moves
+   are never snapshotted, and Undo is only live on the user's
+   turn, so an Undo never rewinds the other players. The wall is
+   not stored — it is rebuilt from the tiles in play
+   (remainingPool), so restoring the racks, melds and discard pile
+   restores the wall too. */
+var undoStack = [];
+var UNDO_MAX = 20;
+function cloneMelds(melds){ return melds.map(function(m){ return {key: m.key, tiles: m.tiles.slice(), kind: m.kind}; }); }
+function snapshotGame(){
+  return {
+    rack: rack.slice(), rackGapAfter: rackGapAfter, rackBreaks: rackBreaks.slice(),
+    rackArrangedForSelected: rackArrangedForSelected,
+    lastNewIndex: lastNewIndex, lastNewKey: lastNewKey,
+    drawsMade: drawsMade, discardsMade: discardsMade,
+    gamePhase: gamePhase, charlestonRound: charlestonRound, charlestonSel: charlestonSel.slice(),
+    charlestonWanted: charlestonWanted, charlestonCompleted: charlestonCompleted,
+    discardPile: discardPile.slice(),
+    discardLog: discardLog.map(function(d){ return {key: d.key, by: d.by}; }),
+    opponents: opponents.map(function(o){ return {id: o.id, name: o.name, label: o.label, rack: o.rack.slice(), melds: cloneMelds(o.melds), status: o.status, target: o.target, showHand: o.showHand}; }),
+    opponentsDealt: opponentsDealt, exposedMelds: cloneMelds(exposedMelds),
+    pendingCall: pendingCall ? {key: pendingCall.key, by: pendingCall.by, pung: pendingCall.pung, kong: pendingCall.kong, mj: pendingCall.mj, mjHand: pendingCall.mjHand, pungJokers: pendingCall.pungJokers, kongJokers: pendingCall.kongJokers} : null,
+    opponentsRunning: opponentsRunning, gameOver: gameOver,
+    gameResult: gameResult ? {type: gameResult.type, opp: gameResult.opp, hand: gameResult.hand, viaCall: gameResult.viaCall} : null,
+    scores: {you: scores.you, right: scores.right, opposite: scores.opposite, left: scores.left},
+    scoredThisGame: scoredThisGame, turnSeq: turnSeq, lastDiscarder: lastDiscarder,
+    resolveChain: resolveChain, currentTurnSeat: currentTurnSeat,
+    pendingStep: pendingStep ? {kind: pendingStep.kind, seat: pendingStep.seat, oppId: pendingStep.oppId, key: pendingStep.key, hand: pendingStep.hand, by: pendingStep.by} : null,
+    selectedHandId: selectedHandId, isEast: isEast, randomMode: randomMode,
+    discardsHighlightKey: discardsHighlightKey, showingMore: showingMore
+  };
+}
+function restoreGame(s){
+  clearOpponentTimer();
+  rack = s.rack.slice(); rackGapAfter = s.rackGapAfter; rackBreaks = s.rackBreaks.slice();
+  rackArrangedForSelected = s.rackArrangedForSelected;
+  lastNewIndex = s.lastNewIndex; lastNewKey = s.lastNewKey;
+  drawsMade = s.drawsMade; discardsMade = s.discardsMade;
+  gamePhase = s.gamePhase; charlestonRound = s.charlestonRound; charlestonSel = s.charlestonSel.slice();
+  charlestonWanted = s.charlestonWanted; charlestonCompleted = s.charlestonCompleted;
+  discardPile = s.discardPile.slice();
+  discardLog = s.discardLog.map(function(d){ return {key: d.key, by: d.by}; });
+  opponents = s.opponents.map(function(o){ return {id: o.id, name: o.name, label: o.label, rack: o.rack.slice(), melds: cloneMelds(o.melds), status: o.status, target: o.target, showHand: o.showHand}; });
+  opponentsDealt = s.opponentsDealt; exposedMelds = cloneMelds(s.exposedMelds);
+  pendingCall = s.pendingCall ? {key: s.pendingCall.key, by: s.pendingCall.by, pung: s.pendingCall.pung, kong: s.pendingCall.kong, mj: s.pendingCall.mj, mjHand: s.pendingCall.mjHand, pungJokers: s.pendingCall.pungJokers, kongJokers: s.pendingCall.kongJokers} : null;
+  opponentsRunning = s.opponentsRunning; gameOver = s.gameOver;
+  gameResult = s.gameResult ? {type: s.gameResult.type, opp: s.gameResult.opp, hand: s.gameResult.hand, viaCall: s.gameResult.viaCall} : null;
+  if(gameResult && gameResult.opp) gameResult.opp = opponentById(gameResult.opp.id) || gameResult.opp;
+  scores = {you: s.scores.you, right: s.scores.right, opposite: s.scores.opposite, left: s.scores.left};
+  scoredThisGame = s.scoredThisGame; turnSeq = s.turnSeq; lastDiscarder = s.lastDiscarder;
+  resolveChain = s.resolveChain; currentTurnSeat = s.currentTurnSeat;
+  pendingStep = s.pendingStep ? {kind: s.pendingStep.kind, seat: s.pendingStep.seat, oppId: s.pendingStep.oppId, key: s.pendingStep.key, hand: s.pendingStep.hand, by: s.pendingStep.by} : null;
+  selectedHandId = s.selectedHandId; isEast = s.isEast; randomMode = s.randomMode;
+  discardsHighlightKey = s.discardsHighlightKey; showingMore = s.showingMore;
+  if(pendingStep && !gameOver) armPendingTimer();
+}
+function pushUndo(){
+  undoStack.push(snapshotGame());
+  if(undoStack.length > UNDO_MAX) undoStack.shift();
+  updateUndoBtn();
+}
+function updateUndoBtn(){
+  var b = document.getElementById('undoBtn');
+  if(!b) return;
+  b.disabled = undoStack.length === 0 || gameOver || !!pendingCall || opponentsRunning;
+}
+function doUndo(){
+  if(!undoStack.length){ showMsg('Nothing to undo yet — make a move first.'); return; }
+  if(gameOver){ showMsg('This game is over — deal a new hand to play again.'); return; }
+  if(pendingCall){ showMsg('Decide on the call first — tap Call or Pass under your rack.'); return; }
+  if(opponentsRunning){ showMsg('The other players are taking their turns — wait for your turn to undo.'); return; }
+  restoreGame(undoStack.pop());
+  showingMore = false;
+  refresh();
+  updateUndoBtn();
+  showMsg('Undid your last move — the table is back to how it was before it.', true);
+}
 /* Game speed — a teaching control for how fast the other players
    discard and call, set with the Speed dropdown at the top of
    the form:
@@ -1696,6 +1789,7 @@ function replaceTileWithRandom(idx){
 }
 function discardTile(idx){
   if(idx < 0 || idx >= rack.length) return;
+  pushUndo();
   var key = rack[idx];
   discardPile.push(key); // kept for the Discards area
   discardLog.push({key: key, by: 'you'});
@@ -1730,6 +1824,7 @@ function drawOneTile(){
   if(opponentsRunning){ showMsg('The other players are taking their turns — wait for your turn to draw.'); return; }
   if(totalTiles() >= 14){ showMsg('You already hold 14 tiles — discard one first, unless those 14 are Mah Jongg.'); return; }
   if(!randomMode){ showMsg('Manual mode — pick your drawn tile yourself in Add tiles above to make ' + (totalTiles() + 1) + ' tiles.'); return; }
+  pushUndo();
   var pool = remainingPool();
   if(!pool.length){
     if(gamePhase === 'play' && opponentsDealt){ endWallGame(); }
@@ -2048,6 +2143,7 @@ function executeOpponentPungCall(oppId, discarder, key){
 }
 function doCallGroup(){
   if(!pendingCall || !pendingCall.pung) return;
+  pushUndo();
   var pc = pendingCall;
   pendingCall = null;
   takeLastDiscard();
@@ -2072,6 +2168,7 @@ function doCallGroup(){
 }
 function doCallMahJongg(){
   if(!pendingCall || !pendingCall.mj) return;
+  pushUndo();
   var pc = pendingCall;
   pendingCall = null;
   takeLastDiscard();
@@ -2141,7 +2238,9 @@ function doUserJokerExchange(owner, meldIndex){
   if(userExchangeBlocked()) return;
   var melds = meldsOfSeat(owner);
   var meld = melds[meldIndex];
-  if(!meld || !performJokerExchange(rack, meld)) { refresh(); return; }
+  if(!meld) { refresh(); return; }
+  pushUndo();
+  if(!performJokerExchange(rack, meld)) { undoStack.pop(); refresh(); return; }
   var ownerOpp = owner !== 'you' ? opponentById(owner) : null;
   if(ownerOpp) ownerOpp.status = 'You exchanged a Joker out of their ' + meld.kind + ' — your ' + tileName(meld.key) + ' took its place.';
   lastNewKey = 'joker';
@@ -2399,6 +2498,7 @@ function swapCharlestonTiles(){
     showMsg('Pick 3 tiles to swap first — tap tiles on your rack. You have picked ' + charlestonSel.length + ' of 3.');
     return;
   }
+  pushUndo();
   var label = CHARLESTON_ROUNDS[charlestonRound];
   var n = charlestonSel.length;
   if(optional && n === 0){
@@ -2696,6 +2796,9 @@ function updateTurnUI(){
     }
   }
   if(bar){ bar.innerHTML = html; bar.hidden = !html; }
+  var gc = document.querySelector('.game-controls');
+  if(gc) gc.classList.toggle('your-turn', !gameOver && !pendingCall && !opponentsRunning && gamePhase !== 'setup');
+  updateUndoBtn();
 }
 function updateDrawUI(){
   var rackHint = document.getElementById('rackHint');
@@ -2718,6 +2821,7 @@ function setRandomMode(on){
   if(on){
     // Ticking Random is the deal: a fresh hand for all four
     // players, replacing whatever was on the rack.
+    pushUndo();
     randomMode = true;
     dealRandomHand();
     return;
@@ -2727,6 +2831,7 @@ function setRandomMode(on){
     // Unticking leaves the dealt game behind: once a game has
     // started it can't be edited by hand, so Manual starts over
     // from an empty rack the user builds themselves.
+    pushUndo();
     clearToSetup();
     refresh();
     showMsg('Manual — the dealt game is cleared. Build your rack by hand in Add tiles above; tap a tile on the rack to take it off. Tick Random when you want a dealt game instead.', true);
@@ -2806,9 +2911,11 @@ function renderRack(){
           return;
         }
         if(randomMode){
+          pushUndo();
           replaceTileWithRandom(idx);
           return;
         }
+        pushUndo();
         rack.splice(idx, 1);
         if(lastNewIndex === idx){ lastNewIndex = -1; lastNewKey = null; }
         else if(lastNewIndex > idx){ lastNewIndex--; }
@@ -2983,6 +3090,7 @@ function addTile(key){
     return;
   }
   var wasThirteen = totalTiles() === 13;
+  pushUndo();
   rack.push(key);
   if(wasThirteen) drawsMade++;
   // The rack arranges itself: for the chosen hand when one is chosen,
@@ -3330,6 +3438,7 @@ function clearToSetup(){
 document.getElementById('clearBtn').addEventListener('click', function(){
   // Clearing follows the Random box: ticked, Clear deals a fresh
   // hand; unticked, it empties the rack for building by hand.
+  pushUndo();
   if(randomMode){ dealRandomHand(); return; }
   clearToSetup();
   showMsg('');
@@ -3399,7 +3508,9 @@ document.getElementById('discardsGrid').addEventListener('click', function(e){
   updateDiscardsUI();
 });
 document.getElementById('drawOneBtn').addEventListener('click', drawOneTile);
+document.getElementById('undoBtn').addEventListener('click', doUndo);
 function startNewHand(){
+  pushUndo();
   if(randomMode){ dealRandomHand(); return; }
   clearToSetup();
   refresh();
