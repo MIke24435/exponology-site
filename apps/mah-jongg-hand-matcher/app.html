@@ -118,10 +118,12 @@
      fullwidth "+" below (which fills the em square) for Draw. */
   /* Icon circles: 54px across — about the height of the exposed
      tiles in this same controls box (.meld-tiles .tile is 54px
-     tall) — with the 3rem glyphs kept. Solid jade fill with white
-     glyphs, so the circles stand out from the pale box (they were
-     pale ghost buttons before, Nov 20). */
-  .btn.btn-icon-lg{width:54px;height:54px;min-width:54px;min-height:54px;padding:0;border-radius:50%;font-size:3rem;font-weight:800;line-height:1;background:var(--jade);color:#fff;border-color:var(--jade)}
+     tall) — with the 3rem glyphs kept. Solid red fill, the app's
+     contrasting accent (green is the app's own colour, so green
+     circles did not stand out; changed Nov 20): white glyphs in
+     light mode, dark glyphs on the salmon red in dark mode. */
+  .btn.btn-icon-lg{width:54px;height:54px;min-width:54px;min-height:54px;padding:0;border-radius:50%;font-size:3rem;font-weight:800;line-height:1;background:var(--red);color:#fff;border-color:var(--red)}
+  @media (prefers-color-scheme: dark){ .btn.btn-icon-lg{color:#3d2320} }
   /* The controls box lights up on the player's turn: a gold ring
      round it, so it is obvious whose move it is. */
   .game-controls.your-turn{border-color:var(--jade);outline:3px solid var(--gold);outline-offset:2px}
