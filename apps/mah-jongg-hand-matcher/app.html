@@ -960,7 +960,7 @@
       <li>When more than one size is possible you get a button for each — pick the one your hand needs, so you don’t spend a Joker you didn’t have to.</li>
       <li>Calling for a set puts those tiles <strong>face-up in the controls box under your rack</strong>.</li>
       <li>The turn jumps to you, and you discard one tile.</li>
-      <li>A Joker can stand in for tiles in a set of 3 or more. To call, you must hold at least one real tile of the kind — Jokers on your rack fill the rest of the set, and the <strong>Call</strong> button says how many Jokers it will use.</li>
+      <li>A Joker can stand in for tiles in a set of 3 or more of the same tile. To call, you must hold at least one real tile of the kind — Jokers on your rack fill the rest of the set, and the <strong>Call</strong> button says how many Jokers it will use.</li>
       <li>An exposed Joker is not stuck there: anyone holding the tile it stands for can swap it back out — see <strong>Joker exchange</strong> below.</li>
       <li>Once you expose a set, a <strong>Concealed</strong> hand can no longer be won.</li>
       <li><strong>Pass</strong> lets the tile go.</li>
@@ -1088,6 +1088,7 @@
       <li>The big code, like <strong>E2.2</strong>, is the hand’s place on the 2026 card, with its section named underneath.</li>
       <li>A gold <span class="sp-star" aria-hidden="true">★</span> next to the hand ID means the hand includes <strong>singles and/or pairs</strong>.</li>
       <li>A Joker can never fill a single or a pair, so those tiles have to be on your rack as themselves.</li>
+      <li>A run (a series like 3-4-5) works the same way: a Joker can never fill a run tile, so all three tiles have to come from the wall.</li>
       <li>The badges show <strong>X · Exposed</strong> or <strong>C · Concealed</strong>, and the hand’s points.</li>
       <li>The three circles under the points are, in order:</li>
       <li>The tiles you hold toward that hand, not counting Jokers (brown).</li>
@@ -1235,6 +1236,26 @@ function dragonRuns(tokens){
   });
   return runs;
 }
+function isRunKeys(keys){
+  // A run: three or more different, consecutive numbers in one suit,
+  // each once (e.g. [bcd] = 3-4-5). Four lone numbers like (2468) are
+  // not a run (not consecutive); a single, pair or pung is not a run
+  // (a number repeats). Wind/dragon/flower keys are never a run.
+  if(keys.length < 3) return false;
+  var suit = null, nums = [];
+  for(var i = 0; i < keys.length; i++){
+    var m = /^([a-z]+)([1-9])$/.exec(keys[i]);
+    if(!m) return false;
+    if(suit === null) suit = m[1];
+    else if(suit !== m[1]) return false;
+    var n = parseInt(m[2], 10);
+    if(nums.indexOf(n) !== -1) return false;
+    nums.push(n);
+  }
+  nums.sort(function(a, b){ return a - b; });
+  for(var j = 1; j < nums.length; j++){ if(nums[j] !== nums[j-1] + 1) return false; }
+  return true;
+}
 function expandGroups(h, tokens, numMap, suitMap, dragonPick){
   var groups = [];
   tokens.forEach(function(tk, ti){
@@ -1267,7 +1288,14 @@ function expandGroups(h, tokens, numMap, suitMap, dragonPick){
     var allSame = true;
     for(var j = 1; j < keys.length; j++){ if(keys[j] !== keys[0]){ allSame = false; break; } }
     if(allSame) groups.push({k: keys[0], n: keys.length});
-    else keys.forEach(function(k){ groups.push({k: k, n: 1}); });
+    else {
+      // A run is one meld, not three singles: tag its tiles so the
+      // singles/pairs star (and filter) do not count them, while the
+      // Joker and blocker rules still see them as single tiles that
+      // only the wall can supply.
+      var isRun = isRunKeys(keys);
+      keys.forEach(function(k){ groups.push({k: k, n: 1, run: isRun}); });
+    }
   });
   return groups;
 }
@@ -1328,7 +1356,7 @@ function matchGroups(groups, rackCounts, boundJokers){
   for(var k in rackCounts) avail[k] = rackCounts[k];
   var jokersLeft = avail['joker'] || 0;
   avail['joker'] = 0;
-  var res = groups.map(function(g){ return {k: g.k, n: g.n, got: 0, jok: 0}; });
+  var res = groups.map(function(g){ return {k: g.k, n: g.n, got: 0, jok: 0, run: !!g.run}; });
   res.forEach(function(r){
     if(r.n < 3){ var take = Math.min(r.n, avail[r.k] || 0); r.got = take; avail[r.k] = (avail[r.k] || 0) - take; }
   });
@@ -1678,7 +1706,7 @@ SECTIONS.forEach(function(s){ selectedSections[s.letter] = true; });
 var minMatched = 1;
 var spFilter = 'without'; // 'all' | 'with' | 'without' — singles & pairs (★) filter
 var selectedHandId = null; // hand id chosen with "Play hand" on a hand card
-function hasSinglesOrPairs(r){ return r.groups.some(function(g){ return g.n < 3; }); }
+function hasSinglesOrPairs(r){ return r.groups.some(function(g){ return g.n < 3 && !g.run; }); }
 var isEast = true;
 /* Every hand on the card is 14 tiles, so 14 is always the most anyone
    can hold — that is the Mah Jongg size, and every player reaches it
