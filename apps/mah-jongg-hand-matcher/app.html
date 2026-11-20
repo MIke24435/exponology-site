@@ -113,7 +113,10 @@
   /* .btn sets font-size:1rem later in the file, so this needs the
      doubled selector to win: without it the glyphs stayed 1rem
      inside the big ovals (caught by the live check, Nov 20). */
-  .btn.btn-icon-lg{min-width:76px;padding:12px 14px;font-size:2.4rem;font-weight:800;line-height:1}
+  /* 2.4rem was not enough in ink: the ordinary "+" glyph is only
+     about half the em tall, so it measured ~19px. 3rem plus the
+     fullwidth "+" below (which fills the em square) for Draw. */
+  .btn.btn-icon-lg{min-width:76px;padding:12px 14px;font-size:3rem;font-weight:800;line-height:1}
   .panel h2{font-size:1.05rem;margin:0}
   .count-line{color:var(--ink-soft);font-weight:600;font-size:.98rem}
   .round-line:empty{display:none}
@@ -698,7 +701,7 @@
         <button type="button" class="btn btn-compact btn-icon btn-icon-lg" id="swapBtn" disabled aria-label="Swap" title="Swap">⇄</button>
       </div>
       <div class="ctl-group">
-        <button type="button" class="btn btn-ghost btn-compact btn-icon btn-icon-lg" id="drawOneBtn" aria-label="Draw a tile" title="Draw a tile">+</button>
+        <button type="button" class="btn btn-ghost btn-compact btn-icon btn-icon-lg" id="drawOneBtn" aria-label="Draw a tile" title="Draw a tile">＋</button>
       </div>
       <div class="ctl-group">
         <button type="button" class="btn btn-ghost btn-compact btn-icon btn-icon-lg" id="clearBtn" disabled aria-label="Clear the rack" title="Clear the rack">✕</button>
