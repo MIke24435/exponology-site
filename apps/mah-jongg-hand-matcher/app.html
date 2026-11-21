@@ -2829,6 +2829,24 @@ function handNeedsKey(r, key){
   for(var i = 0; i < r.needed.length; i++){ if(r.needed[i].k === key && r.needed[i].n > 0) return true; }
   return false;
 }
+/* Is every copy of this tile in the rack already spoken for by the hand
+   as it stands? The re-match in discardAdvice can re-optimise (a run of
+   3-4-5-6 can become 4-5-6-7), so a tile the hand is already using can
+   look free. Count what the hand's current groups actually hold, less
+   the copies already locked in your exposed sets: if that covers every
+   copy in the rack, discarding one breaks the hand as displayed. */
+function handUsesKey(r, key){
+  if(!r || !r.groups) return false;
+  var used = 0;
+  r.groups.forEach(function(g){ if(g.k === key) used += g.got; });
+  if(used <= 0) return false;
+  var inMelds = 0;
+  exposedMelds.forEach(function(m){ m.tiles.forEach(function(t){ if(t === key) inMelds++; }); });
+  var fromRack = used - inMelds;
+  if(fromRack <= 0) return false;
+  var held = (countsOf(rack)[key] || 0);
+  return fromRack >= held;
+}
 /* The chance the next draw is a Joker, from what a player can see: 8 Jokers
    in the set, minus the ones visible (rack, exposed sets, discards), over
    the tiles left in the wall — the count the page already shows. */
@@ -2870,9 +2888,11 @@ function discardAdvice(){
     var costP = 0, costB = 0;
     var bp = bestForHand(hands.primary.h, counts, exposedMeldJokers());
     costP = hands.primary.matched - bp.matched;
+    if(handUsesKey(hands.primary, k)) costP = Math.max(costP, 1);
     if(hands.backup){
       var bb = bestForHand(hands.backup.h, counts, exposedMeldJokers());
       costB = hands.backup.matched - bb.matched;
+      if(handUsesKey(hands.backup, k)) costB = Math.max(costB, 1);
     }
     var cost = costP + costB;
     var out = visibleCount(k);
@@ -2908,9 +2928,13 @@ function discardRisk(key){
   var reasons = [];
   if(hands.primary && handNeedsKey(hands.primary, key)){
     reasons.push('Your ' + (selectedHandId ? 'chosen hand' : 'best hand') + ' (' + hands.primary.h.id + ') still needs a ' + tileName(key) + ' — this is one of the tiles it is waiting on');
+  } else if(hands.primary && handUsesKey(hands.primary, key)){
+    reasons.push('Your ' + (selectedHandId ? 'chosen hand' : 'best hand') + ' (' + hands.primary.h.id + ') is already using a ' + tileName(key) + ' — it is part of the hand as it stands');
   }
   if(hands.backup && handNeedsKey(hands.backup, key)){
     reasons.push('your alternative hand (' + hands.backup.h.id + ') still needs it too');
+  } else if(hands.backup && handUsesKey(hands.backup, key)){
+    reasons.push('your alternative hand (' + hands.backup.h.id + ') is already using it too');
   }
   var opp = oppExposesKey(key);
   if(opp) reasons.push(opp + ' has ' + tileName(key) + 's exposed — they may be collecting them, and could call this one');
@@ -2924,15 +2948,19 @@ function charlestonRisk(){
   charlestonSel.forEach(function(ix){
     var k = rack[ix];
     if(k === 'joker') return; // Jokers are already refused by the pass itself
-    if((hands.primary && handNeedsKey(hands.primary, k)) || (hands.backup && handNeedsKey(hands.backup, k))){
+    if((hands.primary && (handNeedsKey(hands.primary, k) || handUsesKey(hands.primary, k))) || (hands.backup && (handNeedsKey(hands.backup, k) || handUsesKey(hands.backup, k)))){
       if(bad.indexOf(k) === -1) bad.push(k);
     }
   });
   if(!bad.length) return null;
   var first = bad[0];
-  var whose = (hands.primary && handNeedsKey(hands.primary, first)) ? (selectedHandId ? 'your chosen hand' : 'your best hand') + ' (' + hands.primary.h.id + ')' : 'your alternative hand (' + hands.backup.h.id + ')';
-  var s = 'You’re about to pass a ' + tileName(first) + ', and ' + whose + ' still needs it.';
-  if(bad.length > 1) s += ' (' + (bad.length - 1) + ' more of the tiles you picked are needed too.)';
+  var primHit = hands.primary && (handNeedsKey(hands.primary, first) || handUsesKey(hands.primary, first));
+  var primNeed = hands.primary && handNeedsKey(hands.primary, first);
+  var backNeed = hands.backup && handNeedsKey(hands.backup, first);
+  var whose = primHit ? (selectedHandId ? 'your chosen hand' : 'your best hand') + ' (' + hands.primary.h.id + ')' : 'your alternative hand (' + hands.backup.h.id + ')';
+  var verb = primHit ? (primNeed ? 'still needs it' : 'is already using it') : (backNeed ? 'still needs it' : 'is already using it');
+  var s = 'You’re about to pass a ' + tileName(first) + ', and ' + whose + ' ' + verb + '.';
+  if(bad.length > 1) s += ' (' + (bad.length - 1) + ' more of the tiles you picked are needed or in use too.)';
   return s;
 }
 function showWarn(text, kind){
