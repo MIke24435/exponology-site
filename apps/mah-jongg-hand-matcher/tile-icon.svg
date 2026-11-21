@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Mah Jongg tile</title>
+  <!-- Tile body: ivory face with a darker edge, like the tiles in the app -->
+  <rect x="7" y="4" width="50" height="56" rx="9" fill="#efe8d3" stroke="#b7a97f" stroke-width="2"/>
+  <rect x="10" y="7" width="44" height="50" rx="7" fill="#fbf7ea"/>
+  <!-- 2 Bam: green circle, white 2, BAM below -->
+  <circle cx="32" cy="27" r="15" fill="#1e6b3a"/>
+  <text x="32" y="34" font-family="Georgia, 'Times New Roman', serif" font-size="20" font-weight="bold" fill="#ffffff" text-anchor="middle">2</text>
+  <text x="32" y="52" font-family="Georgia, 'Times New Roman', serif" font-size="9" font-weight="bold" letter-spacing="1" fill="#1e6b3a" text-anchor="middle">BAM</text>
+</svg>
