@@ -447,7 +447,8 @@
   }
   .results-head h2{font-family:Georgia,serif;font-size:1.55rem;margin:0;letter-spacing:-.01em}
   .results-count{color:var(--ink-soft);font-weight:600}
-  .results-side{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .results-side{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-left:auto}
+  .results-head .collapse-toggle{margin-left:0}
   .help-link{color:var(--jade);font-weight:700;font-size:1rem;text-decoration:underline;text-underline-offset:3px;white-space:nowrap;padding:6px 2px}
   .sp-star{color:#d9a400;font-size:1.25rem;line-height:1;margin-left:3px}
   /* Help panel */
@@ -767,7 +768,7 @@
   <section aria-live="polite">
     <div class="results-head">
       <h2 id="resultsTitle">Hands you could make</h2>
-      <div class="results-side">
+      <div class="results-side" id="resultsSide">
         <div class="results-count" id="resultsCount"></div>
         <div class="section-filter" id="sectionFilter">
           <button type="button" class="btn btn-ghost" id="sectionBtn" aria-haspopup="true" aria-expanded="false">Sections: All ▾</button>
@@ -800,7 +801,9 @@
         </div>
         <a class="help-link" href="#help-read">Help</a>
       </div>
+      <button type="button" class="collapse-toggle" id="resultsCollapseBtn" aria-expanded="true" aria-controls="resultsBody" aria-label="Collapse Hands you could make">▲</button>
     </div>
+    <div id="resultsBody">
     <p class="early-note" id="earlyNote" hidden><strong>Early hand:</strong> with fewer than 8 tiles entered, treat this list as a broad guide — it will sharpen as you add tiles.</p>
     <p class="align-legend" id="alignLegend" hidden>Number over suit letter — <strong>B</strong> Bam, <strong>C</strong> Crak, <strong>D</strong> Dot; Winds <strong>NEWS</strong>, Dragons <strong>RGW</strong>, Flower <strong>F</strong>, Joker <strong>J</strong>. Full strength = you hold it, dimmed = still needed; <strong>X</strong> = held, <strong>J</strong> = a Joker fills it. The three circles under the points: tiles held (brown), Jokers used (purple), still needed (red). <a class="help-q" href="#help-read" aria-label="Help: reading the hand cards">?</a></p>
     <div class="list" id="results"></div>
@@ -815,6 +818,7 @@
     <div id="blockerWrap" hidden>
       <h2 class="blocker-head">Hands with singles or pairs you don’t hold</h2>
       <div id="blockerArea"></div>
+    </div>
     </div>
   </section>
 
@@ -925,7 +929,7 @@
       <li>They are beginners’ teachers, not sharks: they throw the tiles their hand doesn’t need.</li>
       <li>On their turns they also make <strong>Joker exchanges</strong> — swapping a tile they hold into any exposed set whose Joker it matches, theirs or yours, and taking the Joker. See <strong>Joker exchange</strong> under Calling a discard.</li>
       <li>Tick <strong>Show hand</strong> on a card to see the hand they are going for, in the card's own notation.</li>
-      <li>Tap the <strong>▲ / ▼</strong> button at the right of a box header to collapse or expand it — Settings, Add tiles, Discarded tiles, Other players and Help all collapse that way, and so do the headings inside Help.</li>
+      <li>Tap the <strong>▲ / ▼</strong> button at the right of a box header to collapse or expand it — Settings, Add tiles, Discarded tiles, Other players, Hands you could make and Help all collapse that way, and so do the headings inside Help.</li>
     </ul>
       </div>
     </div>
@@ -1073,6 +1077,7 @@
       <li><strong>Matching tiles</strong> sets how many of your tiles a hand must use to be listed.</li>
       <li><strong>Singles &amp; pairs</strong> shows all hands, only hands with a single or pair (★), or only hands without one.</li>
       <li>Hands blocked by a single or a pair you don’t hold are listed separately, below the main list.</li>
+      <li>Tap the <strong>▲ / ▼</strong> button at the right of "Hands you could make" to hide the filters and the hands together, leaving just the heading — tap again to bring them back.</li>
       <li>The list sharpens as you add tiles — with fewer than 8 entered, treat it as a broad guide.</li>
     </ul>
       </div>
@@ -1500,6 +1505,7 @@ var oppVisible = true; // Other players box chevron: open or collapsed
 var helpVisible = true; // Help panel chevron: open or collapsed
 var helpUseVisible = true; // "How to use" section chevron: open or collapsed
 var helpReadVisible = true; // "How to read" section chevron: open or collapsed
+var resultsVisible = true; // Hands you could make chevron: open or collapsed
 var helpSubOpen = {}; // green sub-heading bodies in Help: body id -> false when collapsed
 var discardsSortBySuit = false; // the Sort by suit box in the discarded tiles header: laid-down order by default
 var discardsHighlightKey = null; // the discarded tile tapped to highlight its matches, or null
@@ -3638,9 +3644,17 @@ function updateOppUI(){
   syncCollapseBtn('oppCollapseBtn', oppVisible, 'Other players');
   grid.style.display = oppVisible ? '' : 'none';
 }
+function updateResultsUI(){
+  var side = document.getElementById('resultsSide');
+  if(side) side.style.display = resultsVisible ? '' : 'none';
+  var body = document.getElementById('resultsBody');
+  if(body) body.style.display = resultsVisible ? '' : 'none';
+  syncCollapseBtn('resultsCollapseBtn', resultsVisible, 'Hands you could make');
+}
 document.getElementById('settingsCollapseBtn').addEventListener('click', function(){ settingsVisible = !settingsVisible; updateSettingsUI(); });
 document.getElementById('addTilesCollapseBtn').addEventListener('click', function(){ addTilesVisible = !addTilesVisible; updateAddTilesUI(); });
 document.getElementById('oppCollapseBtn').addEventListener('click', function(){ oppVisible = !oppVisible; updateOppUI(); });
+document.getElementById('resultsCollapseBtn').addEventListener('click', function(){ resultsVisible = !resultsVisible; updateResultsUI(); });
 function updateHelpUI(){
   var hb = document.getElementById('helpBody');
   if(hb) hb.style.display = helpVisible ? '' : 'none';
