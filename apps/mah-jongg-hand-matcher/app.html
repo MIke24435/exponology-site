@@ -611,6 +611,8 @@
   /* Aligned hand view: number over suit letter; your tiles marked underneath */
   .align-view{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:4px}
   .agroup{display:flex;gap:2px}
+  .agroup.ag-letters{gap:0}
+  .agroup.ag-letters .acell{width:14px}
   .acell{width:19px;display:flex;flex-direction:column;align-items:center;text-align:center}
   .acell .a-num{height:1.05em;font-size:.78rem;font-weight:800;line-height:1.05;font-family:ui-sans-system,-apple-system,sans-serif}
   .acell .a-let{font-size:1.02rem;font-weight:800;line-height:1.2;font-family:ui-sans-system,-apple-system,sans-serif}
@@ -3620,7 +3622,8 @@ function alignedGroupHTML(g, exposed){
     if(mark === 'J') stateCls += ' is-joker';
     cells += '<span class="acell ' + p.cls + stateCls + '"><span class="a-num">' + p.num + '</span><span class="a-let">' + p.let + '</span><span class="a-mark' + (mark === 'J' ? ' mark-j' : '') + '">' + mark + '</span></span>';
   }
-  return '<span class="agroup">' + cells + '</span>';
+  var letters = cellParts(g.k).num === '';
+  return '<span class="agroup' + (letters ? ' ag-letters' : '') + '">' + cells + '</span>';
 }
 function unusedKeysFor(r){
   return unusedFor(r, allTiles());
