@@ -259,6 +259,12 @@
      right under the rack: full card detail across the screen in
      as little vertical space as possible. */
   .chosen-strip{margin-top:10px;display:flex;align-items:center;gap:8px 16px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--jade);border-radius:10px;padding:8px 12px 9px}
+  .best-hand-row{margin:0 2px 12px;padding:10px 12px;background:var(--gold-soft);border-radius:10px;font-size:.95rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .alt-strip{margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--gold);border-radius:10px;padding:8px 12px 9px;font-size:.95rem}
+  .alt-strip .alt-better{font-weight:800;color:var(--red)}
+  .warn-bar{margin-top:10px;padding:12px;border-radius:10px;background:var(--red-soft);border:2px solid var(--red);display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:.95rem}
+  .warn-bar .btn{flex-shrink:0}
+  .warn-bar[hidden],.alt-strip[hidden],.best-hand-row[hidden]{display:none}
   .chosen-strip[hidden]{display:none}
   .chosen-id{display:flex;align-items:baseline;gap:8px;white-space:nowrap;flex:0 0 auto}
   .chosen-id .chosen-label{font-size:.72rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-faint)}
@@ -697,7 +703,10 @@
       <button type="button" class="btn" id="endNewHandBtn">Deal a new hand</button>
     </div>
     <div class="chosen-strip" id="chosenStrip" hidden></div>
+    <div class="alt-strip" id="altStrip" hidden></div>
     <div class="rack" id="rack"></div>
+    <div class="warn-bar" id="warnBar" hidden role="alert"></div>
+    <div class="turn-bar" id="adviceLine" hidden aria-live="polite"></div>
     <div class="call-bar" id="callBar" hidden>
       <span id="callTile"></span>
       <span class="call-label" id="callLabel"></span>
@@ -804,6 +813,7 @@
       <button type="button" class="collapse-toggle" id="resultsCollapseBtn" aria-expanded="true" aria-controls="resultsBody" aria-label="Collapse Hands you could make">▲</button>
     </div>
     <div id="resultsBody">
+    <div class="best-hand-row" id="bestHandRow" hidden></div>
     <p class="early-note" id="earlyNote" hidden><strong>Early hand:</strong> with fewer than 8 tiles entered, treat this list as a broad guide — it will sharpen as you add tiles.</p>
     <p class="align-legend" id="alignLegend" hidden>Number over suit letter — <strong>B</strong> Bam, <strong>C</strong> Crak, <strong>D</strong> Dot; Winds <strong>NEWS</strong>, Dragons <strong>RGW</strong>, Flower <strong>F</strong>, Joker <strong>J</strong>. Full strength = you hold it, dimmed = still needed; <strong>X</strong> = held, <strong>J</strong> = a Joker fills it. The three circles under the points: tiles held (brown), Jokers used (purple), still needed (red). <a class="help-q" href="#help-read" aria-label="Help: reading the hand cards">?</a></p>
     <div class="list" id="results"></div>
@@ -1053,6 +1063,9 @@
       <li>Just tick a different hand, and the rack re-sorts for the new hand at once, with no tiles added or taken away.</li>
       <li>Mid-Charleston, changing hands unpicks any tiles you had picked to swap, since the rack moves.</li>
       <li>Only one hand at a time — untick to clear the choice, and your rack goes back to sorting by suit until you choose another hand.</li>
+      <li>The list opens with the <strong>Best hand</strong> on top — tap <strong>Play this hand</strong> there to start with it: the hand your tiles are closest to, then the most points.</li>
+      <li>Once you have picked a hand, the next-best hand stays in view under your rack as the <strong>Alternative</strong>, with a <strong>Switch</strong> button — it changes as tiles come and go, and it says so when it becomes the better hand.</li>
+      <li>If you are about to throw away (or pass on in the Charleston) a tile one of your hands still needs, or one another player looks to be collecting, the page <strong>warns you and says why</strong> — you can still go ahead if you mean it.</li>
     </ul>
       </div>
     </div>
@@ -1099,6 +1112,11 @@
       <li>The tiles you hold toward that hand, not counting Jokers (brown).</li>
       <li>The Jokers used (purple).</li>
       <li>The tiles you still need for that hand (red).</li>
+      <li>The <strong>Best hand</strong> is the one with the most tiles toward it, then the most points — and the page says what it still needs, and how many of those tiles are still out (copies already discarded or exposed don’t count).</li>
+      <li>The <strong>Alternative</strong> is the next-best hand that isn’t the one you’re playing.</li>
+      <li>The <strong>Best discard</strong> is the tile that costs your hands nothing — it prefers tiles with the most copies already out, and steers clear of tiles another player has exposed.</li>
+      <li>The chance of drawing a Joker is worked out from what anyone can see: 8 Jokers in the set, minus the ones on the table, over the tiles left in the wall.</li>
+      <li>A warning never stops you — it only asks, with the reason.</li>
     </ul>
       </div>
     </div>
@@ -2646,6 +2664,11 @@ function swapCharlestonTiles(){
     showMsg('Pick 3 tiles to swap first — tap tiles on your rack. You have picked ' + charlestonSel.length + ' of 3.');
     return;
   }
+  // A pass that gives away a tile one of your hands still needs gets a
+  // warning first — with the reason — and you decide whether to pass it.
+  var passRisk = charlestonRisk();
+  if(passRisk && !warnArmed){ showWarn(passRisk, 'charleston'); return; }
+  warnArmed = false;
   pushUndo();
   var label = CHARLESTON_ROUNDS[charlestonRound];
   var n = charlestonSel.length;
@@ -2742,6 +2765,239 @@ function swapCharlestonTiles(){
    on the left and the badge / count / progress group right-
    justified, with a Play hand box — the same box as on the card
    below, ticked — at the left of that group. */
+/* ================= Advice — best hand, alternative hand, best discard =================
+   Mike, Nov 21, 2026 (design note item 73): the page names the best hand as a
+   starting option, keeps the next-best hand in view as an Alternative with a
+   Switch, suggests the best tile to discard with a plain-words reason, and
+   warns (never blocks) when a discard or a Charleston pass is not a good play.
+   Everything here is worked out from what a real player can see: the rack,
+   the discard pile, the exposed sets, and the wall count. Opponents' hidden
+   racks are never used — even though the engine knows them. */
+var pendingDiscardIdx = -1; // rack index held while a discard warning waits
+var warnKind = null;        // 'discard' | 'charleston' — what the warning is about
+var warnArmed = false;      // set by "go ahead anyway": the next check lets it through once
+function visibleCount(key){
+  var n = 0;
+  discardPile.forEach(function(k){ if(k === key) n++; });
+  exposedMelds.forEach(function(m){ m.tiles.forEach(function(k){ if(k === key) n++; }); });
+  if(opponentsDealt) opponents.forEach(function(o){ o.melds.forEach(function(m){ m.tiles.forEach(function(k){ if(k === key) n++; }); }); });
+  return n;
+}
+function oppExposesKey(key){
+  if(!opponentsDealt) return null;
+  for(var i = 0; i < opponents.length; i++){
+    var o = opponents[i];
+    for(var j = 0; j < o.melds.length; j++){ if(o.melds[j].key === key) return o.name; }
+  }
+  return null;
+}
+function resultForHand(hand){
+  var b = bestForHand(hand, allCounts(), exposedMeldJokers());
+  return {h: hand, matched: b.matched, neededCount: 14 - b.matched, jokersUsed: b.jokersUsed,
+          needed: b.needed, unreachable: b.unreachable, groups: b.groups, blockers: b.blockers || []};
+}
+/* The hands list as the player sees it — same order and filters as
+   renderResults (sections, then Matching tiles, then Singles & pairs).
+   Keep this filter chain in step with renderResults. */
+function adviceRanked(){
+  var all = rankHands(allCounts(), exposedMeldJokers());
+  var bySection = all.filter(function(r){ return selectedSections[sectionLetter(r.h)]; });
+  var ranked = bySection.filter(function(r){ return r.matched >= minMatched; });
+  if(spFilter === 'with') ranked = ranked.filter(hasSinglesOrPairs);
+  else if(spFilter === 'without') ranked = ranked.filter(function(r){ return !hasSinglesOrPairs(r); });
+  return ranked;
+}
+/* Primary = the hand being played (the chosen one, or the best hand when
+   none is chosen yet). Backup = the best other hand — the Alternative. */
+function adviceHands(){
+  var ranked = adviceRanked();
+  if(!ranked.length) return {primary: null, backup: null};
+  var primary = null;
+  if(selectedHandId){
+    for(var i = 0; i < ranked.length; i++){ if(ranked[i].h.id === selectedHandId){ primary = ranked[i]; break; } }
+    if(!primary){
+      for(var h = 0; h < HANDS.length; h++){ if(HANDS[h].id === selectedHandId){ primary = resultForHand(HANDS[h]); break; } }
+    }
+  }
+  if(!primary) primary = ranked[0];
+  var backup = null;
+  for(var j = 0; j < ranked.length; j++){ if(ranked[j].h.id !== primary.h.id){ backup = ranked[j]; break; } }
+  return {primary: primary, backup: backup};
+}
+function handNeedsKey(r, key){
+  if(!r) return false;
+  for(var i = 0; i < r.needed.length; i++){ if(r.needed[i].k === key && r.needed[i].n > 0) return true; }
+  return false;
+}
+/* The chance the next draw is a Joker, from what a player can see: 8 Jokers
+   in the set, minus the ones visible (rack, exposed sets, discards), over
+   the tiles left in the wall — the count the page already shows. */
+function jokerOddsText(r){
+  if(!r) return '';
+  var fillable = false;
+  r.groups.forEach(function(g){ if(g.n >= 3 && (g.n - g.got - g.jok) > 0) fillable = true; });
+  if(!fillable) return '';
+  var vis = (allCounts()['joker'] || 0);
+  discardPile.forEach(function(k){ if(k === 'joker') vis++; });
+  if(opponentsDealt) opponents.forEach(function(o){ o.melds.forEach(function(m){ m.tiles.forEach(function(k){ if(k === 'joker') vis++; }); }); });
+  var left = 8 - vis;
+  var wall = remainingPool().length;
+  if(left <= 0) return 'no Jokers left to draw';
+  if(wall <= 0) return '';
+  return 'about 1 in ' + Math.max(1, Math.round(wall / left)) + ' to draw a Joker';
+}
+function bestNeedsText(r){
+  if(!r.needed.length) return 'complete — nothing still needed';
+  var n0 = r.needed[0];
+  var total = tileLimit(n0.k);
+  var stillOut = total - visibleCount(n0.k);
+  var s = 'needs a ' + tileName(n0.k) + ' (' + stillOut + ' of ' + total + ' still out)';
+  if(r.needed.length > 1) s += ' + ' + (r.needed.length - 1) + ' more';
+  return s;
+}
+function discardAdvice(){
+  if(!opponentsDealt || gamePhase !== 'play' || gameOver || pendingCall || opponentsRunning) return null;
+  if(totalTiles() !== 14) return null;
+  var hands = adviceHands();
+  if(!hands.primary) return null;
+  var seen = {};
+  var best = null;
+  rack.forEach(function(k){
+    if(seen[k] || k === 'joker') return;
+    seen[k] = true;
+    var counts = allCounts();
+    counts[k] = (counts[k] || 0) - 1;
+    var costP = 0, costB = 0;
+    var bp = bestForHand(hands.primary.h, counts, exposedMeldJokers());
+    costP = hands.primary.matched - bp.matched;
+    if(hands.backup){
+      var bb = bestForHand(hands.backup.h, counts, exposedMeldJokers());
+      costB = hands.backup.matched - bb.matched;
+    }
+    var cost = costP + costB;
+    var out = visibleCount(k);
+    var danger = oppExposesKey(k);
+    var score = cost * 100 - out * 10 + (danger ? 50 : 0);
+    if(!best || score < best.score){
+      best = {key: k, cost: cost, costHand: costP > 0 ? hands.primary.h.id : (hands.backup ? hands.backup.h.id : hands.primary.h.id), out: out, danger: danger, score: score};
+    }
+  });
+  return best;
+}
+function discardAdviceLine(){
+  var a = discardAdvice();
+  if(!a) return '';
+  var name = tileName(a.key);
+  var bits;
+  if(a.out >= 4) bits = 'all 4 are already out';
+  else if(a.out === 3) bits = '3 copies are already out';
+  else if(a.out > 0) bits = a.out + (a.out === 1 ? ' copy is' : ' copies are') + ' already out';
+  else bits = 'no copies are out yet';
+  var reason;
+  if(a.cost > 0){
+    reason = 'No free discard — every tile helps a hand. Least costly: <strong>' + esc(name) + '</strong> — it slows ' + esc(a.costHand) + ' by ' + a.cost + (a.cost === 1 ? ' tile' : ' tiles') + ', and ' + bits + '.';
+  } else {
+    reason = 'Best discard: <strong>' + esc(name) + '</strong> — neither of your hands needs it, and ' + bits + '.';
+  }
+  if(a.danger) reason += ' ' + esc(a.danger) + ' has it exposed, so they might call it.';
+  return ' ' + reason;
+}
+function discardRisk(key){
+  if(key === 'joker') return 'That’s a Joker — it can fill any set of 3 or more in your hands. Throwing it away is almost never right.';
+  var hands = adviceHands();
+  var reasons = [];
+  if(hands.primary && handNeedsKey(hands.primary, key)){
+    reasons.push('Your ' + (selectedHandId ? 'chosen hand' : 'best hand') + ' (' + hands.primary.h.id + ') still needs a ' + tileName(key) + ' — this is one of the tiles it is waiting on');
+  }
+  if(hands.backup && handNeedsKey(hands.backup, key)){
+    reasons.push('your alternative hand (' + hands.backup.h.id + ') still needs it too');
+  }
+  var opp = oppExposesKey(key);
+  if(opp) reasons.push(opp + ' has ' + tileName(key) + 's exposed — they may be collecting them, and could call this one');
+  if(!reasons.length) return null;
+  return reasons.join('. ') + '.';
+}
+function charlestonRisk(){
+  var hands = adviceHands();
+  if(!hands.primary && !hands.backup) return null;
+  var bad = [];
+  charlestonSel.forEach(function(ix){
+    var k = rack[ix];
+    if(k === 'joker') return; // Jokers are already refused by the pass itself
+    if((hands.primary && handNeedsKey(hands.primary, k)) || (hands.backup && handNeedsKey(hands.backup, k))){
+      if(bad.indexOf(k) === -1) bad.push(k);
+    }
+  });
+  if(!bad.length) return null;
+  var first = bad[0];
+  var whose = (hands.primary && handNeedsKey(hands.primary, first)) ? (selectedHandId ? 'your chosen hand' : 'your best hand') + ' (' + hands.primary.h.id + ')' : 'your alternative hand (' + hands.backup.h.id + ')';
+  var s = 'You’re about to pass a ' + tileName(first) + ', and ' + whose + ' still needs it.';
+  if(bad.length > 1) s += ' (' + (bad.length - 1) + ' more of the tiles you picked are needed too.)';
+  return s;
+}
+function showWarn(text, kind){
+  var el = document.getElementById('warnBar');
+  if(!el) return;
+  warnKind = kind;
+  var goLabel = kind === 'discard' ? 'Discard anyway' : 'Swap anyway';
+  var keepLabel = kind === 'discard' ? 'Keep it' : 'Keep them';
+  el.innerHTML = '<span><strong>Are you sure?</strong> ' + esc(text) + '</span>' +
+    '<button type="button" class="btn btn-compact" data-warn-act="go">' + goLabel + '</button>' +
+    '<button type="button" class="btn btn-ghost btn-compact" data-warn-act="keep">' + keepLabel + '</button>';
+  el.hidden = false;
+}
+function hideWarn(){
+  var el = document.getElementById('warnBar');
+  if(el){ el.hidden = true; el.innerHTML = ''; }
+  pendingDiscardIdx = -1;
+  warnKind = null;
+}
+function maybeDiscard(idx){
+  if(idx < 0 || idx >= rack.length) return;
+  var risk = discardRisk(rack[idx]);
+  if(risk && !warnArmed){
+    pendingDiscardIdx = idx;
+    showWarn(risk, 'discard');
+    return;
+  }
+  warnArmed = false;
+  discardTile(idx);
+}
+function updateAltStrip(){
+  var el = document.getElementById('altStrip');
+  if(!el) return;
+  if(!selectedHandId){ el.hidden = true; el.innerHTML = ''; return; }
+  var hands = adviceHands();
+  var alt = hands.backup, prim = hands.primary;
+  if(!alt || !prim){ el.hidden = true; el.innerHTML = ''; return; }
+  var better = alt.matched > prim.matched;
+  var needBits = alt.needed.slice(0, 2).map(function(n){ return 'a ' + tileName(n.k) + (n.n > 1 ? ' (×' + n.n + ')' : ''); });
+  var needs = alt.needed.length ? 'needs ' + needBits.join(', ') + (alt.needed.length > 2 ? '…' : '') : 'complete';
+  el.innerHTML = '<span><strong>Alternative:</strong> ' + esc(alt.h.id) + ' — ' + alt.matched + ' tiles toward it, ' + esc(needs) + (better ? ' — <span class="alt-better">now better than the hand you’re playing</span>' : '') + '</span>' +
+    '<button type="button" class="btn btn-compact" id="altSwitchBtn">Switch to ' + esc(alt.h.id) + '</button>';
+  el.hidden = false;
+  document.getElementById('altSwitchBtn').addEventListener('click', function(){ setSelectedHand(alt.h.id); });
+}
+function updateBestHandRow(ranked){
+  var el = document.getElementById('bestHandRow');
+  if(!el) return;
+  if(!ranked || !ranked.length){ el.hidden = true; el.innerHTML = ''; return; }
+  var best = ranked[0];
+  if(best.h.id === selectedHandId){ el.hidden = true; el.innerHTML = ''; return; }
+  var odds = jokerOddsText(best);
+  el.innerHTML = '<span><strong>Best hand:</strong> ' + esc(best.h.id) + ' — ' + best.h.pts + ' pts · ' + esc(bestNeedsText(best)) + (odds ? ' · ' + esc(odds) : '') + '</span>' +
+    '<button type="button" class="btn btn-compact" id="bestHandBtn">Play this hand</button>';
+  el.hidden = false;
+  document.getElementById('bestHandBtn').addEventListener('click', function(){ setSelectedHand(best.h.id); });
+}
+function updateAdviceLine(){
+  var el = document.getElementById('adviceLine');
+  if(!el) return;
+  var txt = discardAdviceLine();
+  if(!txt){ el.hidden = true; el.innerHTML = ''; return; }
+  el.innerHTML = txt.replace(/^\s+/, '');
+  el.hidden = false;
+}
 function updateChosenStrip(){
   var el = document.getElementById('chosenStrip');
   if(!el) return;
@@ -3022,6 +3278,7 @@ function renderRack(){
           if(pi !== -1) charlestonSel.splice(pi, 1);
           else if(charlestonSel.length < 3) charlestonSel.push(idx);
           else { showMsg('You have already picked 3 tiles to swap — tap a picked tile to unpick it, or tap Swap.'); return; }
+          hideWarn();
           renderRack();
           return;
         }
@@ -3045,7 +3302,7 @@ function renderRack(){
         // the rack plus any exposed sets. At 14 in total, tapping a
         // rack tile discards it; at 13, you must draw (or call) first.
         if(gamePhase === 'play'){
-          if(totalTiles() === 14){ discardTile(idx); return; }
+          if(totalTiles() === 14){ maybeDiscard(idx); return; }
           if(totalTiles() === 13){
             showMsg('Draw first — tap Draw for a random tile (Random), or pick the tile you drew in Add tiles (Manual). When another player discards a tile you can use, you will be offered the call.');
             return;
@@ -3055,7 +3312,7 @@ function renderRack(){
         // included): tapping discards in both Random and Manual, so
         // play always runs draw to 14, discard back to 13.
         if(rack.length === 14){
-          discardTile(idx);
+          maybeDiscard(idx);
           return;
         }
         if(randomMode){
@@ -3096,6 +3353,8 @@ function renderRack(){
   updateCharlestonCheckUI();
   updateDiscardsUI();
   updateChosenStrip();
+  updateAltStrip();
+  updateAdviceLine();
   renderExposed();
   renderOpponents();
   updateCallUI();
@@ -3468,6 +3727,7 @@ function renderResults(){
     countEl.textContent = '';
     earlyEl.hidden = true;
     legendEl.hidden = true;
+    updateBestHandRow([]);
     return;
   }
   emptyEl.hidden = true;
@@ -3512,6 +3772,7 @@ function renderResults(){
     moreWrap.hidden = true;
     moreArea.hidden = true;
     blockerWrap.hidden = true;
+    updateBestHandRow([]);
     attachSelectHandlers();
     return;
   }
@@ -3536,9 +3797,11 @@ function renderResults(){
     blockerWrap.hidden = true;
     blockerArea.innerHTML = '';
   }
+  updateBestHandRow(ranked);
   attachSelectHandlers();
 }
 function refresh(){
+  hideWarn();
   renderRack();
   renderGroupBadges();
   renderSubpicker();
@@ -3624,6 +3887,19 @@ document.getElementById('charlestonCheck').addEventListener('change', function()
 });
 document.getElementById('startCharlestonBtn').addEventListener('click', startCharleston);
 document.getElementById('swapBtn').addEventListener('click', swapCharlestonTiles);
+document.getElementById('warnBar').addEventListener('click', function(e){
+  var act = e.target && e.target.getAttribute ? e.target.getAttribute('data-warn-act') : null;
+  if(!act) return;
+  var kind = warnKind;
+  var ix = pendingDiscardIdx;
+  hideWarn();
+  if(act === 'go'){
+    warnArmed = true;
+    if(kind === 'discard' && ix >= 0) discardTile(ix);
+    else if(kind === 'charleston') swapCharlestonTiles();
+    warnArmed = false; // the bypass is spent: the next risky move warns again
+  }
+});
 document.getElementById('randomCheck').addEventListener('change', function(){ setRandomMode(this.checked); renderRack(); });
 document.getElementById('discardsCollapseBtn').addEventListener('click', function(){ discardsVisible = !discardsVisible; updateDiscardsUI(); });
 function updateSettingsUI(){
