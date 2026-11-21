@@ -302,7 +302,7 @@
     <div class="brand-bar">
       <a class="brand-home" href="https://exponology.com/" aria-label="Exponology — home page"><div class="brand-logo">Exponology<span class="dot">.</span></div><div class="brand-sub">exponology.com</div></a>
     </div>
-    <div class="eyebrow">2026 Card &bull; 80 Hands</div>
+    <div class="eyebrow">2026 Card &bull; <span id="handsCount">80</span> Hands</div>
     <h1>Mah Jongg Hand Finder</h1>
     <p class="lede">Pick a section and number of suits, tap the numbers a hand <strong>must contain</strong>, tap the <strong>points</strong> you want, and turn on the tiles and groups it <strong>must have</strong>, then tap <strong>Apply</strong>.</p>
   </header>
@@ -467,6 +467,8 @@ function loadHands(onReady){
     return r.json();
   }).then(function(data){
     HANDS = data;
+    var hc = document.getElementById('handsCount');
+    if(hc) hc.textContent = HANDS.length;
     onReady();
   }).catch(function(err){
     if(window.console) console.error('Could not load hands:', err);
