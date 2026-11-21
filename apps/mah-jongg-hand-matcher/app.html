@@ -664,16 +664,11 @@
         <div class="ctl-group">
           <label class="match-label" for="speedSelect">Speed</label>
           <select id="speedSelect" class="match-select" aria-label="Game speed — seconds between the other players' moves, or Manual">
-            <option value="1">1 sec</option>
+            <option value="1" selected>1 sec</option>
             <option value="2">2 sec</option>
             <option value="3">3 sec</option>
             <option value="4">4 sec</option>
             <option value="5">5 sec</option>
-            <option value="6">6 sec</option>
-            <option value="7">7 sec</option>
-            <option value="8">8 sec</option>
-            <option value="9">9 sec</option>
-            <option value="10" selected>10 sec</option>
             <option value="manual">Manual</option>
           </select>
           <button type="button" class="btn btn-compact" id="nextPlayerBtn" hidden>Next player →</button>
@@ -985,7 +980,7 @@
       <div class="help-sub-body" id="helpSubBody8">
         <ul>
       <li>This is a teaching game, so you choose how fast the other players discard and call.</li>
-      <li>Use the <strong>Speed</strong> dropdown in the <strong>Settings</strong> box: <strong>1 to 10 seconds</strong> between their moves.</li>
+      <li>Use the <strong>Speed</strong> dropdown in the <strong>Settings</strong> box: <strong>1 to 5 seconds</strong> between their moves.</li>
       <li>Pick the pace that gives you time to follow each discard, check the discard pile, and think about your hand.</li>
       <li><strong>Manual</strong> turns the timer off completely:</li>
       <li>No opponent moves until you tap <strong>Next player</strong> in the <strong>Settings</strong> box (the button names who plays next).</li>
@@ -1666,7 +1661,7 @@ function doUndo(){
    Charleston is not timed either — its passes happen when the user
    taps Swap. Changing speed while an opponent is waiting applies
    to that wait at once. */
-var gameSpeed = 10;        // seconds between opponent moves, or 'manual' — starts at 10 seconds, the teaching pace
+var gameSpeed = 1;         // seconds between opponent moves, or 'manual' — starts at 1 second
 var opponentTimer = null;  // id of the pending auto-advance timer, if any
 var pendingStep = null;    // the opponent move waiting to happen: {kind:'turn', seat} or {kind:'discard', oppId}
 function speedDelayMs(){ return gameSpeed === 'manual' ? null : gameSpeed * 1000; }
