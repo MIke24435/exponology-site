@@ -1150,7 +1150,7 @@
       <li>The tiles you still need for that hand (red).</li>
       <li>The <strong>Best hand</strong> is the one with the most tiles toward it, then the most points — and the page says what it still needs, and how many of those tiles are still out (copies already discarded or exposed don’t count).</li>
       <li>The <strong>Alternative</strong> is the next-best hand that isn’t the one you’re playing.</li>
-      <li>The <strong>Best discard</strong> is the tile that costs your hands nothing — never a tile one of your hands is already using — it prefers tiles with the most copies already out, and steers clear of tiles another player has exposed.</li>
+      <li>The <strong>Best discard</strong> is the tile that costs the hand you are playing least — never a tile it is already using. A tile that only slows your alternative hand beats one that slows the hand you are playing. It prefers tiles with the most copies already out, and steers clear of tiles another player has exposed.</li>
       <li>The chance of drawing a Joker is worked out from what anyone can see: 8 Jokers in the set, minus the ones on the table, over the tiles left in the wall — it shows at the right-hand end of the line under your rack, after the Best discard, in a dealt game.</li>
       <li>A warning never stops you — it only asks, with the reason.</li>
     </ul>
@@ -2949,12 +2949,15 @@ function discardAdvice(){
       costB = hands.backup.matched - bb.matched;
       if(handUsesKey(hands.backup, k)) costB = Math.max(costB, 1);
     }
-    var cost = costP + costB;
+    /* The hand being played counts double: a tile that costs it nothing
+       beats one that costs it a tile, even if the second is free for the
+       alternative hand. (0,0)=0, (0,1)=1, (1,0)=2, (1,1)=3. */
+    var cost = costP * 2 + costB;
     var out = visibleCount(k);
     var danger = oppExposesKey(k);
     var score = cost * 100 - out * 10 + (danger ? 50 : 0);
     if(!best || score < best.score){
-      best = {key: k, cost: cost, costHand: costP > 0 ? hands.primary.h.id : (hands.backup ? hands.backup.h.id : hands.primary.h.id), out: out, danger: danger, score: score};
+      best = {key: k, cost: cost, costP: costP, costB: costB, primaryId: hands.primary.h.id, backupId: hands.backup ? hands.backup.h.id : null, out: out, danger: danger, score: score};
     }
   });
   return best;
@@ -2969,10 +2972,15 @@ function discardAdviceLine(){
   else if(a.out > 0) bits = a.out + (a.out === 1 ? ' copy is' : ' copies are') + ' already out';
   else bits = 'no copies are out yet';
   var reason;
-  if(a.cost > 0){
-    reason = 'No free discard — every tile helps a hand. Least costly: <strong>' + esc(name) + '</strong> — it slows ' + esc(a.costHand) + ' by ' + a.cost + (a.cost === 1 ? ' tile' : ' tiles') + ', and ' + bits + '.';
-  } else {
+  var handWord = selectedHandId ? 'chosen hand' : 'best hand';
+  if(a.costP === 0 && a.costB === 0){
     reason = 'Best discard: <strong>' + esc(name) + '</strong> — neither of your hands needs it, and ' + bits + '.';
+  } else if(a.costP === 0){
+    reason = 'Best discard: <strong>' + esc(name) + '</strong> — your ' + handWord + ' (' + esc(a.primaryId) + ') does not need it. It slows your alternative (' + esc(a.backupId) + ') by 1 tile, and ' + bits + '.';
+  } else if(a.costB > 0){
+    reason = 'No free discard — every tile helps a hand. Least costly: <strong>' + esc(name) + '</strong> — it slows your ' + handWord + ' (' + esc(a.primaryId) + ') by 1 tile and your alternative (' + esc(a.backupId) + ') by 1 tile too, and ' + bits + '.';
+  } else {
+    reason = 'No free discard — every tile helps a hand. Least costly: <strong>' + esc(name) + '</strong> — it slows your ' + handWord + ' (' + esc(a.primaryId) + ') by 1 tile, and ' + bits + '.';
   }
   if(a.danger) reason += ' ' + esc(a.danger) + ' has it exposed, so they might call it.';
   var hands = adviceHands();
@@ -3030,7 +3038,7 @@ function showWarn(text, kind){
   warnKind = kind;
   var goLabel = kind === 'discard' ? 'Discard anyway' : 'Swap anyway';
   var keepLabel = kind === 'discard' ? 'Keep it' : 'Keep them';
-  el.innerHTML = '<span><strong>Are you sure?</strong> ' + esc(text) + '</span>' +
+  el.innerHTML = '<span><strong>Are you sure?</strong> ' + esc(text.charAt(0).toUpperCase() + text.slice(1)) + '</span>' +
     '<button type="button" class="btn btn-compact" data-warn-act="go">' + goLabel + '</button>' +
     '<button type="button" class="btn btn-ghost btn-compact" data-warn-act="keep">' + keepLabel + '</button>';
   el.hidden = false;
