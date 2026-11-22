@@ -3000,9 +3000,9 @@ function discardRisk(key){
     reasons.push('Your ' + (selectedHandId ? 'chosen hand' : 'best hand') + ' (' + hands.primary.h.id + ') is already using a ' + tileName(key) + ' — it is part of the hand as it stands');
   }
   if(hands.backup && handNeedsKey(hands.backup, key)){
-    reasons.push('your alternative hand (' + hands.backup.h.id + ') still needs it too');
+    reasons.push('Your alternative hand (' + hands.backup.h.id + ') still needs it too');
   } else if(hands.backup && handUsesKey(hands.backup, key)){
-    reasons.push('your alternative hand (' + hands.backup.h.id + ') is already using it too');
+    reasons.push('Your alternative hand (' + hands.backup.h.id + ') is already using it too');
   }
   var opp = oppExposesKey(key);
   if(opp) reasons.push(opp + ' has ' + tileName(key) + 's exposed — they may be collecting them, and could call this one');
