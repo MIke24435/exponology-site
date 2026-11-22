@@ -1108,7 +1108,7 @@
       <li>Mid-Charleston, changing hands unpicks any tiles you had picked to swap, since the rack moves.</li>
       <li>Only one hand at a time — untick to clear the choice, and your rack goes back to sorting by suit until you choose another hand.</li>
       <li>The list opens with the <strong>Best hand</strong> on top — tap <strong>Play this hand</strong> there to start with it: the hand your tiles are closest to, then the most points.</li>
-      <li>Once you have picked a hand, the <strong>Alternative</strong> only appears under your rack when your hand can’t be completed any more — it says which tile is gone, and offers a <strong>Switch</strong> button to move to the next-best hand that still can be completed.</li>
+      <li>Once you have picked a hand, the <strong>Alternative</strong> only appears under your rack when your hand can’t realistically be completed any more — either a tile it needs is gone for good, or the only way left is drawing Jokers and the chance of drawing the ones it needs is under 1 in 10. It says which tile is gone, and offers a <strong>Switch</strong> button to move to the most promising hand that still can be completed.</li>
       <li>If you are about to throw away (or pass on in the Charleston) a tile one of your hands still needs, or one another player looks to be collecting, the page <strong>warns you and says why</strong> — you can still go ahead if you mean it.</li>
       <li>Untick <strong>Suggestions</strong> in the <strong>Settings</strong> box to turn all of this off — no Best hand row, no Alternative strip, no Best discard line, no warnings.</li>
     </ul>
@@ -3069,29 +3069,68 @@ function maybeDiscard(idx){
   warnArmed = false;
   discardTile(idx);
 }
-/* Tiles the hand still needs that can no longer be got, per group: the
-   shortfall after what the rack holds and the Jokers in hand have spent.
-   Copies left = the set's copies, less what is visible (discarded or
-   exposed) and less what is in the rack. For a group of 3 or more a Joker
-   drawn later can still fill it, so the Jokers still out count too; a
-   single, a pair or a run tile can never take a Joker, so those die on
-   tile count alone. Only what a real player can see is counted —
-   opponents' hidden racks are never used — so this fires only when the
-   hand as displayed truly cannot be completed. */
+/* Binomial coefficient, small enough for wall-sized numbers. */
+function binom(n, k){
+  if(k < 0 || k > n) return 0;
+  if(k === 0) return 1;
+  k = Math.min(k, n - k);
+  var c = 1;
+  for(var i = 1; i <= k; i++) c = c * (n - k + i) / i;
+  return c;
+}
+/* Chance of drawing at least `need` Jokers in your remaining draws:
+   about a quarter of the wall is yours (four players draw in turn).
+   `wall` is the tiles left in the wall, `jokers` the Jokers still out
+   as the player sees them (visible Jokers and rack Jokers excluded). */
+function jokerDrawProb(need, wall, jokers){
+  if(need <= 0) return 1;
+  if(need > jokers) return 0;
+  if(wall <= 0) return 0;
+  var draws = Math.max(1, Math.floor(wall / 4));
+  if(draws > wall) draws = wall;
+  var total = binom(wall, draws), p = 0;
+  for(var i = need; i <= Math.min(jokers, draws); i++){
+    p += binom(jokers, i) * binom(wall - jokers, draws - i) / total;
+  }
+  return p;
+}
+/* Tiles the hand still needs that it can no longer realistically get.
+   A single, a pair or a run tile can never take a Joker, so those die
+   on tile count alone: fewer copies left than the hand still needs.
+   A group of 3 or more can still take Jokers, so it is dead only when
+   there is no natural way AND the chance of drawing the Jokers it
+   needs is under 1 in 10. The chance assumes you draw every remaining
+   natural copy, so it is an upper bound on completing the group — the
+   test only fires when the hand is genuinely unlikely. Only what a
+   real player can see is counted — opponents' hidden racks are never
+   used. */
 function deadNeeded(r){
   if(!r || !r.groups) return [];
-  var jokersOut = 8 - visibleCount('joker') - (countsOf(rack)['joker'] || 0);
+  var rackCounts = countsOf(rack);
+  var jokersOut = 8 - visibleCount('joker') - (rackCounts['joker'] || 0);
   if(jokersOut < 0) jokersOut = 0;
+  var wall = remainingPool().length;
   var byKey = {}, order = [];
   r.groups.forEach(function(g){
     var d = g.n - g.got - g.jok;
     if(d <= 0) return;
-    var left = tileLimit(g.k) - visibleCount(g.k) - (countsOf(rack)[g.k] || 0);
-    var fillers = left + (g.n >= 3 ? jokersOut : 0);
-    if(fillers < d){
-      if(!byKey[g.k]){ byKey[g.k] = {k: g.k, n: 0, left: left}; order.push(byKey[g.k]); }
+    var left = tileLimit(g.k) - visibleCount(g.k) - (rackCounts[g.k] || 0);
+    var dead = false, prob = 1, need = 0;
+    if(g.n < 3){
+      dead = left < d;
+    } else {
+      need = Math.max(0, d - left);
+      if(need > 0){
+        prob = jokerDrawProb(need, wall, jokersOut);
+        dead = prob < 0.10;
+      }
+    }
+    if(dead){
+      if(!byKey[g.k]){ byKey[g.k] = {k: g.k, n: 0, left: left, prob: prob, need: need}; order.push(byKey[g.k]); }
       byKey[g.k].n += d;
       if(left < byKey[g.k].left) byKey[g.k].left = left;
+      if(prob < byKey[g.k].prob) byKey[g.k].prob = prob;
+      if(need > byKey[g.k].need) byKey[g.k].need = need;
     }
   });
   return order;
@@ -3118,7 +3157,11 @@ function updateAltStrip(){
   if(!alt){ el.hidden = true; el.innerHTML = ''; return; }
   var deadBits = dead.slice(0, 2).map(function(nd){
     var qty = nd.n === 1 ? 'a ' + tileName(nd.k) : nd.n + ' ' + tileName(nd.k) + 's';
-    return qty + ' (' + (nd.left <= 0 ? 'none left' : 'only ' + nd.left + ' left') + ')';
+    var where = nd.left <= 0 ? 'none left' : 'only ' + nd.left + ' left';
+    if(nd.need > 0){
+      where += nd.prob <= 0 ? ' — no Jokers left to draw' : ' — about 1 in ' + Math.max(1, Math.round(1 / nd.prob)) + ' to draw the ' + (nd.need === 1 ? 'Joker' : nd.need + ' Jokers');
+    }
+    return qty + ' (' + where + ')';
   }).join(' and ') + (dead.length > 2 ? ' (+' + (dead.length - 2) + ' more)' : '');
   var better = alt.matched > prim.matched;
   var needBits = alt.needed.slice(0, 2).map(function(n){ return 'a ' + tileName(n.k) + (n.n > 1 ? ' (×' + n.n + ')' : ''); });
