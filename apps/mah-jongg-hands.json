@@ -14,7 +14,8 @@
   "pongs": true,
   "kongs": true,
   "quints": false,
-  "order": 1
+  "order": 1,
+  "year": 2026
  },
  {
   "id": "A2.1",
@@ -31,7 +32,8 @@
   "pongs": true,
   "kongs": true,
   "quints": false,
-  "order": 2
+  "order": 2,
+  "year": 2026
  },
  {
   "id": "A2.2",
@@ -48,7 +50,8 @@
   "pongs": true,
   "kongs": true,
   "quints": false,
-  "order": 3
+  "order": 3,
+  "year": 2026
  },
  {
   "id": "A3",
@@ -65,7 +68,8 @@
   "pongs": true,
   "kongs": true,
   "quints": false,
-  "order": 4
+  "order": 4,
+  "year": 2026
  },
  {
   "id": "A4",
@@ -82,7 +86,8 @@
   "pongs": true,
   "kongs": false,
   "quints": false,
-  "order": 5
+  "order": 5,
+  "year": 2026
  },
  {
   "id": "B1.1",
@@ -99,7 +104,8 @@
   "pongs": true,
   "kongs": true,
   "quints": false,
-  "order": 6
+  "order": 6,
+  "year": 2026
  },
  {
   "id": "B1.2",
@@ -116,7 +122,8 @@
   "pongs": true,
   "kongs": true,
   "quints": false,
-  "order": 7
+  "order": 7,
+  "year": 2026
  },
  {
   "id": "B2",
@@ -133,7 +140,8 @@
   "pongs": false,
   "kongs": true,
   "quints": false,
-  "order": 8
+  "order": 8,
+  "year": 2026
  },
  {
   "id": "B3",
@@ -150,7 +158,8 @@
   "pongs": true,
   "kongs": false,
   "quints": false,
-  "order": 9
+  "order": 9,
+  "year": 2026
  },
  {
   "id": "B4",
@@ -167,7 +176,8 @@
   "pongs": true,
   "kongs": true,
   "quints": false,
-  "order": 10
+  "order": 10,
+  "year": 2026
  },
  {
   "id": "B5",
@@ -184,7 +194,8 @@
   "pongs": true,
   "kongs": true,
   "quints": false,
-  "order": 11
+  "order": 11,
+  "year": 2026
  },
  {
   "id": "B6.1",
@@ -201,7 +212,8 @@
   "pongs": false,
   "kongs": true,
   "quints": false,
-  "order": 12
+  "order": 12,
+  "year": 2026
  },
  {
   "id": "B6.2",
@@ -218,7 +230,8 @@
   "pongs": false,
   "kongs": true,
   "quints": false,
-  "order": 13
+  "order": 13,
+  "year": 2026
  },
  {
   "id": "B6.3",
@@ -235,7 +248,8 @@
   "pongs": false,
   "kongs": true,
   "quints": false,
-  "order": 14
+  "order": 14,
+  "year": 2026
  },
  {
   "id": "B6.4",
@@ -252,7 +266,8 @@
   "pongs": false,
   "kongs": true,
   "quints": false,
-  "order": 15
+  "order": 15,
+  "year": 2026
  },
  {
   "id": "B7.1",
@@ -269,7 +284,8 @@
   "pongs": true,
   "kongs": true,
   "quints": false,
-  "order": 16
+  "order": 16,
+  "year": 2026
  },
  {
   "id": "B7.2",
@@ -286,7 +302,8 @@
   "pongs": true,
   "kongs": true,
   "quints": false,
-  "order": 17
+  "order": 17,
+  "year": 2026
  },
  {
   "id": "B7.3",
@@ -303,7 +320,8 @@
   "pongs": true,
   "kongs": true,
   "quints": false,
-  "order": 18
+  "order": 18,
+  "year": 2026
  },
  {
   "id": "B7.4",
@@ -320,7 +338,8 @@
   "pongs": true,
   "kongs": true,
   "quints": false,
-  "order": 19
+  "order": 19,
+  "year": 2026
  },
  {
   "id": "B8",
@@ -337,7 +356,8 @@
   "pongs": true,
   "kongs": false,
   "quints": false,
-  "order": 20
+  "order": 20,
+  "year": 2026
  },
  {
   "id": "C1",
@@ -355,6 +375,7 @@
   "kongs": true,
   "quints": true,
   "order": 21,
+  "year": 2026,
   "gen": {
    "t": "one",
    "d": [
@@ -386,6 +407,7 @@
   "kongs": true,
   "quints": false,
   "order": 22,
+  "year": 2026,
   "gen": {
    "t": "one",
    "d": [
@@ -417,6 +439,7 @@
   "kongs": true,
   "quints": false,
   "order": 23,
+  "year": 2026,
   "gen": {
    "t": "one",
    "d": [
@@ -448,6 +471,7 @@
   "kongs": true,
   "quints": true,
   "order": 24,
+  "year": 2026,
   "gen": {
    "t": "one",
    "d": [
@@ -479,6 +503,7 @@
   "kongs": false,
   "quints": true,
   "order": 25,
+  "year": 2026,
   "gen": {
    "t": "run",
    "k": 3
@@ -500,6 +525,7 @@
   "kongs": true,
   "quints": true,
   "order": 26,
+  "year": 2026,
   "gen": {
    "t": "any2"
   }
@@ -519,7 +545,8 @@
   "pongs": true,
   "kongs": true,
   "quints": false,
-  "order": 27
+  "order": 27,
+  "year": 2026
  },
  {
   "id": "E1.2",
@@ -536,7 +563,8 @@
   "pongs": true,
   "kongs": true,
   "quints": false,
-  "order": 28
+  "order": 28,
+  "year": 2026
  },
  {
   "id": "E2.1",
@@ -554,6 +582,7 @@
   "kongs": true,
   "quints": false,
   "order": 29,
+  "year": 2026,
   "gen": {
    "t": "run",
    "k": 5
@@ -575,6 +604,7 @@
   "kongs": true,
   "quints": false,
   "order": 30,
+  "year": 2026,
   "gen": {
    "t": "run",
    "k": 5
@@ -596,6 +626,7 @@
   "kongs": true,
   "quints": false,
   "order": 31,
+  "year": 2026,
   "gen": {
    "t": "run",
    "k": 3
@@ -617,6 +648,7 @@
   "kongs": true,
   "quints": false,
   "order": 32,
+  "year": 2026,
   "gen": {
    "t": "run",
    "k": 4
@@ -638,6 +670,7 @@
   "kongs": true,
   "quints": false,
   "order": 33,
+  "year": 2026,
   "gen": {
    "t": "run",
    "k": 4
@@ -659,6 +692,7 @@
   "kongs": true,
   "quints": false,
   "order": 34,
+  "year": 2026,
   "gen": {
    "t": "run",
    "k": 3
@@ -680,6 +714,7 @@
   "kongs": true,
   "quints": false,
   "order": 35,
+  "year": 2026,
   "gen": {
    "t": "run",
    "k": 3
@@ -701,6 +736,7 @@
   "kongs": true,
   "quints": true,
   "order": 36,
+  "year": 2026,
   "gen": {
    "t": "run",
    "k": 2
@@ -722,6 +758,7 @@
   "kongs": true,
   "quints": false,
   "order": 37,
+  "year": 2026,
   "gen": {
    "t": "run",
    "k": 3
@@ -743,6 +780,7 @@
   "kongs": true,
   "quints": false,
   "order": 38,
+  "year": 2026,
   "gen": {
    "t": "run",
    "k": 3
@@ -764,6 +802,7 @@
   "kongs": false,
   "quints": false,
   "order": 39,
+  "year": 2026,
   "gen": {
    "t": "run",
    "k": 4
@@ -784,7 +823,8 @@
   "pongs": true,
   "kongs": true,
   "quints": false,
-  "order": 40
+  "order": 40,
+  "year": 2026
  },
  {
   "id": "F1.2",
@@ -801,7 +841,8 @@
   "pongs": true,
   "kongs": true,
   "quints": false,
-  "order": 41
+  "order": 41,
+  "year": 2026
  },
  {
   "id": "F2.1",
@@ -818,7 +859,8 @@
   "pongs": true,
   "kongs": true,
   "quints": false,
-  "order": 42
+  "order": 42,
+  "year": 2026
  },
  {
   "id": "F2.2",
@@ -835,7 +877,8 @@
   "pongs": true,
   "kongs": true,
   "quints": false,
-  "order": 43
+  "order": 43,
+  "year": 2026
  },
  {
   "id": "F3.1",
@@ -852,7 +895,8 @@
   "pongs": false,
   "kongs": true,
   "quints": false,
-  "order": 44
+  "order": 44,
+  "year": 2026
  },
  {
   "id": "F3.2",
@@ -869,7 +913,8 @@
   "pongs": false,
   "kongs": true,
   "quints": false,
-  "order": 45
+  "order": 45,
+  "year": 2026
  },
  {
   "id": "F4",
@@ -887,6 +932,7 @@
   "kongs": true,
   "quints": false,
   "order": 46,
+  "year": 2026,
   "gen": {
    "t": "one",
    "d": [
@@ -913,7 +959,8 @@
   "pongs": true,
   "kongs": true,
   "quints": false,
-  "order": 47
+  "order": 47,
+  "year": 2026
  },
  {
   "id": "F5.2",
@@ -930,7 +977,8 @@
   "pongs": true,
   "kongs": true,
   "quints": false,
-  "order": 48
+  "order": 48,
+  "year": 2026
  },
  {
   "id": "F6.1",
@@ -947,7 +995,8 @@
   "pongs": true,
   "kongs": true,
   "quints": false,
-  "order": 49
+  "order": 49,
+  "year": 2026
  },
  {
   "id": "F6.2",
@@ -964,7 +1013,8 @@
   "pongs": true,
   "kongs": true,
   "quints": false,
-  "order": 50
+  "order": 50,
+  "year": 2026
  },
  {
   "id": "F7.1",
@@ -981,7 +1031,8 @@
   "pongs": false,
   "kongs": true,
   "quints": false,
-  "order": 51
+  "order": 51,
+  "year": 2026
  },
  {
   "id": "F7.2",
@@ -998,7 +1049,8 @@
   "pongs": false,
   "kongs": true,
   "quints": false,
-  "order": 52
+  "order": 52,
+  "year": 2026
  },
  {
   "id": "F8.1",
@@ -1015,7 +1067,8 @@
   "pongs": true,
   "kongs": false,
   "quints": false,
-  "order": 53
+  "order": 53,
+  "year": 2026
  },
  {
   "id": "F8.2",
@@ -1032,7 +1085,8 @@
   "pongs": true,
   "kongs": false,
   "quints": false,
-  "order": 54
+  "order": 54,
+  "year": 2026
  },
  {
   "id": "F9",
@@ -1049,7 +1103,8 @@
   "pongs": true,
   "kongs": false,
   "quints": false,
-  "order": 55
+  "order": 55,
+  "year": 2026
  },
  {
   "id": "G1.1",
@@ -1066,7 +1121,8 @@
   "pongs": true,
   "kongs": true,
   "quints": false,
-  "order": 56
+  "order": 56,
+  "year": 2026
  },
  {
   "id": "G1.2",
@@ -1083,7 +1139,8 @@
   "pongs": true,
   "kongs": true,
   "quints": false,
-  "order": 57
+  "order": 57,
+  "year": 2026
  },
  {
   "id": "G2.1",
@@ -1101,6 +1158,7 @@
   "kongs": true,
   "quints": false,
   "order": 58,
+  "year": 2026,
   "gen": {
    "t": "run",
    "k": 4
@@ -1123,6 +1181,7 @@
   "kongs": true,
   "quints": false,
   "order": 59,
+  "year": 2026,
   "gen": {
    "t": "run",
    "k": 4
@@ -1145,6 +1204,7 @@
   "kongs": true,
   "quints": false,
   "order": 60,
+  "year": 2026,
   "gen": {
    "t": "one",
    "d": [
@@ -1172,6 +1232,7 @@
   "kongs": true,
   "quints": false,
   "order": 61,
+  "year": 2026,
   "gen": {
    "t": "one",
    "d": [
@@ -1197,7 +1258,8 @@
   "pongs": true,
   "kongs": true,
   "quints": false,
-  "order": 62
+  "order": 62,
+  "year": 2026
  },
  {
   "id": "G6",
@@ -1214,7 +1276,8 @@
   "pongs": true,
   "kongs": true,
   "quints": false,
-  "order": 63
+  "order": 63,
+  "year": 2026
  },
  {
   "id": "G7.1",
@@ -1231,7 +1294,8 @@
   "pongs": false,
   "kongs": true,
   "quints": false,
-  "order": 64
+  "order": 64,
+  "year": 2026
  },
  {
   "id": "G7.2",
@@ -1248,7 +1312,8 @@
   "pongs": false,
   "kongs": true,
   "quints": false,
-  "order": 65
+  "order": 65,
+  "year": 2026
  },
  {
   "id": "G8",
@@ -1265,7 +1330,8 @@
   "pongs": true,
   "kongs": false,
   "quints": false,
-  "order": 66
+  "order": 66,
+  "year": 2026
  },
  {
   "id": "H1.1",
@@ -1282,7 +1348,8 @@
   "pongs": true,
   "kongs": true,
   "quints": false,
-  "order": 67
+  "order": 67,
+  "year": 2026
  },
  {
   "id": "H1.2",
@@ -1299,7 +1366,8 @@
   "pongs": true,
   "kongs": true,
   "quints": false,
-  "order": 68
+  "order": 68,
+  "year": 2026
  },
  {
   "id": "H2",
@@ -1316,7 +1384,8 @@
   "pongs": true,
   "kongs": true,
   "quints": false,
-  "order": 69
+  "order": 69,
+  "year": 2026
  },
  {
   "id": "H3.1",
@@ -1333,7 +1402,8 @@
   "pongs": true,
   "kongs": true,
   "quints": false,
-  "order": 70
+  "order": 70,
+  "year": 2026
  },
  {
   "id": "H3.2",
@@ -1350,7 +1420,8 @@
   "pongs": true,
   "kongs": true,
   "quints": false,
-  "order": 71
+  "order": 71,
+  "year": 2026
  },
  {
   "id": "H4",
@@ -1367,7 +1438,8 @@
   "pongs": true,
   "kongs": false,
   "quints": false,
-  "order": 72
+  "order": 72,
+  "year": 2026
  },
  {
   "id": "H5",
@@ -1385,6 +1457,7 @@
   "kongs": true,
   "quints": false,
   "order": 73,
+  "year": 2026,
   "gen": {
    "t": "one",
    "d": [
@@ -1409,7 +1482,8 @@
   "pongs": true,
   "kongs": false,
   "quints": false,
-  "order": 74
+  "order": 74,
+  "year": 2026
  },
  {
   "id": "I1",
@@ -1427,6 +1501,7 @@
   "kongs": false,
   "quints": false,
   "order": 75,
+  "year": 2026,
   "gen": {
    "t": "one",
    "d": [
@@ -1457,7 +1532,8 @@
   "pongs": false,
   "kongs": false,
   "quints": false,
-  "order": 76
+  "order": 76,
+  "year": 2026
  },
  {
   "id": "I3",
@@ -1474,7 +1550,8 @@
   "pongs": false,
   "kongs": false,
   "quints": false,
-  "order": 77
+  "order": 77,
+  "year": 2026
  },
  {
   "id": "I4",
@@ -1492,6 +1569,7 @@
   "kongs": false,
   "quints": false,
   "order": 78,
+  "year": 2026,
   "gen": {
    "t": "run",
    "k": 7
@@ -1512,7 +1590,8 @@
   "pongs": false,
   "kongs": false,
   "quints": false,
-  "order": 79
+  "order": 79,
+  "year": 2026
  },
  {
   "id": "I6",
@@ -1529,6 +1608,7 @@
   "pongs": false,
   "kongs": false,
   "quints": false,
-  "order": 80
+  "order": 80,
+  "year": 2026
  }
 ]
