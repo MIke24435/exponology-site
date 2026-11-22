@@ -174,6 +174,14 @@
     .rack .tile .t-new,.rack .tile .t-pass{font-size:.55rem;padding:1px 5px}
     .rack-spacer{width:34px;height:46px;flex-basis:34px}
     .rack-break{width:8px;height:46px;flex-basis:8px}
+    /* Discarded tiles shrink on a phone so more of them fit on screen;
+       desktop widths keep the original 40x54 exactly. The .discards-panel
+       prefix lifts specificity above the base rules further down the file. */
+    .discards-panel .discards-grid{gap:5px;padding:8px}
+    .discards-panel .discards-grid .tile,.discards-panel .discards-grid .tile-back{width:30px;height:41px}
+    .discards-panel .discards-grid .tile .t-main{font-size:.85rem}
+    .discards-panel .discards-grid .tile .t-num{width:20px;height:20px;font-size:.8rem}
+    .discards-panel .discards-grid .tile .t-sub{font-size:.45rem}
   }
   .hint:empty{display:none}
   .turn-bar[hidden]{display:none}
@@ -953,6 +961,7 @@
       <li>Every tile discarded in the game is kept — yours and the other players’.</li>
       <li>There is no Discards button: the <strong>Discarded tiles</strong> box sits above the other players and opens on its own when the first tile is discarded, and stays open for the rest of the game.</li>
       <li>Its header shows how many tiles have been discarded, alongside the <strong>Wall</strong> count — how many tiles are left to draw from.</li>
+      <li>On a phone the discarded tiles are smaller, so more of them fit on screen; on a computer they stay full size.</li>
       <li>Tap the <strong>▲ / ▼</strong> button at the right of its header to collapse or expand the box.</li>
       <li>Tiles show in the order they were laid down. Tick <strong>Sort by suit</strong> in the header to group them by suit instead.</li>
       <li>Tap a discarded tile to highlight every tile like it; tap it again to clear the highlight.</li>
@@ -1099,7 +1108,7 @@
       <li>Mid-Charleston, changing hands unpicks any tiles you had picked to swap, since the rack moves.</li>
       <li>Only one hand at a time — untick to clear the choice, and your rack goes back to sorting by suit until you choose another hand.</li>
       <li>The list opens with the <strong>Best hand</strong> on top — tap <strong>Play this hand</strong> there to start with it: the hand your tiles are closest to, then the most points.</li>
-      <li>Once you have picked a hand, the next-best hand stays in view under your rack as the <strong>Alternative</strong>, with a <strong>Switch</strong> button — it changes as tiles come and go, and it says so when it becomes the better hand.</li>
+      <li>Once you have picked a hand, the <strong>Alternative</strong> only appears under your rack when your hand can’t be completed any more — it says which tile is gone, and offers a <strong>Switch</strong> button to move to the next-best hand that still can be completed.</li>
       <li>If you are about to throw away (or pass on in the Charleston) a tile one of your hands still needs, or one another player looks to be collecting, the page <strong>warns you and says why</strong> — you can still go ahead if you mean it.</li>
       <li>Untick <strong>Suggestions</strong> in the <strong>Settings</strong> box to turn all of this off — no Best hand row, no Alternative strip, no Best discard line, no warnings.</li>
     </ul>
@@ -3060,18 +3069,61 @@ function maybeDiscard(idx){
   warnArmed = false;
   discardTile(idx);
 }
+/* Tiles the hand still needs that can no longer be got, per group: the
+   shortfall after what the rack holds and the Jokers in hand have spent.
+   Copies left = the set's copies, less what is visible (discarded or
+   exposed) and less what is in the rack. For a group of 3 or more a Joker
+   drawn later can still fill it, so the Jokers still out count too; a
+   single, a pair or a run tile can never take a Joker, so those die on
+   tile count alone. Only what a real player can see is counted —
+   opponents' hidden racks are never used — so this fires only when the
+   hand as displayed truly cannot be completed. */
+function deadNeeded(r){
+  if(!r || !r.groups) return [];
+  var jokersOut = 8 - visibleCount('joker') - (countsOf(rack)['joker'] || 0);
+  if(jokersOut < 0) jokersOut = 0;
+  var byKey = {}, order = [];
+  r.groups.forEach(function(g){
+    var d = g.n - g.got - g.jok;
+    if(d <= 0) return;
+    var left = tileLimit(g.k) - visibleCount(g.k) - (countsOf(rack)[g.k] || 0);
+    var fillers = left + (g.n >= 3 ? jokersOut : 0);
+    if(fillers < d){
+      if(!byKey[g.k]){ byKey[g.k] = {k: g.k, n: 0, left: left}; order.push(byKey[g.k]); }
+      byKey[g.k].n += d;
+      if(left < byKey[g.k].left) byKey[g.k].left = left;
+    }
+  });
+  return order;
+}
 function updateAltStrip(){
   var el = document.getElementById('altStrip');
   if(!el) return;
   if(!suggestionsOn){ el.hidden = true; el.innerHTML = ''; return; }
   if(!selectedHandId){ el.hidden = true; el.innerHTML = ''; return; }
   var hands = adviceHands();
-  var alt = hands.backup, prim = hands.primary;
-  if(!alt || !prim){ el.hidden = true; el.innerHTML = ''; return; }
+  var prim = hands.primary;
+  if(!prim){ el.hidden = true; el.innerHTML = ''; return; }
+  /* The Alternative only earns its space once the hand being played
+     cannot be completed — until then it is noise under the rack. */
+  var dead = deadNeeded(prim);
+  if(!dead.length){ el.hidden = true; el.innerHTML = ''; return; }
+  /* The alternative is the best other hand that can still be completed;
+     if every other hand is dead too, there is nothing to switch to. */
+  var alt = null;
+  var ranked = adviceRanked();
+  for(var j = 0; j < ranked.length; j++){
+    if(ranked[j].h.id !== prim.h.id && !deadNeeded(ranked[j]).length){ alt = ranked[j]; break; }
+  }
+  if(!alt){ el.hidden = true; el.innerHTML = ''; return; }
+  var deadBits = dead.slice(0, 2).map(function(nd){
+    var qty = nd.n === 1 ? 'a ' + tileName(nd.k) : nd.n + ' ' + tileName(nd.k) + 's';
+    return qty + ' (' + (nd.left <= 0 ? 'none left' : 'only ' + nd.left + ' left') + ')';
+  }).join(' and ') + (dead.length > 2 ? ' (+' + (dead.length - 2) + ' more)' : '');
   var better = alt.matched > prim.matched;
   var needBits = alt.needed.slice(0, 2).map(function(n){ return 'a ' + tileName(n.k) + (n.n > 1 ? ' (×' + n.n + ')' : ''); });
   var needs = alt.needed.length ? 'needs ' + needBits.join(', ') + (alt.needed.length > 2 ? '…' : '') : 'complete';
-  el.innerHTML = '<span><strong>Alternative:</strong> ' + esc(alt.h.id) + ' — ' + alt.matched + ' tiles toward it, ' + esc(needs) + (better ? ' — <span class="alt-better">now better than the hand you’re playing</span>' : '') + '</span>' +
+  el.innerHTML = '<span><strong>Your chosen hand (' + esc(prim.h.id) + ') can’t be completed</strong> — it still needs ' + esc(deadBits) + '. <strong>Alternative:</strong> ' + esc(alt.h.id) + ' — ' + alt.matched + ' tiles toward it, ' + esc(needs) + (better ? ' — <span class="alt-better">now better than the hand you’re playing</span>' : '') + '</span>' +
     '<button type="button" class="btn btn-compact" id="altSwitchBtn">Switch to ' + esc(alt.h.id) + '</button>';
   el.hidden = false;
   document.getElementById('altSwitchBtn').addEventListener('click', function(){ setSelectedHand(alt.h.id); });
