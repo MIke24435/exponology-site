@@ -824,7 +824,8 @@
         <div class="match-filter">
           <label class="match-label" for="matchSelect">Matching tiles</label>
           <select id="matchSelect" class="match-select" aria-label="Minimum matching tiles">
-            <option value="1" selected>1</option>
+            <option value="0" selected>0</option>
+            <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
             <option value="4">4</option>
@@ -1122,7 +1123,7 @@
       <div class="help-sub-body" id="helpSubBody17">
         <ul>
       <li><strong>Sections</strong> (above the hands list) limits the results to the card sections you pick.</li>
-      <li><strong>Matching tiles</strong> sets how many of your tiles a hand must use to be listed.</li>
+      <li><strong>Matching tiles</strong> sets how many of your tiles a hand must use to be listed — 0 shows every hand on the card.</li>
       <li><strong>Singles &amp; pairs</strong> shows all hands, only hands with a single or pair (★), or only hands without one.</li>
       <li>Hands blocked by a single or a pair you don’t hold are listed separately, below the main list.</li>
       <li>Tap the <strong>▲ / ▼</strong> button at the right of "Hands you could make" to hide the filters and the hands together, leaving just the heading — tap again to bring them back.</li>
@@ -1781,7 +1782,7 @@ var SECTIONS = [
 ];
 var selectedSections = {};
 SECTIONS.forEach(function(s){ selectedSections[s.letter] = true; });
-var minMatched = 1;
+var minMatched = 0;
 var spFilter = 'without'; // 'all' | 'with' | 'without' — singles & pairs (★) filter
 var selectedHandId = null; // hand id chosen with "Play hand" on a hand card
 function hasSinglesOrPairs(r){ return r.groups.some(function(g){ return g.n < 3 && !g.run; }); }
@@ -4206,7 +4207,8 @@ document.getElementById('sectionNone').addEventListener('click', function(){
 });
 document.getElementById('sectionDone').addEventListener('click', function(){ closeSectionMenu(); });
 document.getElementById('matchSelect').addEventListener('change', function(){
-  minMatched = parseInt(this.value, 10) || 1;
+  var v = parseInt(this.value, 10);
+  minMatched = isNaN(v) ? 1 : v;
   renderResults();
 });
 document.getElementById('spFilterSelect').addEventListener('change', function(){
