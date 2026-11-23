@@ -303,6 +303,11 @@
   .best-hand-row{margin:0 2px 12px;padding:10px 12px;background:var(--gold-soft);border-radius:10px;font-size:.95rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .alt-strip{margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--gold);border-radius:10px;padding:8px 12px 9px;font-size:.95rem}
   .alt-strip .alt-better{font-weight:800;color:var(--red)}
+  /* Chosen and Alternative sit side by side above the rack when there
+     is room (each takes at least 420px); below that they wrap to the
+     old stacked layout, so a phone still reads them one at a time. */
+  .hand-strips{display:flex;gap:10px;flex-wrap:wrap;align-items:stretch}
+  .hand-strips .chosen-strip,.hand-strips .alt-strip{flex:1 1 420px}
   .warn-bar{margin-top:10px;padding:12px;border-radius:10px;background:var(--red-soft);border:2px solid var(--red);display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:.95rem}
   .warn-bar .btn{flex-shrink:0}
   .warn-bar[hidden],.alt-strip[hidden],.best-hand-row[hidden]{display:none}
@@ -744,8 +749,10 @@
       <span id="endBannerText"></span>
       <button type="button" class="btn" id="endNewHandBtn">Deal a new hand</button>
     </div>
-    <div class="chosen-strip" id="chosenStrip" hidden></div>
-    <div class="alt-strip" id="altStrip" hidden></div>
+    <div class="hand-strips" id="handStrips">
+      <div class="chosen-strip" id="chosenStrip" hidden></div>
+      <div class="alt-strip" id="altStrip" hidden></div>
+    </div>
     <div class="rack" id="rack"></div>
     <div class="warn-bar" id="warnBar" hidden role="alert"></div>
     <div class="turn-bar" id="adviceLine" hidden aria-live="polite"></div>
@@ -1108,7 +1115,7 @@
       <li>Mid-Charleston, changing hands unpicks any tiles you had picked to swap, since the rack moves.</li>
       <li>Only one hand at a time — untick to clear the choice, and your rack goes back to sorting by suit until you choose another hand.</li>
       <li>The list opens with the <strong>Best hand</strong> on top — tap <strong>Play this hand</strong> there to start with it: the hand your tiles are closest to, then the most points.</li>
-      <li>Once you have picked a hand, the <strong>Alternative</strong> only appears under your rack when your hand can’t realistically be completed any more — either a tile it needs is gone for good, or the only way left is drawing Jokers and the chance of drawing the ones it needs is under 1 in 10. It says which tile is gone, and offers a <strong>Switch</strong> button to move to the most promising hand that still can be completed.</li>
+      <li>Once you have picked a hand, the <strong>Alternative</strong> only appears beside your chosen hand, above the rack, when your hand can’t realistically be completed any more — either a tile it needs is gone for good, or the only way left is drawing Jokers and the chance of drawing the ones it needs is under 1 in 10. It says which tile is gone, and offers a <strong>Switch</strong> button to move to the most promising hand that still can be completed.</li>
       <li>If you are about to throw away (or pass on in the Charleston) a tile one of your hands still needs, or one another player looks to be collecting, the page <strong>warns you and says why</strong> — you can still go ahead if you mean it.</li>
       <li>Untick <strong>Suggestions</strong> in the <strong>Settings</strong> box to turn all of this off — no Best hand row, no Alternative strip, no Best discard line, no warnings.</li>
     </ul>
