@@ -3062,13 +3062,13 @@ function discardAdviceLine(){
   var reason;
   var handWord = selectedHandId ? 'chosen hand' : 'best hand';
   if(a.costP === 0 && a.costB === 0){
-    reason = 'Best discard: the tile marked Disc — neither of your hands needs it, and ' + bits + '.';
+    reason = 'Neither of your hands needs it, and ' + bits + '.';
   } else if(a.costP === 0){
-    reason = 'Best discard: the tile marked Disc — your ' + handWord + ' (' + esc(a.primaryId) + ') does not need it. It slows your alternative (' + esc(a.backupId) + ') by 1 tile, and ' + bits + '.';
+    reason = 'Your ' + handWord + ' (' + esc(a.primaryId) + ') does not need it. It slows your alternative (' + esc(a.backupId) + ') by 1 tile, and ' + bits + '.';
   } else if(a.costB > 0){
-    reason = 'No free discard — every tile helps a hand. Least costly is the tile marked Disc — it slows your ' + handWord + ' (' + esc(a.primaryId) + ') by 1 tile and your alternative (' + esc(a.backupId) + ') by 1 tile too, and ' + bits + '.';
+    reason = 'No free discard — every tile helps a hand. The least costly one slows your ' + handWord + ' (' + esc(a.primaryId) + ') by 1 tile and your alternative (' + esc(a.backupId) + ') by 1 tile too, and ' + bits + '.';
   } else {
-    reason = 'No free discard — every tile helps a hand. Least costly is the tile marked Disc — it slows your ' + handWord + ' (' + esc(a.primaryId) + ') by 1 tile, and ' + bits + '.';
+    reason = 'No free discard — every tile helps a hand. The least costly one slows your ' + handWord + ' (' + esc(a.primaryId) + ') by 1 tile, and ' + bits + '.';
   }
   if(a.danger) reason += ' ' + esc(a.danger) + ' has it exposed, so they might call it.';
   var hands = adviceHands();
