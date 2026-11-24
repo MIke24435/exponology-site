@@ -3111,8 +3111,10 @@ function binom(n, k){
 }
 /* Chance of drawing at least `need` Jokers in your remaining draws:
    about a quarter of the wall is yours (four players draw in turn).
-   `wall` is the tiles left in the wall, `jokers` the Jokers still out
-   as the player sees them (visible Jokers and rack Jokers excluded). */
+   `wall` is the tiles left in the wall, `jokers` the Jokers that can
+   still be drawn — the share of the unseen Jokers estimated to be
+   sitting in the wall. The rest are in the other players' hidden
+   racks, where they stay (same correction as the Joker odds). */
 function jokerDrawProb(need, wall, jokers){
   if(need <= 0) return 1;
   if(need > jokers) return 0;
@@ -3132,15 +3134,26 @@ function jokerDrawProb(need, wall, jokers){
    there is no natural way AND the chance of drawing the Jokers it
    needs is under 1 in 10. The chance assumes you draw every remaining
    natural copy, so it is an upper bound on completing the group — the
-   test only fires when the hand is genuinely unlikely. Only what a
-   real player can see is counted — opponents' hidden racks are never
-   used. */
+   test only fires when the hand is genuinely unlikely. The Jokers it
+   counts are only the share estimated to be in the wall: the other
+   players keep the rest in their hidden racks (only the rack sizes
+   are used, never their contents). */
 function deadNeeded(r){
   if(!r || !r.groups) return [];
   var rackCounts = countsOf(rack);
   var jokersOut = 8 - visibleCount('joker') - (rackCounts['joker'] || 0);
   if(jokersOut < 0) jokersOut = 0;
   var wall = remainingPool().length;
+  /* The Jokers still out are not all in the wall — the other players
+     hold some in their hidden racks and keep them. The drawable ones
+     are the share of the unseen Jokers sitting in the wall (item 94's
+     correction, applied here at Mike's say-so). With no opponents
+     dealt the share is the whole count, so rack-only play is
+     unchanged. Only the rack sizes are used, never their contents. */
+  var oppRacks = 0;
+  if(opponentsDealt) opponents.forEach(function(o){ oppRacks += o.rack.length; });
+  var wallJokers = Math.round(jokersOut * wall / (wall + oppRacks));
+  if(wallJokers < 0) wallJokers = 0;
   var byKey = {}, order = [];
   r.groups.forEach(function(g){
     var d = g.n - g.got - g.jok;
@@ -3152,12 +3165,12 @@ function deadNeeded(r){
     } else {
       need = Math.max(0, d - left);
       if(need > 0){
-        prob = jokerDrawProb(need, wall, jokersOut);
+        prob = jokerDrawProb(need, wall, wallJokers);
         dead = prob < 0.10;
       }
     }
     if(dead){
-      if(!byKey[g.k]){ byKey[g.k] = {k: g.k, n: 0, left: left, prob: prob, need: need}; order.push(byKey[g.k]); }
+      if(!byKey[g.k]){ byKey[g.k] = {k: g.k, n: 0, left: left, prob: prob, need: need, wj: wallJokers}; order.push(byKey[g.k]); }
       byKey[g.k].n += d;
       if(left < byKey[g.k].left) byKey[g.k].left = left;
       if(prob < byKey[g.k].prob) byKey[g.k].prob = prob;
@@ -3194,7 +3207,7 @@ function updateAltStrip(){
     var qty = nd.n === 1 ? 'a ' + tileName(nd.k) : nd.n + ' ' + tileName(nd.k) + 's';
     var where = nd.left <= 0 ? 'none left' : 'only ' + nd.left + ' left';
     if(nd.need > 0){
-      where += nd.prob <= 0 ? ' — no Jokers left to draw' : ' — about 1 in ' + Math.max(1, Math.round(1 / nd.prob)) + ' to draw the ' + (nd.need === 1 ? 'Joker' : nd.need + ' Jokers');
+      where += nd.prob <= 0 ? (nd.wj <= 0 ? ' — no Jokers left to draw' : ' — not enough Jokers in the wall') : ' — about 1 in ' + Math.max(1, Math.round(1 / nd.prob)) + ' to draw the ' + (nd.need === 1 ? 'Joker' : nd.need + ' Jokers');
     }
     return qty + ' (' + where + ')';
   }).join(' and ') + (dead.length > 2 ? ' (+' + (dead.length - 2) + ' more)' : '');
