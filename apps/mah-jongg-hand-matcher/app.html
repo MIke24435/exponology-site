@@ -207,7 +207,7 @@
   @media (prefers-color-scheme: dark){ .mj-banner .mj-btn{background:#0e1a13;color:var(--jade-strong)} }
   .turn-bar{margin-top:12px;padding:11px 12px;border-radius:10px;background:var(--gold-soft);border:1px solid var(--line);font-size:.96rem;line-height:1.45}
   .turn-bar{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 14px}
-  .turn-bar .advice-odds{margin-left:auto;white-space:nowrap;font-weight:700}
+  .turn-bar .advice-odds{flex:1 1 100%;white-space:nowrap;font-weight:700}
   .turn-bar strong{color:var(--ink)}
   .turn-bar .turn-step{font-weight:800}
   /* Settings box: Speed, Random, Charleston and East in one row */
@@ -1180,7 +1180,7 @@
       <li>The <strong>Best hand</strong> is the one with the most tiles toward it, then the most points — and the page says what it still needs, and how many of those tiles are still out (copies already discarded or exposed don’t count).</li>
       <li>The <strong>Alternative</strong> is the next-best hand that isn’t the one you’re playing.</li>
       <li>The <strong>Best discard</strong> is the tile that costs the hand you are playing least — never a tile it is already using. A tile that only slows your alternative hand beats one that slows the hand you are playing. It prefers tiles with the most copies already out, and steers clear of tiles another player has exposed. The tile is marked <strong>Disc</strong> in red on your rack, so you can spot it without reading the line.</li>
-      <li>The chance of drawing a Joker is worked out from what anyone can see: 8 Jokers in the set, minus the ones on the table, over the tiles left in the wall — it shows at the right-hand end of the line under your rack, after the Best discard, in a dealt game.</li>
+      <li>The chance of drawing a Joker is worked out from what anyone can see: 8 Jokers in the set, minus the ones on the table, over the tiles left in the wall — it shows on the top line of the advice box under your rack, above the Best discard, in a dealt game.</li>
       <li>A warning never stops you — it only asks, with the reason.</li>
     </ul>
       </div>
@@ -3073,8 +3073,11 @@ function discardAdviceLine(){
   if(a.danger) reason += ' ' + esc(a.danger) + ' has it exposed, so they might call it.';
   var hands = adviceHands();
   var odds = hands.primary ? jokerOddsText(hands.primary) : '';
-  var out = '<span class="advice-main">' + reason + '</span>';
+  /* The Joker odds sit on the top line of the advice box, above the
+     Best discard — not at the right-hand end of the same line. */
+  var out = '';
   if(odds) out += '<span class="advice-odds">' + odds.charAt(0).toUpperCase() + odds.slice(1) + '.</span>';
+  out += '<span class="advice-main">' + reason + '</span>';
   return ' ' + out;
 }
 function discardRisk(key){
