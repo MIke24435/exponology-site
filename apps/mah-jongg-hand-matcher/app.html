@@ -713,6 +713,10 @@
           <input type="checkbox" id="showAltCheck">
           <span class="sort-all-label">Show Alt</span>
         </label>
+        <label class="sort-all-filter" for="soundCheck" title="Play a short chime when anyone gets Mah Jongg. Untick to play in silence.">
+          <input type="checkbox" id="soundCheck" checked>
+          <span class="sort-all-label">Sound</span>
+        </label>
     </div>
   </section>
 
@@ -1077,6 +1081,7 @@
       <li>They score the hand’s points.</li>
       <li><strong>Their whole hand is revealed</strong> under the other players, grouped into its sets, so you can study how it fits together.</li>
       <li>Your wins are revealed the same way.</li>
+      <li>A short chime plays when anyone gets Mah Jongg — untick <strong>Sound</strong> in Settings to silence it.</li>
       <li>If the wall runs out first, the hand is a draw and nobody scores.</li>
     </ul>
       </div>
@@ -1595,6 +1600,7 @@ var discardsVisible = true; // the chevron button in the discarded tiles box: op
 var settingsVisible = true; // Settings box chevron: open or collapsed
 var suggestionsOn = true; // Suggestions checkbox in Settings: the advice features on or off
 var showAltOn = false; // Show Alt checkbox in Settings: keep the Alternative strip on screen
+var soundOn = true; // Sound checkbox in Settings: the Mah Jongg chime on or off
 var jokerOddsOpen = null; // Joker odds at the opening of this game: the best the odds ever claim
 var addTilesVisible = true; // Add tiles box chevron: open or collapsed
 var oppVisible = true; // Other players box chevron: open or collapsed
@@ -2537,6 +2543,34 @@ function passCall(){
   if(resolveChain <= 8 && opponentPungCall(pc.by, pc.key)) return;
   scheduleOpponentStep(nextSeat(pc.by));
 }
+/* The Mah Jongg chime: four notes up, played with the Web Audio API
+   so no sound file is needed. It plays when anyone gets Mah Jongg —
+   your win or an opponent's — never for a wall game. Silent if sound
+   is off in Settings or the browser cannot play audio. */
+function playMjSound(){
+  if(!soundOn) return;
+  try{
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return;
+    var ctx = new AC();
+    if(ctx.state === 'suspended') ctx.resume();
+    var notes = [523.25, 659.25, 783.99, 1046.50]; // C5 E5 G5 C6
+    notes.forEach(function(freq, i){
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.value = freq;
+      var t0 = ctx.currentTime + i * 0.13;
+      gain.gain.setValueAtTime(0.0001, t0);
+      gain.gain.exponentialRampToValueAtTime(0.18, t0 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.55);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(t0);
+      osc.stop(t0 + 0.6);
+    });
+  }catch(e){ /* no sound, no fuss */ }
+}
 function endOpponentWin(opp, hand, viaCall, fromSeat, callKey){
   gameOver = true;
   opponentsRunning = false;
@@ -2546,6 +2580,7 @@ function endOpponentWin(opp, hand, viaCall, fromSeat, callKey){
   currentTurnSeat = null;
   if(!scoredThisGame){ scoredThisGame = true; scores[opp.id] += hand.pts; }
   gameResult = {type: 'opp-mj', opp: opp, hand: hand, viaCall: !!viaCall, fromSeat: fromSeat || null, callKey: callKey || null};
+  playMjSound();
   opp.status = viaCall ? 'Called Mah Jongg!' : 'Drew the winning tile — Mah Jongg!';
   turnSeq++;
   refresh();
@@ -2673,7 +2708,9 @@ function renderReveal(){
     for(i = 0; i < g.got; i++) tilesHtml += revealTileHTML(g.k);
     for(i = 0; i < g.jok; i++) tilesHtml += revealTileHTML('joker');
     var label = g.n === 1 ? 'Single' : g.n === 2 ? 'Pair' : g.n === 3 ? 'Pung' : g.n === 4 ? 'Kong' : g.n === 5 ? 'Quint' : 'Set of ' + g.n;
-    return '<span class="meld"><span class="meld-tiles">' + tilesHtml + '</span><span class="meld-label">' + label + ' · ' + esc(tileName(g.k)) + '</span></span>';
+    /* The label is the set size only — the tiles themselves show which
+       tile the set is, so the "· 3 Bam" suffix just crowded the row. */
+    return '<span class="meld"><span class="meld-tiles">' + tilesHtml + '</span><span class="meld-label">' + label + '</span></span>';
   }).join('');
 }
 
@@ -3400,6 +3437,7 @@ function updateTurnUI(){
     var winHand = mj ? selectedMatch().hand : anyMj;
     scores.you += winHand.pts;
     gameResult = {type: 'user-mj', hand: winHand};
+    playMjSound();
   }
   if(banner){
     if(mj){
@@ -4398,6 +4436,12 @@ document.getElementById('showAltCheck').addEventListener('change', function(){
   showMsg(showAltOn
     ? 'Show Alt on — the Alternative strip stays on screen all the time, even while your chosen hand can still be completed.'
     : 'Show Alt off — the Alternative only appears during the Charleston, or when your chosen hand can’t be completed.', true);
+});
+document.getElementById('soundCheck').addEventListener('change', function(){
+  soundOn = this.checked;
+  showMsg(soundOn
+    ? 'Sound on — a short chime plays when anyone gets Mah Jongg.'
+    : 'Sound off — Mah Jongg arrives in silence.', true);
 });
 document.getElementById('showMoreBtn').addEventListener('click', function(){
   showingMore = !showingMore;
