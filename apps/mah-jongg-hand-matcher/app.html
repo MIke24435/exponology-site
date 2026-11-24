@@ -199,6 +199,7 @@
   @media(max-width:560px){ .draw-controls{width:100%} .draw-controls .match-select{flex:1 1 160px} }
   /* Wall count — a pill in the discarded tiles box, nothing more */
   .wall-pill{background:var(--jade-soft);border:1px solid var(--line);padding:4px 10px;border-radius:999px;font-weight:800;color:var(--jade);font-size:.92rem;white-space:nowrap}
+  .discards-odds{font-weight:700;white-space:nowrap}
   .mj-banner{margin-top:14px;padding:16px;border-radius:12px;background:var(--jade);color:#fff;text-align:center;border:2px solid var(--gold)}
   @media (prefers-color-scheme: dark){ .mj-banner{color:#0e1a13} }
   .mj-banner strong{display:block;font-family:Georgia,serif;font-size:1.7rem;line-height:1.1;letter-spacing:-.01em}
@@ -207,7 +208,6 @@
   @media (prefers-color-scheme: dark){ .mj-banner .mj-btn{background:#0e1a13;color:var(--jade-strong)} }
   .turn-bar{margin-top:12px;padding:11px 12px;border-radius:10px;background:var(--gold-soft);border:1px solid var(--line);font-size:.96rem;line-height:1.45}
   .turn-bar{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 14px}
-  .turn-bar .advice-odds{flex:1 1 100%;white-space:nowrap;font-weight:700}
   .turn-bar strong{color:var(--ink)}
   .turn-bar .turn-step{font-weight:800}
   /* Settings box: Speed, Random, Charleston and East in one row */
@@ -809,6 +809,7 @@
         <input type="checkbox" id="discardsSortCheck">
         <span class="sort-all-label">Sort by suit</span>
       </label>
+      <span class="discards-odds" id="discardsOdds" aria-live="polite"></span>
       <a class="help-q" href="#help-discards" aria-label="Help: the discard pile">?</a>
       <button type="button" class="collapse-toggle" id="discardsCollapseBtn" aria-expanded="true" aria-controls="discardsGrid" aria-label="Collapse discarded tiles">▲</button>
     </div>
@@ -977,7 +978,7 @@
       <div class="help-sub-body" id="helpSubBody6">
         <ul>
       <li>Every tile discarded in the game is kept — yours and the other players’.</li>
-      <li>There is no Discards button: the <strong>Discarded tiles</strong> box sits above the other players and opens on its own when the first tile is discarded, and stays open for the rest of the game.</li>
+      <li>There is no Discards button: the <strong>Discarded tiles</strong> box sits above the other players and opens on its own once there is something to show — the first discarded tile, or the Joker odds at 14 tiles — and stays open for the rest of the game.</li>
       <li>Its header shows how many tiles have been discarded, alongside the <strong>Wall</strong> count — how many tiles are left to draw from.</li>
       <li>On a phone the discarded tiles are smaller, so more of them fit on screen; on a computer they stay full size.</li>
       <li>Tap the <strong>▲ / ▼</strong> button at the right of its header to collapse or expand the box.</li>
@@ -1180,7 +1181,7 @@
       <li>The <strong>Best hand</strong> is the one with the most tiles toward it, then the most points — and the page says what it still needs, and how many of those tiles are still out (copies already discarded or exposed don’t count).</li>
       <li>The <strong>Alternative</strong> is the next-best hand that isn’t the one you’re playing.</li>
       <li>The <strong>Best discard</strong> is the tile that costs the hand you are playing least — never a tile it is already using. A tile that only slows your alternative hand beats one that slows the hand you are playing. When two tiles cost nothing, one no hand uses at all goes before one that sits in a hand's structure, even a spare copy of it. It prefers tiles with the most copies already out, and steers clear of tiles another player has exposed. The tile is marked <strong>Disc</strong> in red on your rack, so you can spot it without reading the line.</li>
-      <li>The chance of drawing a Joker is worked out from what anyone can see: 8 Jokers in the set, minus the ones on the table, over the tiles left in the wall — it shows on the top line of the advice box under your rack, above the Best discard, in a dealt game.</li>
+      <li>The chance of drawing a Joker is worked out from what anyone can see: 8 Jokers in the set, minus the ones on the table, over the tiles left in the wall — it shows in the <strong>Discarded tiles</strong> box header, to the right of <strong>Sort by suit</strong>, in a dealt game.</li>
       <li>A warning never stops you — it only asks, with the reason.</li>
     </ul>
       </div>
@@ -3090,14 +3091,9 @@ function discardAdviceLine(){
     reason = 'No free discard — every tile helps a hand. The least costly one slows your ' + handWord + ' (' + esc(a.primaryId) + ') by 1 tile, and ' + bits + '.';
   }
   if(a.danger) reason += ' ' + esc(a.danger) + ' has it exposed, so they might call it.';
-  var hands = adviceHands();
-  var odds = hands.primary ? jokerOddsText(hands.primary) : '';
-  /* The Joker odds sit on the top line of the advice box, above the
-     Best discard — not at the right-hand end of the same line. */
-  var out = '';
-  if(odds) out += '<span class="advice-odds">' + odds.charAt(0).toUpperCase() + odds.slice(1) + '.</span>';
-  out += '<span class="advice-main">' + reason + '</span>';
-  return ' ' + out;
+  /* The Joker odds live in the Discarded tiles box header now, not
+     here — this line carries only the reason. */
+  return ' <span class="advice-main">' + reason + '</span>';
 }
 function discardRisk(key){
   if(!suggestionsOn) return null;
@@ -3398,7 +3394,20 @@ function updateDiscardsUI(){
   var view = document.getElementById('discardsView');
   if(!view) return;
   syncCollapseBtn('discardsCollapseBtn', discardsVisible, 'discarded tiles');
-  view.hidden = discardPile.length === 0;
+  /* The Joker odds live in this header, to the right of Sort by suit.
+     They show under the same conditions as the Best discard line
+     (a dealt game, 14 tiles, a group of 3+ still short of Jokers) —
+     so the box opens for them at 14 tiles even before the first
+     discard, and they stay visible when the box is collapsed. */
+  var odds = '';
+  if(discardAdvice()){
+    var h = adviceHands();
+    if(h.primary) odds = jokerOddsText(h.primary);
+    if(odds) odds = odds.charAt(0).toUpperCase() + odds.slice(1) + '.';
+  }
+  var oddsEl = document.getElementById('discardsOdds');
+  if(oddsEl){ oddsEl.textContent = odds; oddsEl.hidden = !odds; }
+  view.hidden = discardPile.length === 0 && !odds;
   if(view.hidden) return;
   var countEl = document.getElementById('discardsCount');
   if(countEl) countEl.textContent = discardPile.length + (discardPile.length === 1 ? ' tile discarded' : ' tiles discarded');
