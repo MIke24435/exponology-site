@@ -1179,7 +1179,7 @@
       <li>The tiles you still need for that hand (red).</li>
       <li>The <strong>Best hand</strong> is the one with the most tiles toward it, then the most points — and the page says what it still needs, and how many of those tiles are still out (copies already discarded or exposed don’t count).</li>
       <li>The <strong>Alternative</strong> is the next-best hand that isn’t the one you’re playing.</li>
-      <li>The <strong>Best discard</strong> is the tile that costs the hand you are playing least — never a tile it is already using. A tile that only slows your alternative hand beats one that slows the hand you are playing. It prefers tiles with the most copies already out, and steers clear of tiles another player has exposed. The tile is marked <strong>Disc</strong> in red on your rack, so you can spot it without reading the line.</li>
+      <li>The <strong>Best discard</strong> is the tile that costs the hand you are playing least — never a tile it is already using. A tile that only slows your alternative hand beats one that slows the hand you are playing. When two tiles cost nothing, one no hand uses at all goes before one that sits in a hand's structure, even a spare copy of it. It prefers tiles with the most copies already out, and steers clear of tiles another player has exposed. The tile is marked <strong>Disc</strong> in red on your rack, so you can spot it without reading the line.</li>
       <li>The chance of drawing a Joker is worked out from what anyone can see: 8 Jokers in the set, minus the ones on the table, over the tiles left in the wall — it shows on the top line of the advice box under your rack, above the Best discard, in a dealt game.</li>
       <li>A warning never stops you — it only asks, with the reason.</li>
     </ul>
@@ -2959,6 +2959,17 @@ function handNeedsKey(r, key){
   for(var i = 0; i < r.needed.length; i++){ if(r.needed[i].k === key && r.needed[i].n > 0) return true; }
   return false;
 }
+/* Copies of this tile the hand's current groups hold that came from
+   the rack — copies already locked in your exposed sets don't count. */
+function handRackCopies(r, key){
+  if(!r || !r.groups) return 0;
+  var used = 0;
+  r.groups.forEach(function(g){ if(g.k === key) used += g.got; });
+  if(used <= 0) return 0;
+  var inMelds = 0;
+  exposedMelds.forEach(function(m){ m.tiles.forEach(function(t){ if(t === key) inMelds++; }); });
+  return used - inMelds;
+}
 /* Is every copy of this tile in the rack already spoken for by the hand
    as it stands? The re-match in discardAdvice can re-optimise (a run of
    3-4-5-6 can become 4-5-6-7), so a tile the hand is already using can
@@ -2966,16 +2977,18 @@ function handNeedsKey(r, key){
    the copies already locked in your exposed sets: if that covers every
    copy in the rack, discarding one breaks the hand as displayed. */
 function handUsesKey(r, key){
-  if(!r || !r.groups) return false;
-  var used = 0;
-  r.groups.forEach(function(g){ if(g.k === key) used += g.got; });
-  if(used <= 0) return false;
-  var inMelds = 0;
-  exposedMelds.forEach(function(m){ m.tiles.forEach(function(t){ if(t === key) inMelds++; }); });
-  var fromRack = used - inMelds;
+  var fromRack = handRackCopies(r, key);
   if(fromRack <= 0) return false;
   var held = (countsOf(rack)[key] || 0);
   return fromRack >= held;
+}
+/* Does the hand as displayed hold at least one copy of this tile from
+   the rack — even if it has a spare? A run needs one 4 Bam; holding
+   two leaves one spare, and the spare still sits in the hand's
+   structure, so letting it go is worse than letting go a tile no
+   hand uses at all. */
+function handTouchesKey(r, key){
+  return handRackCopies(r, key) > 0;
 }
 /* The chance the next draw is a Joker, from what a player can see: 8 Jokers
    in the set, minus the ones visible (rack, exposed sets, discards). But the
@@ -3042,7 +3055,13 @@ function discardAdvice(){
     var cost = costP * 2 + costB;
     var out = visibleCount(k);
     var danger = oppExposesKey(k);
-    var score = cost * 100 - out * 10 + (danger ? 50 : 0);
+    /* Among tiles that cost nothing, one no hand touches beats one
+       that sits in a hand's structure: a South that fits neither hand
+       goes before a 4 Bam in the alternative's run, even though the
+       second 4 Bam is spare. 40 keeps a cost-0 tile ahead of any
+       cost-1 tile (40 + 50 danger < 100). */
+    var touches = handTouchesKey(hands.primary, k) || (hands.backup && handTouchesKey(hands.backup, k));
+    var score = cost * 100 - out * 10 + (danger ? 50 : 0) + (touches ? 40 : 0);
     if(!best || score < best.score){
       best = {key: k, cost: cost, costP: costP, costB: costB, primaryId: hands.primary.h.id, backupId: hands.backup ? hands.backup.h.id : null, out: out, danger: danger, score: score};
     }
