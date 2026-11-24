@@ -171,7 +171,7 @@
     .rack .tile .t-main{font-size:1rem}
     .rack .tile.c-dragr .t-main,.rack .tile.c-dragg .t-main,.rack .tile.c-dragw .t-main{font-size:.8rem}
     .rack .tile .t-sub{font-size:.48rem}
-    .rack .tile .t-new,.rack .tile .t-pass{font-size:.55rem;padding:1px 5px}
+    .rack .tile .t-new,.rack .tile .t-pass,.rack .tile .t-disc{font-size:.55rem;padding:1px 5px}
     .rack-spacer{width:34px;height:46px;flex-basis:34px}
     .rack-break{width:8px;height:46px;flex-basis:8px}
     /* Discarded tiles shrink on a phone so more of them fit on screen;
@@ -242,6 +242,8 @@
   .ctl-group[hidden]{display:none}
   .tile.is-pass{outline:3px solid var(--gold);outline-offset:2px;box-shadow:0 0 0 5px var(--gold-soft)}
   .tile .t-pass{position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);z-index:2;background:var(--red);color:#fff;font-family:ui-sans-system,-apple-system,sans-serif;font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:999px;border:2px solid var(--surface);white-space:nowrap}
+  .tile .t-disc{position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);z-index:2;background:var(--red);color:#fff;font-family:ui-sans-system,-apple-system,sans-serif;font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:999px;border:2px solid var(--surface);white-space:nowrap}
+  .tile.is-disc{outline:3px solid var(--red);outline-offset:2px;box-shadow:0 0 0 5px var(--red-soft)}
   /* Charleston option (checkbox greys out once the Charleston is over) */
   .sort-all-filter.is-disabled{opacity:.45;cursor:default}
   .sort-all-filter.is-disabled input,.sort-all-filter.is-disabled .sort-all-label{cursor:default}
@@ -713,7 +715,7 @@
           <input type="checkbox" id="showAltCheck">
           <span class="sort-all-label">Show Alt</span>
         </label>
-        <label class="sort-all-filter" for="soundCheck" title="Play a short chime when anyone gets Mah Jongg. Untick to play in silence.">
+        <label class="sort-all-filter" for="soundCheck" title="Play a short chime when anyone gets Mah Jongg, and a shorter one when anyone takes a Joker out of an exposed set. Untick to play in silence.">
           <input type="checkbox" id="soundCheck" checked>
           <span class="sort-all-label">Sound</span>
         </label>
@@ -1065,6 +1067,7 @@
       <li>You can make more than one exchange in the same turn, as long as you hold the matching tiles — the bar stays while swaps remain.</li>
       <li>Exchanges are made on your own turn: not during the Charleston, not while a Call decision is waiting, and not while the other players are moving.</li>
       <li><strong>They exchange too:</strong> on their turns, the other players swap for any exposed Joker they hold the tile for — including Jokers in <strong>your</strong> exposed sets. Their card says when it happens.</li>
+      <li>A short two-note chime plays whenever anyone takes a Joker out of an exposed set — yours or theirs.</li>
       <li>A Joker in a set can only be swapped out with the real tile — a Joker can never be exchanged for another Joker, and singles and pairs never hold Jokers to exchange.</li>
     </ul>
       </div>
@@ -1081,7 +1084,7 @@
       <li>They score the hand’s points.</li>
       <li><strong>Their whole hand is revealed</strong> under the other players, grouped into its sets, so you can study how it fits together.</li>
       <li>Your wins are revealed the same way.</li>
-      <li>A short chime plays when anyone gets Mah Jongg — untick <strong>Sound</strong> in Settings to silence it.</li>
+      <li>A short chime plays when anyone gets Mah Jongg, and a shorter one when anyone takes a Joker out of an exposed set — untick <strong>Sound</strong> in Settings to silence them.</li>
       <li>If the wall runs out first, the hand is a draw and nobody scores.</li>
     </ul>
       </div>
@@ -1176,7 +1179,7 @@
       <li>The tiles you still need for that hand (red).</li>
       <li>The <strong>Best hand</strong> is the one with the most tiles toward it, then the most points — and the page says what it still needs, and how many of those tiles are still out (copies already discarded or exposed don’t count).</li>
       <li>The <strong>Alternative</strong> is the next-best hand that isn’t the one you’re playing.</li>
-      <li>The <strong>Best discard</strong> is the tile that costs the hand you are playing least — never a tile it is already using. A tile that only slows your alternative hand beats one that slows the hand you are playing. It prefers tiles with the most copies already out, and steers clear of tiles another player has exposed.</li>
+      <li>The <strong>Best discard</strong> is the tile that costs the hand you are playing least — never a tile it is already using. A tile that only slows your alternative hand beats one that slows the hand you are playing. It prefers tiles with the most copies already out, and steers clear of tiles another player has exposed. The tile is marked <strong>Disc</strong> in red on your rack, so you can spot it without reading the line.</li>
       <li>The chance of drawing a Joker is worked out from what anyone can see: 8 Jokers in the set, minus the ones on the table, over the tiles left in the wall — it shows at the right-hand end of the line under your rack, after the Best discard, in a dealt game.</li>
       <li>A warning never stops you — it only asks, with the reason.</li>
     </ul>
@@ -2489,6 +2492,7 @@ function doUserJokerExchange(owner, meldIndex){
   if(!meld) { refresh(); return; }
   pushUndo();
   if(!performJokerExchange(rack, meld)) { undoStack.pop(); refresh(); return; }
+  playExchangeSound();
   var ownerOpp = owner !== 'you' ? opponentById(owner) : null;
   if(ownerOpp) ownerOpp.status = 'You exchanged a Joker out of their ' + meld.kind + ' — your ' + tileName(meld.key) + ' took its place.';
   lastNewKey = 'joker';
@@ -2513,6 +2517,7 @@ function opponentDoExchanges(opp){
     notes.push({owner: ex.owner, meld: ex.meld});
     found = findExchanges(opp.rack);
   }
+  if(notes.length) playExchangeSound();
   return notes;
 }
 function updateExchangeUI(){
@@ -2543,34 +2548,39 @@ function passCall(){
   if(resolveChain <= 8 && opponentPungCall(pc.by, pc.key)) return;
   scheduleOpponentStep(nextSeat(pc.by));
 }
-/* The Mah Jongg chime: four notes up, played with the Web Audio API
-   so no sound file is needed. It plays when anyone gets Mah Jongg —
-   your win or an opponent's — never for a wall game. Silent if sound
-   is off in Settings or the browser cannot play audio. */
-function playMjSound(){
+/* The chimes, played with the Web Audio API so no sound file is
+   needed. playNotes() is the shared helper: `freqs` are the notes,
+   `step` the gap between them, `len` how long each rings. The Mah
+   Jongg chime is four notes up (C5 E5 G5 C6) and plays when anyone
+   gets Mah Jongg — your win or an opponent's — never for a wall
+   game. The exchange chime is two notes (E5 G5) and plays when
+   anyone takes a Joker out of an exposed set. Both are silent if
+   sound is off in Settings or the browser cannot play audio. */
+function playNotes(freqs, step, len){
   if(!soundOn) return;
   try{
     var AC = window.AudioContext || window.webkitAudioContext;
     if(!AC) return;
     var ctx = new AC();
     if(ctx.state === 'suspended') ctx.resume();
-    var notes = [523.25, 659.25, 783.99, 1046.50]; // C5 E5 G5 C6
-    notes.forEach(function(freq, i){
+    freqs.forEach(function(freq, i){
       var osc = ctx.createOscillator();
       var gain = ctx.createGain();
       osc.type = 'triangle';
       osc.frequency.value = freq;
-      var t0 = ctx.currentTime + i * 0.13;
+      var t0 = ctx.currentTime + i * step;
       gain.gain.setValueAtTime(0.0001, t0);
       gain.gain.exponentialRampToValueAtTime(0.18, t0 + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.55);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + len);
       osc.connect(gain);
       gain.connect(ctx.destination);
       osc.start(t0);
-      osc.stop(t0 + 0.6);
+      osc.stop(t0 + len + 0.05);
     });
   }catch(e){ /* no sound, no fuss */ }
 }
+function playMjSound(){ playNotes([523.25, 659.25, 783.99, 1046.50], 0.13, 0.55); }
+function playExchangeSound(){ playNotes([659.25, 783.99], 0.10, 0.35); }
 function endOpponentWin(opp, hand, viaCall, fromSeat, callKey){
   gameOver = true;
   opponentsRunning = false;
@@ -3042,7 +3052,8 @@ function discardAdvice(){
 function discardAdviceLine(){
   var a = discardAdvice();
   if(!a) return '';
-  var name = tileName(a.key);
+  /* The tile itself is marked Disc in red on the rack, so this line
+     no longer names it — it only gives the reason. */
   var bits;
   if(a.out >= 4) bits = 'all 4 are already out';
   else if(a.out === 3) bits = '3 copies are already out';
@@ -3051,13 +3062,13 @@ function discardAdviceLine(){
   var reason;
   var handWord = selectedHandId ? 'chosen hand' : 'best hand';
   if(a.costP === 0 && a.costB === 0){
-    reason = 'Best discard: <strong>' + esc(name) + '</strong> — neither of your hands needs it, and ' + bits + '.';
+    reason = 'Best discard: the tile marked Disc — neither of your hands needs it, and ' + bits + '.';
   } else if(a.costP === 0){
-    reason = 'Best discard: <strong>' + esc(name) + '</strong> — your ' + handWord + ' (' + esc(a.primaryId) + ') does not need it. It slows your alternative (' + esc(a.backupId) + ') by 1 tile, and ' + bits + '.';
+    reason = 'Best discard: the tile marked Disc — your ' + handWord + ' (' + esc(a.primaryId) + ') does not need it. It slows your alternative (' + esc(a.backupId) + ') by 1 tile, and ' + bits + '.';
   } else if(a.costB > 0){
-    reason = 'No free discard — every tile helps a hand. Least costly: <strong>' + esc(name) + '</strong> — it slows your ' + handWord + ' (' + esc(a.primaryId) + ') by 1 tile and your alternative (' + esc(a.backupId) + ') by 1 tile too, and ' + bits + '.';
+    reason = 'No free discard — every tile helps a hand. Least costly is the tile marked Disc — it slows your ' + handWord + ' (' + esc(a.primaryId) + ') by 1 tile and your alternative (' + esc(a.backupId) + ') by 1 tile too, and ' + bits + '.';
   } else {
-    reason = 'No free discard — every tile helps a hand. Least costly: <strong>' + esc(name) + '</strong> — it slows your ' + handWord + ' (' + esc(a.primaryId) + ') by 1 tile, and ' + bits + '.';
+    reason = 'No free discard — every tile helps a hand. Least costly is the tile marked Disc — it slows your ' + handWord + ' (' + esc(a.primaryId) + ') by 1 tile, and ' + bits + '.';
   }
   if(a.danger) reason += ' ' + esc(a.danger) + ' has it exposed, so they might call it.';
   var hands = adviceHands();
@@ -3542,6 +3553,8 @@ function renderRack(){
     var showBreaks = rackArrangedForSelected && rackBreaks.length > 0;
     var tapAction = gamePhase === 'charleston' ? 'tap to pick or unpick this tile to swap' : (isMahJongg() ? 'Mah Jongg tile' : (rack.length === 14 ? 'tap to discard this tile' : (randomMode ? 'tap to discard this tile when you hold 14' : 'tap to remove')));
     var parts = [];
+    var adv = suggestionsOn ? discardAdvice() : null;
+    var discMarked = false;
     rack.forEach(function(key, i){
       if(showGap && i === rackGapAfter) parts.push('<span class="rack-spacer" aria-hidden="true"></span>');
       else if(showBreaks && rackBreaks.indexOf(i) !== -1) parts.push('<span class="rack-break" aria-hidden="true"></span>');
@@ -3552,7 +3565,11 @@ function renderRack(){
       var isPass = gamePhase === 'charleston' && charlestonSel.indexOf(i) !== -1;
       var passCls = isPass ? ' is-pass' : '';
       var passBadge = isPass ? '<span class="t-pass">Swap</span>' : '';
-      parts.push('<button type="button" class="tile ' + tileFace(key).cls + imgCls + newCls + passCls + '" data-rack-idx="' + i + '" aria-label="' + esc(tileName(key)) + ' — ' + tapAction + ', drag to move">' + newBadge + passBadge + tileButtonHTML(key, 0, true) + '</button>');
+      var isDisc = !!adv && !discMarked && key === adv.key;
+      if(isDisc) discMarked = true;
+      var discCls = isDisc ? ' is-disc' : '';
+      var discBadge = isDisc ? '<span class="t-disc">Disc</span>' : '';
+      parts.push('<button type="button" class="tile ' + tileFace(key).cls + imgCls + newCls + passCls + discCls + '" data-rack-idx="' + i + '" aria-label="' + esc(tileName(key)) + ' — ' + tapAction + ', drag to move">' + newBadge + passBadge + discBadge + tileButtonHTML(key, 0, true) + '</button>');
     });
     el.innerHTML = parts.join('');
     var btns = el.querySelectorAll('[data-rack-idx]');
@@ -4440,8 +4457,8 @@ document.getElementById('showAltCheck').addEventListener('change', function(){
 document.getElementById('soundCheck').addEventListener('change', function(){
   soundOn = this.checked;
   showMsg(soundOn
-    ? 'Sound on — a short chime plays when anyone gets Mah Jongg.'
-    : 'Sound off — Mah Jongg arrives in silence.', true);
+    ? 'Sound on — a chime plays for Mah Jongg and for Joker exchanges.'
+    : 'Sound off — Mah Jongg and Joker exchanges arrive in silence.', true);
 });
 document.getElementById('showMoreBtn').addEventListener('click', function(){
   showingMore = !showingMore;
