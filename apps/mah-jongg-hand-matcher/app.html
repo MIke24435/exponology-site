@@ -256,6 +256,7 @@
   .opp-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
   .opp-name{font-weight:800;font-size:1.02rem}
   .opp-seat{color:var(--ink-faint);font-size:.82rem;font-weight:700}
+  .opp-jokers{color:var(--joker-purple);font-weight:800;font-size:.95rem;letter-spacing:.18em}
   .opp-backs{display:flex;flex-wrap:wrap;gap:3px;margin-top:9px;min-height:26px}
   .tile-back{width:17px;height:24px;border-radius:3px;background:var(--jade);border:1px solid var(--jade-strong);border-bottom:3px solid var(--jade-strong)}
   .opp-show{display:flex;align-items:center;gap:6px;margin-top:9px;font-size:.9rem;font-weight:700;color:var(--ink-soft);cursor:pointer}
@@ -1003,6 +1004,7 @@
       <li>Each works toward the card hand their tiles are closest to.</li>
       <li>Their hidden tiles show as green tile backs; the number is how many they hold.</li>
       <li>Their exposed sets show face-up on their cards.</li>
+      <li>A <strong>J</strong> by a player's name marks each Joker known in their hand — in their exposed sets, or taken by a Joker exchange. A Joker in an exposed set counts there only, so it comes off the swapped number.</li>
       <li>Yours sit in the controls box under your rack.</li>
       <li>They are beginners’ teachers, not sharks: they throw the tiles their hand doesn’t need.</li>
       <li>On their turns they also make <strong>Joker exchanges</strong> — swapping a tile they hold into any exposed set whose Joker it matches, theirs or yours, and taking the Joker. See <strong>Joker exchange</strong> under Calling a discard.</li>
@@ -1035,6 +1037,7 @@
       <div class="help-sub-body" id="helpSubBody9">
         <ul>
       <li>A discard is not dead until everyone has passed on it.</li>
+      <li>A discarded Joker is dead — it can never be called, not even for Mah Jongg.</li>
       <li>If a tile another player throws is one you can use, play pauses and the <strong>Call / Pass</strong> buttons appear under your rack.</li>
       <li>You can call it two ways:</li>
       <li><strong>For Mah Jongg</strong> — if it is the last tile you need.</li>
@@ -1654,7 +1657,7 @@ function snapshotGame(){
     charlestonWanted: charlestonWanted, charlestonCompleted: charlestonCompleted,
     discardPile: discardPile.slice(),
     discardLog: discardLog.map(function(d){ return {key: d.key, by: d.by}; }),
-    opponents: opponents.map(function(o){ return {id: o.id, name: o.name, label: o.label, rack: o.rack.slice(), melds: cloneMelds(o.melds), status: o.status, target: o.target, showHand: o.showHand}; }),
+    opponents: opponents.map(function(o){ return {id: o.id, name: o.name, label: o.label, rack: o.rack.slice(), melds: cloneMelds(o.melds), status: o.status, target: o.target, showHand: o.showHand, swappedJokers: o.swappedJokers || 0}; }),
     opponentsDealt: opponentsDealt, exposedMelds: cloneMelds(exposedMelds),
     pendingCall: pendingCall ? {key: pendingCall.key, by: pendingCall.by, pung: pendingCall.pung, kong: pendingCall.kong, quint: pendingCall.quint, mj: pendingCall.mj, mjHand: pendingCall.mjHand, pungJokers: pendingCall.pungJokers, kongJokers: pendingCall.kongJokers, quintJokers: pendingCall.quintJokers} : null,
     opponentsRunning: opponentsRunning, gameOver: gameOver,
@@ -1678,7 +1681,7 @@ function restoreGame(s){
   charlestonWanted = s.charlestonWanted; charlestonCompleted = s.charlestonCompleted;
   discardPile = s.discardPile.slice();
   discardLog = s.discardLog.map(function(d){ return {key: d.key, by: d.by}; });
-  opponents = s.opponents.map(function(o){ return {id: o.id, name: o.name, label: o.label, rack: o.rack.slice(), melds: cloneMelds(o.melds), status: o.status, target: o.target, showHand: o.showHand}; });
+  opponents = s.opponents.map(function(o){ return {id: o.id, name: o.name, label: o.label, rack: o.rack.slice(), melds: cloneMelds(o.melds), status: o.status, target: o.target, showHand: o.showHand, swappedJokers: o.swappedJokers || 0}; });
   opponentsDealt = s.opponentsDealt; exposedMelds = cloneMelds(s.exposedMelds);
   pendingCall = s.pendingCall ? {key: s.pendingCall.key, by: s.pendingCall.by, pung: s.pendingCall.pung, kong: s.pendingCall.kong, quint: s.pendingCall.quint, mj: s.pendingCall.mj, mjHand: s.pendingCall.mjHand, pungJokers: s.pendingCall.pungJokers, kongJokers: s.pendingCall.kongJokers, quintJokers: s.pendingCall.quintJokers} : null;
   opponentsRunning = s.opponentsRunning; gameOver = s.gameOver;
@@ -1968,6 +1971,17 @@ function meldJokers(melds){
   return out;
 }
 function exposedMeldJokers(){ return meldJokers(exposedMelds); }
+/* Jokers known in an opponent's hand: the ones showing in their
+   exposed sets, plus the ones they took by Joker exchange and still
+   hold. A Joker sitting in an exposed set counts there only - the
+   swapped number is reduced by the exposed count, so no Joker is
+   counted twice. */
+function oppKnownJokers(opp){
+  var exposed = 0;
+  opp.melds.forEach(function(m){ m.tiles.forEach(function(k){ if(k === 'joker') exposed++; }); });
+  var swapped = Math.max(0, (opp.swappedJokers || 0) - exposed);
+  return {exposed: exposed, swapped: swapped, total: exposed + swapped};
+}
 function allTiles(){ return rack.concat(meldTiles(exposedMelds)); }
 function allCounts(){ return countsOf(allTiles()); }
 function totalTiles(){ return rack.length + meldTiles(exposedMelds).length; }
@@ -2110,9 +2124,9 @@ function shuffleCopy(arr){
 }
 function makeOpponents(){
   return [
-    {id:'right', name:'Right', label:'Player on your right', rack:[], melds:[], status:'Waiting.', target:null, showHand:false},
-    {id:'opposite', name:'Opposite', label:'Player across from you', rack:[], melds:[], status:'Waiting.', target:null, showHand:false},
-    {id:'left', name:'Left', label:'Player on your left', rack:[], melds:[], status:'Waiting.', target:null, showHand:false}
+    {id:'right', name:'Right', label:'Player on your right', rack:[], melds:[], status:'Waiting.', target:null, showHand:false, swappedJokers: 0},
+    {id:'opposite', name:'Opposite', label:'Player across from you', rack:[], melds:[], status:'Waiting.', target:null, showHand:false, swappedJokers: 0},
+    {id:'left', name:'Left', label:'Player on your left', rack:[], melds:[], status:'Waiting.', target:null, showHand:false, swappedJokers: 0}
   ];
 }
 /* Each opponent plays toward one card hand — the one their tiles are
@@ -2172,6 +2186,7 @@ function takeLastDiscard(){
 }
 function canUserCall(key){
   var out = {pung: false, kong: false, quint: false, mj: false, mjHand: null, pungJokers: 0, kongJokers: 0, quintJokers: 0};
+  if(key === 'joker') return out; // A discarded Joker is dead - it can never be called, not even for Mah Jongg.
   if(gamePhase !== 'play' || gameOver || totalTiles() !== 13) return out;
   var counts = rackCounts();
   var inRack = counts[key] || 0;
@@ -2196,6 +2211,7 @@ function canUserCall(key){
   return out;
 }
 function oppCanCallMahJongg(opp, key){
+  if(key === 'joker') return null; // A discarded Joker is dead - it can never be called, not even for Mah Jongg.
   if(oppTotal(opp) !== 13) return null;
   var sim = oppAllCounts(opp);
   sim[key] = (sim[key] || 0) + 1;
@@ -2205,6 +2221,7 @@ function oppCanCallMahJongg(opp, key){
    they are playing toward forward: they must hold at least 2 more of
    the tile, and their best hand must still need that group of 3+. */
 function oppCallInfo(opp, key){
+  if(key === 'joker') return null; // A discarded Joker is dead - it can never be called, not even for Mah Jongg.
   if(oppTotal(opp) !== 13) return null;
   var rc = countsOf(opp.rack);
   var inRack = rc[key] || 0;
@@ -2520,6 +2537,7 @@ function opponentDoExchanges(opp){
     guard++;
     var ex = found[0];
     if(!performJokerExchange(opp.rack, ex.meld)) break;
+    opp.swappedJokers = (opp.swappedJokers || 0) + 1; // The Joker they took is now known to be in their rack.
     notes.push({owner: ex.owner, meld: ex.meld});
     found = findExchanges(opp.rack);
   }
@@ -2640,6 +2658,10 @@ function renderOpponents(){
         : '';
       var eastTag = (!isEast && o.id === 'right') ? ' · East' : '';
       var targetTag = (gamePhase === 'play' && o.target) ? '<span class="opp-seat">going for ' + esc(o.target) + '</span>' : '';
+      var jk = oppKnownJokers(o);
+      var jmarks = '';
+      for(var ji = 0; ji < jk.total; ji++) jmarks += 'J';
+      var jokerTag = jk.total ? '<span class="opp-jokers" title="Jokers known in this hand: ' + jk.exposed + ' in exposed sets, ' + jk.swapped + ' taken by exchange">' + jmarks + '</span>' : '';
       var showHand = '';
       if(o.target){
         var th = null;
@@ -2647,7 +2669,7 @@ function renderOpponents(){
         showHand = '<label class="opp-show"><input type="checkbox" data-opp-show="' + o.id + '"' + (o.showHand ? ' checked' : '') + '> Show hand</label>' +
           (o.showHand && th ? '<div class="opp-hand">' + esc(th.id) + ' — ' + esc(th.hand) + '</div>' : '');
       }
-      return '<div class="opp-card' + (currentTurnSeat === o.id ? ' is-turn' : '') + '"><div class="opp-head"><span class="opp-name">' + esc(o.name) + eastTag + '</span>' + targetTag + '</div><div class="opp-backs" role="img" aria-label="' + o.rack.length + ' hidden tiles">' + backs + '</div>' + melds + showHand + '</div>';
+      return '<div class="opp-card' + (currentTurnSeat === o.id ? ' is-turn' : '') + '"><div class="opp-head"><span class="opp-name">' + esc(o.name) + eastTag + '</span>' + targetTag + jokerTag + '</div><div class="opp-backs" role="img" aria-label="' + o.rack.length + ' hidden tiles">' + backs + '</div>' + melds + showHand + '</div>';
     }).join('');
     var boxes = grid.querySelectorAll('[data-opp-show]');
     for(var bi = 0; bi < boxes.length; bi++){
